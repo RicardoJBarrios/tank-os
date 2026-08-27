@@ -1,0 +1,12 @@
+<p>aquarium-detail-page works!</p>
+<main>
+  @if (loading) {
+  <p aria-live="polite">Loading aquarium…</p>
+  } @else if (aquarium) {
+  <h1>{{ aquarium.name }}</h1>
+  <p>Aquarium workspace</p>
+  } @else {
+  <p role="alert">Aquarium not found.</p>
+  }
+  <a routerLink="/aquariums">Back to aquariums</a>
+</main>

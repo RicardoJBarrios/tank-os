@@ -31,4 +31,6 @@ export interface Aquarium {
   readonly name: AquariumName;
   readonly establishedByKeeperId: string;
   readonly establishedAt: Date;
+  readonly components: readonly import('./aquarium-system').AquariumComponent[];
+  readonly links: readonly import('./aquarium-system').AquariumLink[];
 }

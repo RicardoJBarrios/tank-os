@@ -1,0 +1,9 @@
+{
+  "name": "@tankos/aquarium-zod",
+  "version": "0.0.0",
+  "peerDependencies": {
+    "@tankos/aquarium": "^0.0.0",
+    "zod": "^4.4.3"
+  },
+  "sideEffects": false
+}

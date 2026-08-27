@@ -1,22 +1,21 @@
 {
-  "name": "aquarium",
+  "name": "aquarium-zod",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/aquarium/src",
-  "prefix": "tankos",
+  "sourceRoot": "libs/aquarium-zod/src",
   "projectType": "library",
-  "tags": ["scope:tankos", "type:feature"],
+  "tags": ["scope:tankos", "type:adapter"],
   "targets": {
     "build": {
       "executor": "@nx/angular:ng-packagr-lite",
       "outputs": ["{workspaceRoot}/dist/{projectRoot}"],
       "defaultConfiguration": "production",
       "options": {
-        "project": "libs/aquarium/ng-package.json",
-        "tsConfig": "libs/aquarium/tsconfig.lib.json"
+        "project": "libs/aquarium-zod/ng-package.json",
+        "tsConfig": "libs/aquarium-zod/tsconfig.lib.json"
       },
       "configurations": {
         "production": {
-          "tsConfig": "libs/aquarium/tsconfig.lib.prod.json"
+          "tsConfig": "libs/aquarium-zod/tsconfig.lib.prod.json"
         },
         "development": {}
       }
@@ -25,9 +24,10 @@
       "executor": "@nx/eslint:lint"
     },
     "test": {
+      "outputs": ["{workspaceRoot}/coverage/libs/aquarium-zod"],
       "options": {
-        "coverage": true,
-        "coverage.reportsDirectory": "../../coverage/libs/aquarium"
+        "coverage": false,
+        "coverage.reportsDirectory": "../../coverage/libs/aquarium-zod"
       }
     }
   }

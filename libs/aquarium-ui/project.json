@@ -4,8 +4,14 @@
   "sourceRoot": "libs/aquarium-ui/src",
   "prefix": "tankos",
   "projectType": "library",
-  "tags": ["scope:tankos", "type:ui"],
+  "tags": ["scope:shared", "type:feature"],
   "targets": {
+    "test": {
+      "options": {
+        "coverage": false,
+        "coverage.reportsDirectory": "../../coverage/libs/aquarium-ui"
+      }
+    },
     "lint": {
       "executor": "@nx/eslint:lint"
     }

@@ -16,13 +16,61 @@ the workspace archive.
   are not inferred from Firebase claims or route visibility.
 - The aggregate does not embed membership grants, measurements, observations,
   care, livestock or equipment.
+- The aggregate does own the physical system topology: structural components
+  and links between them. Components describe compartments or system sections;
+  equipment installed in them is a separate future vertical.
+- Component identity is stable and local to the Aquarium. Component names are
+  human labels; kind is a constrained structural classification. Capacity and
+  dimensions are optional positive physical properties, expressed in the
+  domain's canonical units.
+- Links reference existing distinct components and have an explicit connection
+  kind (`water`, `air`, `electrical` or `other`). The domain bounds topology
+  size and rejects dangling references and self-links.
+- A component may contain bounded internal zones. Zones represent functional
+  areas such as mechanical filtration, skimmer, biological media, refugium or
+  return chambers. A link may target a whole component or a specific zone.
+  Equipment installed in a zone remains outside this vertical.
+
+## Physical communication
+
+System communication is modelled through `AquariumLink`. Every link has an
+explicit source and target: it represents communication in that direction
+between two components or between component zones. A link without a zone
+applies to the whole component.
+
+The link kinds have these meanings:
+
+- `water`: water movement between components or zones. It is directed and can
+  describe drains, filtration stages and returns.
+- `air`: air communication or exchange. It is also expressed with a source and
+  target, although a future vertical may interpret a particular relation as
+  non-directional.
+- `electrical`: a power or electrical connection. It does not mean Aquarium
+  knows which equipment is connected.
+- `other`: a physical connection without a specialised meaning yet.
+
+A link does not declare flow rate, pressure, power, control or availability.
+Those properties belong to future hydraulic, equipment or automation contexts.
+If a relation is bidirectional, it is represented by two directed links rather
+than hiding a second relation in one record.
+
+Example hydraulic flow:
+
+```text
+display -> sump/mechanical -> sump/skimmer -> sump/return -> display
+```
+
+The model permits cycles because recirculating systems need them, but rejects
+missing endpoints and self-links. Advanced hydraulic validity—for example, the
+existence of a return path or sufficient flow—will be checked when the vertical
+that owns those concepts is introduced.
 
 ## First use cases
 
 The first complete slice is private and online-required:
 
-1. Establish an Aquarium with a non-empty name and a system-generated opaque
-   identity.
+1. Establish an Aquarium with a non-empty name, a system-generated opaque
+   identity and an initially empty or explicitly configured physical topology.
 2. List Aquariums for which the current keeper has an active membership.
 3. Select one accessible Aquarium as application-level Active Context.
 

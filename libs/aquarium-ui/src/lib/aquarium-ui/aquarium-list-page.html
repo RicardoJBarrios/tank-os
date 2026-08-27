@@ -1,0 +1,20 @@
+<p>aquarium-list-page works!</p>
+<main>
+  <header>
+    <h1>My aquariums</h1>
+    <a routerLink="new">Create aquarium</a>
+  </header>
+  @if (service.status() === 'loading') {
+  <p aria-live="polite">Loading aquariums…</p>
+  } @else if (service.status() === 'error') {
+  <p role="alert">Aquariums could not be loaded.</p>
+  } @else if (service.items().length === 0) {
+  <p>No aquariums yet.</p>
+  } @else {
+  <ul>
+    @for (aquarium of service.items(); track aquarium.id) {
+    <li><a [routerLink]="[aquarium.id]">{{ aquarium.name }}</a></li>
+    }
+  </ul>
+  }
+</main>

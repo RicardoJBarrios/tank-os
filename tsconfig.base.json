@@ -50,10 +50,10 @@
       ],
       "@tankos/units-composition": ["./libs/units-composition/src/index.ts"],
       "@tankos/aquarium": ["./libs/aquarium/src/index.ts"],
-      "@tankos/aquarium-firebase": [
-        "./libs/aquarium-firebase/src/index.ts"
-      ],
-      "@tankos/aquarium-ui": ["./libs/aquarium-ui/src/index.ts"]
+      "@tankos/aquarium-firebase": ["./libs/aquarium-firebase/src/index.ts"],
+      "@tankos/aquarium-ui": ["./libs/aquarium-ui/src/index.ts"],
+      "@tankos/aquarium-firestore": ["./libs/aquarium-firestore/src/index.ts"],
+      "@tankos/aquarium-zod": ["./libs/aquarium-zod/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

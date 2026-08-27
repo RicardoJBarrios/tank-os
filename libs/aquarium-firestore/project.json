@@ -1,0 +1,35 @@
+{
+  "name": "aquarium-firestore",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/aquarium-firestore/src",
+  "projectType": "library",
+  "tags": ["scope:tankos", "type:adapter"],
+  "targets": {
+    "build": {
+      "executor": "@nx/angular:ng-packagr-lite",
+      "dependsOn": ["aquarium-zod:build", "data-access-firestore:build"],
+      "outputs": ["{workspaceRoot}/dist/{projectRoot}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "project": "libs/aquarium-firestore/ng-package.json",
+        "tsConfig": "libs/aquarium-firestore/tsconfig.lib.json"
+      },
+      "configurations": {
+        "production": {
+          "tsConfig": "libs/aquarium-firestore/tsconfig.lib.prod.json"
+        },
+        "development": {}
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "test": {
+      "outputs": ["{workspaceRoot}/coverage/libs/aquarium-firestore"],
+      "options": {
+        "coverage": false,
+        "coverage.reportsDirectory": "../../coverage/libs/aquarium-firestore"
+      }
+    }
+  }
+}
