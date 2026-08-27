@@ -1,18 +1,38 @@
-<p>aquarium-editor-page works!</p>
-<main>
-  <h1>Create aquarium</h1>
-  <form (ngSubmit)="submit()">
-    <label for="aquarium-name">Name</label>
-    <input
-      id="aquarium-name"
-      name="name"
-      [(ngModel)]="name"
-      required
-      maxlength="120"
-    />
-    <button type="submit" [disabled]="!name.trim() || service.saving()">
-      Create
-    </button>
-    <a routerLink="/aquariums">Cancel</a>
-  </form>
+<main class="aquarium-editor-page" data-testid="aquarium-editor">
+  <a class="back-link" routerLink="/aquariums">Back to aquariums</a>
+  <section class="editor-card">
+    <p class="eyebrow">Aquarium setup</p>
+    <h1>Create aquarium</h1>
+    <p class="page-intro">
+      Give this system a name. You can add its display, sump, zones and
+      connections afterwards.
+    </p>
+    <form data-testid="aquarium-form" (submit)="submit($event)">
+      <label for="aquarium-name">Name</label>
+      <input
+        data-testid="aquarium-name"
+        id="aquarium-name"
+        name="name"
+        [value]="name"
+        (input)="name = $any($event.target).value"
+        required
+        maxlength="120"
+        autocomplete="off"
+      />
+      <span class="field-hint"
+        >Use a name that helps you identify the system.</span
+      >
+      <div class="form-actions">
+        <button
+          class="primary-action"
+          data-testid="aquarium-save"
+          type="submit"
+          [disabled]="service.saving()"
+        >
+          {{ service.saving() ? 'Creating…' : 'Create aquarium' }}
+        </button>
+        <a class="secondary-action" routerLink="/aquariums">Cancel</a>
+      </div>
+    </form>
+  </section>
 </main>

@@ -1,11 +1,10 @@
 import { Component, inject } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AquariumFeatureService } from './aquarium-feature-service';
 
 @Component({
   selector: 'tankos-aquarium-editor-page',
-  imports: [FormsModule, RouterLink],
+  imports: [RouterLink],
   templateUrl: './aquarium-editor-page.html',
   styleUrl: './aquarium-editor-page.css',
 })
@@ -14,7 +13,8 @@ export class AquariumEditorPage {
   readonly #router = inject(Router);
   protected name = '';
 
-  protected submit(): void {
+  protected submit(event: Event): void {
+    event.preventDefault();
     if (!this.name.trim() || this.service.saving()) return;
     void this.service
       .establish(this.name)

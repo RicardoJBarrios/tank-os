@@ -1,19 +1,75 @@
-<p>aquarium-list-page works!</p>
-<main>
-  <header>
-    <h1>My aquariums</h1>
-    <a routerLink="new">Create aquarium</a>
+<main class="aquarium-page" data-testid="aquarium-list">
+  <a class="back-link" routerLink="/">Back to TankOS</a>
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">TankOS workspace</p>
+      <h1>My aquariums</h1>
+      <p class="page-intro">
+        Manage your aquarium systems, their physical areas and connected
+        equipment.
+      </p>
+    </div>
+    <a class="primary-action" data-testid="aquarium-create" routerLink="new"
+      >Create aquarium</a
+    >
   </header>
   @if (service.status() === 'loading') {
-  <p aria-live="polite">Loading aquariums…</p>
+  <section
+    class="state-card"
+    data-testid="aquarium-list-status"
+    aria-live="polite"
+  >
+    <span class="state-icon" aria-hidden="true">◌</span>
+    <h2>Loading aquariums…</h2>
+    <p>We are retrieving the aquariums available to your account.</p>
+  </section>
   } @else if (service.status() === 'error') {
-  <p role="alert">Aquariums could not be loaded.</p>
+  <section
+    class="state-card state-card-error"
+    data-testid="aquarium-list-status"
+    role="alert"
+  >
+    <span class="state-icon" aria-hidden="true">!</span>
+    <h2>Aquariums could not be loaded.</h2>
+    <p>Check your connection and try again.</p>
+    <button type="button" class="secondary-action" (click)="service.load()">
+      Try again
+    </button>
+  </section>
   } @else if (service.items().length === 0) {
-  <p>No aquariums yet.</p>
+  <section
+    class="state-card state-card-empty"
+    data-testid="aquarium-list-status"
+  >
+    <span class="state-icon" aria-hidden="true">◎</span>
+    <h2>No aquariums yet.</h2>
+    <p>Create your first aquarium to start modelling its system.</p>
+    <a class="primary-action" routerLink="new">Create aquarium</a>
+  </section>
   } @else {
-  <ul>
+  <section class="list-summary">
+    <h2>Your aquarium systems</h2>
+    <span
+      >{{ service.items().length }} aquarium{{ service.items().length === 1 ? ''
+      : 's' }}</span
+    >
+  </section>
+  <ul class="aquarium-grid" data-testid="aquarium-items">
     @for (aquarium of service.items(); track aquarium.id) {
-    <li><a [routerLink]="[aquarium.id]">{{ aquarium.name }}</a></li>
+    <li class="aquarium-card" data-testid="aquarium-item">
+      <div class="aquarium-card-icon" aria-hidden="true">◉</div>
+      <div class="aquarium-card-content">
+        <p class="card-label">Aquarium system</p>
+        <h3>{{ aquarium.name }}</h3>
+        <p class="card-meta">Ready to configure</p>
+      </div>
+      <a
+        class="secondary-action"
+        data-testid="aquarium-detail"
+        [routerLink]="[aquarium.id]"
+        >Open workspace</a
+      >
+    </li>
     }
   </ul>
   }

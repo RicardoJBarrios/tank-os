@@ -1,4 +1,4 @@
-import { Component, inject, type OnInit } from '@angular/core';
+import { Component, inject, signal, type OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AUTH_SESSION } from '@tankos/authn';
 import type { AquariumListItem } from '@tankos/aquarium';
@@ -11,8 +11,8 @@ import { ACCESSIBLE_AQUARIUM_READER } from './aquarium-tokens';
   styleUrl: './aquarium-detail-page.css',
 })
 export class AquariumDetailPage implements OnInit {
-  protected aquarium: AquariumListItem | null = null;
-  protected loading = true;
+  protected readonly aquarium = signal<AquariumListItem | null>(null);
+  protected readonly loading = signal(true);
   readonly #route = inject(ActivatedRoute);
   readonly #reader = inject(ACCESSIBLE_AQUARIUM_READER);
   readonly #auth = inject(AUTH_SESSION);
@@ -20,7 +20,7 @@ export class AquariumDetailPage implements OnInit {
   public ngOnInit(): void {
     const id = this.#route.snapshot.paramMap.get('id');
     if (!id) {
-      this.loading = false;
+      this.loading.set(false);
       return;
     }
     void this.#auth
@@ -29,8 +29,8 @@ export class AquariumDetailPage implements OnInit {
         this.#reader.getAccessible(access.principalId, id as never),
       )
       .then((aquarium) => {
-        this.aquarium = aquarium;
-        this.loading = false;
+        this.aquarium.set(aquarium);
+        this.loading.set(false);
       });
   }
 }

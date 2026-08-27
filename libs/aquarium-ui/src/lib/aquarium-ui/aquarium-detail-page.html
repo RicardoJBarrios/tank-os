@@ -1,12 +1,41 @@
-<p>aquarium-detail-page works!</p>
-<main>
-  @if (loading) {
-  <p aria-live="polite">Loading aquarium…</p>
-  } @else if (aquarium) {
-  <h1>{{ aquarium.name }}</h1>
-  <p>Aquarium workspace</p>
+<main class="aquarium-detail-page" data-testid="aquarium-detail-page">
+  <a class="back-link" routerLink="/aquariums">Back to aquariums</a>
+  @if (loading()) {
+  <section class="state-card" aria-live="polite">
+    <span class="state-icon" aria-hidden="true">◌</span>
+    <h1>Loading aquarium…</h1>
+  </section>
+  } @else if (aquarium(); as currentAquarium) {
+  <header class="detail-header">
+    <div>
+      <p class="eyebrow">Aquarium workspace</p>
+      <h1>{{ currentAquarium.name }}</h1>
+      <p class="page-intro">
+        Your system overview and configuration workspace.
+      </p>
+    </div>
+    <span class="status-badge">Accessible</span>
+  </header>
+  <section class="overview-card">
+    <div class="overview-icon" aria-hidden="true">◉</div>
+    <div>
+      <h2>System overview</h2>
+      <p>
+        Define the physical areas and connections that make up this aquarium.
+      </p>
+    </div>
+  </section>
+  <section class="detail-section">
+    <h2>Configuration</h2>
+    <p>
+      Components, zones and system links will be managed from this workspace.
+    </p>
+  </section>
   } @else {
-  <p role="alert">Aquarium not found.</p>
+  <section class="state-card state-card-error" role="alert">
+    <span class="state-icon" aria-hidden="true">!</span>
+    <h1>Aquarium not found.</h1>
+    <p>This aquarium may have been removed or is no longer available to you.</p>
+  </section>
   }
-  <a routerLink="/aquariums">Back to aquariums</a>
 </main>
