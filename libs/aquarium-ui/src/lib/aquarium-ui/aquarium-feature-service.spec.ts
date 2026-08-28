@@ -3,6 +3,7 @@ import type { AuthSessionPort } from '@tankos/authn';
 import type {
   AquariumEstablisher,
   AccessibleAquariumReader,
+  AquariumManager,
 } from '@tankos/aquarium';
 import type { FeedbackService } from '@tankos/feedback';
 import { AquariumFeatureService } from './aquarium-feature-service';
@@ -15,6 +16,13 @@ function createService() {
   const establisher: AquariumEstablisher = {
     establish: vi.fn().mockResolvedValue(undefined),
   };
+  const manager: AquariumManager = {
+    get: vi.fn(),
+    rename: vi.fn().mockResolvedValue(undefined),
+    markForDeletion: vi.fn().mockResolvedValue(undefined),
+    restore: vi.fn().mockResolvedValue(undefined),
+    deletePermanently: vi.fn().mockResolvedValue(undefined),
+  };
   const auth = {
     access: vi
       .fn()
@@ -25,7 +33,13 @@ function createService() {
     success: vi.fn(),
   } as unknown as FeedbackService;
   return {
-    service: new AquariumFeatureService(reader, establisher, auth, feedback),
+    service: new AquariumFeatureService(
+      reader,
+      establisher,
+      manager,
+      auth,
+      feedback,
+    ),
     reader,
     establisher,
     feedback,
@@ -35,7 +49,7 @@ function createService() {
 describe('AquariumFeatureService', () => {
   it('loads accessible aquariums through the application port', async () => {
     const { service, reader } = createService();
-    service.load();
+    void service.load();
     await vi.waitFor(() => {
       expect(reader.listAccessible).toHaveBeenCalledWith('keeper-1');
     });

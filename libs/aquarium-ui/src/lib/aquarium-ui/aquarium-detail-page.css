@@ -59,3 +59,15 @@
   border-bottom: 1px solid var(--tankos-color-border);
   padding-bottom: 1.25rem;
 }
+.detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+@media (max-width: 34rem) {
+  .detail-actions a,
+  .detail-actions button {
+    width: 100%;
+  }
+}

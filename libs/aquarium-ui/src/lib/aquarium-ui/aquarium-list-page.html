@@ -55,7 +55,7 @@
       <div class="aquarium-card-content">
         <p class="card-label">Aquarium system</p>
         <h3>{{ aquarium.name }}</h3>
-        <p class="card-meta">Ready to configure</p>
+        <p class="card-meta">{{ aquarium.lifecycleStatus }}</p>
       </div>
       <a
         mat-stroked-button
@@ -63,6 +63,44 @@
         [routerLink]="[aquarium.id]"
         >Open workspace</a
       >
+      <div class="aquarium-card-actions">
+        @if (aquarium.lifecycleStatus === 'marked-for-deletion' ||
+        aquarium.lifecycleStatus === 'deleted') { @if (service.admin()) {
+        <button
+          mat-button
+          type="button"
+          data-testid="aquarium-restore"
+          (click)="restoreAquarium(aquarium.id)"
+        >
+          Restore
+        </button>
+        <button
+          mat-button
+          color="warn"
+          type="button"
+          data-testid="aquarium-delete-permanently"
+          (click)="deletePermanently(aquarium.id)"
+        >
+          Delete permanently
+        </button>
+        } } @else {
+        <a
+          mat-button
+          data-testid="aquarium-edit"
+          [routerLink]="[aquarium.id, 'edit']"
+          >Edit</a
+        >
+        <button
+          mat-button
+          color="warn"
+          type="button"
+          data-testid="aquarium-delete"
+          (click)="deleteAquarium(aquarium.id)"
+        >
+          Delete
+        </button>
+        }
+      </div>
     </li>
     }
   </ul>

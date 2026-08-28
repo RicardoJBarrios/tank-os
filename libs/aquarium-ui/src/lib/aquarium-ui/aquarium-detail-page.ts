@@ -2,11 +2,13 @@ import { Component, inject, signal, type OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AUTH_SESSION } from '@tankos/authn';
+import { CONFIRMATION_SERVICE, confirmAndRun } from '@tankos/feedback';
 import type { AquariumListItem } from '@tankos/aquarium';
 import {
   TankosPageHeaderComponent,
   TankosStateCardComponent,
 } from '@tankos/ui-material';
+import { AquariumFeatureService } from './aquarium-feature-service';
 import { ACCESSIBLE_AQUARIUM_READER } from './aquarium-tokens';
 
 @Component({
@@ -26,6 +28,8 @@ export class AquariumDetailPage implements OnInit {
   readonly #route = inject(ActivatedRoute);
   readonly #reader = inject(ACCESSIBLE_AQUARIUM_READER);
   readonly #auth = inject(AUTH_SESSION);
+  protected readonly service = inject(AquariumFeatureService);
+  readonly #confirmation = inject(CONFIRMATION_SERVICE);
 
   public ngOnInit(): void {
     const id = this.#route.snapshot.paramMap.get('id');
@@ -42,5 +46,39 @@ export class AquariumDetailPage implements OnInit {
         this.aquarium.set(aquarium);
         this.loading.set(false);
       });
+  }
+
+  protected async deleteAquarium(): Promise<void> {
+    const current = this.aquarium();
+    if (!current) return;
+    await confirmAndRun(
+      this.#confirmation,
+      {
+        title: 'Delete aquarium',
+        message: 'The aquarium will be moved to the recycle bin.',
+        confirmLabel: 'Delete aquarium',
+      },
+      () => this.service.markForDeletion(current.id),
+    );
+  }
+
+  protected async restoreAquarium(): Promise<void> {
+    const current = this.aquarium();
+    if (current) await this.service.restore(current.id);
+  }
+
+  protected async deletePermanently(): Promise<void> {
+    const current = this.aquarium();
+    if (!current) return;
+    await confirmAndRun(
+      this.#confirmation,
+      {
+        title: 'Delete aquarium permanently',
+        message:
+          'This cannot be undone and will permanently remove the aquarium.',
+        confirmLabel: 'Delete permanently',
+      },
+      () => this.service.deletePermanently(current.id),
+    );
   }
 }

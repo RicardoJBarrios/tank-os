@@ -7,7 +7,11 @@ import { TankosShellComponent } from './tankos-shell.component';
 
 describe('TankosShellComponent', () => {
   const createFixture = async (
-    session: { signOut: () => Promise<void> } | null = {
+    session: {
+      signOut: () => Promise<void>;
+      subscribe?: (listener: () => void) => () => void;
+      access?: () => Promise<unknown>;
+    } | null = {
       signOut: vi.fn(() => Promise.resolve()),
     },
   ) => {
@@ -50,6 +54,37 @@ describe('TankosShellComponent', () => {
 
     await vi.waitFor(() => {
       expect(signOut).toHaveBeenCalledOnce();
+    });
+  });
+
+  it('refreshes the account when authentication changes', async () => {
+    let changed: (() => void) | undefined;
+    const fixture = await createFixture({
+      signOut: vi.fn(() => Promise.resolve()),
+      subscribe: (listener) => {
+        changed = listener;
+        return vi.fn();
+      },
+      access: vi.fn(() =>
+        Promise.resolve({
+          principalId: 'user-1',
+          principalName: 'keeper@example.test',
+          roles: ['keeper'],
+        }),
+      ),
+    });
+
+    changed?.();
+
+    await vi.waitFor(() => {
+      const account = (
+        fixture.componentInstance as unknown as {
+          account: () => unknown;
+        }
+      ).account();
+      expect(account).toMatchObject({
+        principalName: 'keeper@example.test',
+      });
     });
   });
 

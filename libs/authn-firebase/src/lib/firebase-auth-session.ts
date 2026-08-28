@@ -1,6 +1,7 @@
 import type { Auth, User } from 'firebase/auth';
 import {
   createUserWithEmailAndPassword,
+  onAuthStateChanged,
   signInWithEmailAndPassword,
   signOut,
 } from 'firebase/auth';
@@ -28,6 +29,10 @@ export function createFirebaseAuthSession(
   options: FirebaseAuthSessionOptions,
 ): AuthSessionPort {
   return {
+    subscribe: (listener) =>
+      onAuthStateChanged(options.auth, () => {
+        listener();
+      }),
     access: async () => {
       const user = await ensureFirebaseUser(options);
       return createAccessContext(

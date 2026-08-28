@@ -13,6 +13,8 @@ export class AuthRequiredError extends Error {
 
 /** Authenticated access resolved by the active authentication adapter. */
 export interface AuthSessionPort {
+  /** Notifies consumers when the authenticated principal changes. */
+  readonly subscribe?: (listener: () => void) => () => void;
   readonly access: () => Promise<AccessContext>;
   readonly signIn: (credentials: AuthCredentials) => Promise<void>;
   readonly signOut: () => Promise<void>;

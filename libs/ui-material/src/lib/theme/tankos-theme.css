@@ -28,6 +28,7 @@
   --tankos-shadow-card: 0 0.2rem 0.8rem rgb(30 56 100 / 7%);
   --tankos-shadow-dialog: 0 1rem 2.5rem rgb(30 56 100 / 12%);
   --tankos-content-max-width: 72rem;
+  --tankos-font-family: Roboto, 'Helvetica Neue', Arial, sans-serif;
 
   --mat-sys-primary: var(--tankos-color-primary);
   --mat-sys-on-primary: #ffffff;
@@ -43,6 +44,21 @@
   --mat-sys-surface: var(--tankos-color-surface);
   --mat-sys-on-surface: var(--tankos-color-ink);
   --mat-sys-outline: var(--tankos-color-border-strong);
+  --mat-sys-body-large-font: var(--tankos-font-family);
+  --mat-sys-body-medium-font: var(--tankos-font-family);
+  --mat-sys-body-small-font: var(--tankos-font-family);
+  --mat-sys-display-large-font: var(--tankos-font-family);
+  --mat-sys-display-medium-font: var(--tankos-font-family);
+  --mat-sys-display-small-font: var(--tankos-font-family);
+  --mat-sys-headline-large-font: var(--tankos-font-family);
+  --mat-sys-headline-medium-font: var(--tankos-font-family);
+  --mat-sys-headline-small-font: var(--tankos-font-family);
+  --mat-sys-label-large-font: var(--tankos-font-family);
+  --mat-sys-label-medium-font: var(--tankos-font-family);
+  --mat-sys-label-small-font: var(--tankos-font-family);
+  --mat-sys-title-large-font: var(--tankos-font-family);
+  --mat-sys-title-medium-font: var(--tankos-font-family);
+  --mat-sys-title-small-font: var(--tankos-font-family);
 }
 
 html,
@@ -54,7 +70,7 @@ body {
   margin: 0;
   background: var(--tankos-color-surface-tint);
   color: var(--tankos-color-ink);
-  font-family: Inter, Roboto, 'Helvetica Neue', sans-serif;
+  font-family: var(--tankos-font-family);
   line-height: 1.5;
 }
 
@@ -66,12 +82,4 @@ a {
 :focus-visible {
   outline: 3px solid color-mix(in srgb, var(--tankos-color-accent) 75%, white);
   outline-offset: 3px;
-}
-
-.mat-mdc-button,
-.mat-mdc-unelevated-button,
-.mat-mdc-outlined-button,
-.mat-mdc-raised-button {
-  min-height: 2.75rem;
-  border-radius: var(--tankos-radius-sm) !important;
 }

@@ -2,7 +2,7 @@
   <a class="back-link" routerLink="/aquariums">← Back to aquariums</a>
   <section class="editor-card">
     <p class="eyebrow">Aquarium setup</p>
-    <h1>Create aquarium</h1>
+    <h1>{{ editing ? 'Edit aquarium' : 'Create aquarium' }}</h1>
     <p class="page-intro">
       Give this system a name. You can add its display, sump, zones and
       connections afterwards.
@@ -16,7 +16,8 @@
           id="aquarium-name"
           name="name"
           [value]="name"
-          (input)="name = $any($event.target).value"
+          (input)="updateName($event)"
+          [disabled]="loading()"
           required
           maxlength="120"
           autocomplete="off"
@@ -29,9 +30,10 @@
           color="primary"
           data-testid="aquarium-save"
           type="submit"
-          [disabled]="service.saving()"
+          [disabled]="loading() || service.saving()"
         >
-          {{ service.saving() ? 'Creating…' : 'Create aquarium' }}
+          {{ loading() ? 'Loading…' : service.saving() ? 'Saving…' : editing ?
+          'Save changes' : 'Create aquarium' }}
         </button>
         <a mat-stroked-button routerLink="/aquariums">Cancel</a>
       </div>

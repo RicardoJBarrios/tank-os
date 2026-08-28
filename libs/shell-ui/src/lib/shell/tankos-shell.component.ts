@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -23,12 +23,23 @@ import { FeedbackMaterialOutletComponent } from '@tankos/feedback-ui';
 export class TankosShellComponent {
   readonly #authSession = inject(AUTH_SESSION, { optional: true });
   readonly #router = inject(Router);
+  readonly #destroyRef = inject(DestroyRef);
 
   protected readonly title = 'TankOS';
   protected readonly loggingOut = signal(false);
   protected readonly loadingAccount = signal(false);
   protected readonly account = signal<AccessContext | null>(null);
   protected readonly accountResolved = signal(false);
+
+  public constructor() {
+    const subscribe = this.#authSession?.subscribe;
+    if (subscribe) {
+      const unsubscribe = subscribe(() => {
+        this.refreshAccount();
+      });
+      this.#destroyRef.onDestroy(unsubscribe);
+    }
+  }
 
   protected accountLabel(): string {
     return this.account()?.principalName ?? 'Account';

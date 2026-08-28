@@ -1,4 +1,9 @@
 import type { Aquarium, AquariumId, AquariumName } from '../domain/aquarium';
+import type {
+  AccessContext,
+  CrudRecord,
+  LifecycleStatus,
+} from '@tankos/data-access';
 
 export interface EstablishAquariumInput {
   readonly name: AquariumName;
@@ -14,6 +19,8 @@ export interface AquariumEstablisher {
 export interface AquariumListItem {
   readonly id: AquariumId;
   readonly name: AquariumName;
+  readonly establishedByKeeperId: string;
+  readonly lifecycleStatus: LifecycleStatus;
 }
 
 export interface AccessibleAquariumReader {
@@ -22,4 +29,19 @@ export interface AccessibleAquariumReader {
     keeperId: string,
     aquariumId: AquariumId,
   ): Promise<AquariumListItem | null>;
+}
+
+export interface AquariumManager {
+  get(
+    access: AccessContext,
+    id: AquariumId,
+  ): Promise<CrudRecord<Aquarium> | undefined>;
+  rename(
+    access: AccessContext,
+    id: AquariumId,
+    name: AquariumName,
+  ): Promise<void>;
+  markForDeletion(access: AccessContext, id: AquariumId): Promise<void>;
+  restore(access: AccessContext, id: AquariumId): Promise<void>;
+  deletePermanently(access: AccessContext, id: AquariumId): Promise<void>;
 }

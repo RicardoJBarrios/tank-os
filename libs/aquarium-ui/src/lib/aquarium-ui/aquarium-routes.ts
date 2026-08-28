@@ -8,6 +8,7 @@ import { AquariumListPage } from './aquarium-list-page';
 import { AquariumDetailPage } from './aquarium-detail-page';
 import {
   ACCESSIBLE_AQUARIUM_READER,
+  AQUARIUM_MANAGER,
   AQUARIUM_ESTABLISHER,
 } from './aquarium-tokens';
 
@@ -21,6 +22,7 @@ export const aquariumRoutes: Route[] = [
           new AquariumFeatureService(
             inject(ACCESSIBLE_AQUARIUM_READER),
             inject(AQUARIUM_ESTABLISHER),
+            inject(AQUARIUM_MANAGER),
             inject(AUTH_SESSION),
             inject(FEEDBACK_SERVICE),
           ),
@@ -29,6 +31,7 @@ export const aquariumRoutes: Route[] = [
     children: [
       { path: '', component: AquariumListPage },
       { path: 'new', component: AquariumEditorPage },
+      { path: ':id/edit', component: AquariumEditorPage },
       { path: ':id', component: AquariumDetailPage },
     ],
   },

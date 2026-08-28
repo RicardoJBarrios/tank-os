@@ -77,3 +77,11 @@
   grid-column: 1 / -1;
   width: 100%;
 }
+.aquarium-card-actions {
+  display: flex;
+  grid-column: 1 / -1;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  border-top: 1px solid var(--tankos-color-border);
+  padding-top: 0.75rem;
+}

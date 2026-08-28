@@ -7,6 +7,7 @@ import { createLocalFirebaseAuthSession } from './firebase-local-auth-session';
 const firebaseAuthMocks = vi.hoisted(() => ({
   signInWithEmailAndPassword: vi.fn(),
   createUserWithEmailAndPassword: vi.fn(),
+  onAuthStateChanged: vi.fn(),
   signOut: vi.fn(),
 }));
 
@@ -14,11 +15,16 @@ vi.mock('firebase/auth', () => ({
   signInWithEmailAndPassword: firebaseAuthMocks.signInWithEmailAndPassword,
   createUserWithEmailAndPassword:
     firebaseAuthMocks.createUserWithEmailAndPassword,
+  onAuthStateChanged: firebaseAuthMocks.onAuthStateChanged,
   signOut: firebaseAuthMocks.signOut,
 }));
 
-const { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } =
-  firebaseAuthMocks;
+const {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut,
+} = firebaseAuthMocks;
 
 describe('Firebase auth session', () => {
   beforeEach(() => {
@@ -47,6 +53,29 @@ describe('Firebase auth session', () => {
       principalId: 'current-user',
     });
     expect(authStateReady).toHaveBeenCalledTimes(2);
+  });
+
+  it('exposes Firebase authentication changes to the application', () => {
+    const unsubscribe = vi.fn();
+    let listener: (() => void) | undefined;
+    onAuthStateChanged.mockImplementation((_auth, callback) => {
+      listener = callback;
+      return unsubscribe;
+    });
+    const session = createFirebaseAuthSession({
+      auth: {} as Auth,
+      email: 'keeper@example.test',
+      password: 'password',
+      roles: ['keeper'],
+    });
+    const changed = vi.fn();
+
+    const stop = session.subscribe?.(changed);
+    listener?.();
+    stop?.();
+
+    expect(changed).toHaveBeenCalledOnce();
+    expect(unsubscribe).toHaveBeenCalledOnce();
   });
 
   it('resolves roles from Firebase custom claims', async () => {

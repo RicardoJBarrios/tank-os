@@ -25,6 +25,41 @@
       Components, zones and system links will be managed from this workspace.
     </p>
   </section>
+  <div class="detail-actions">
+    @if (currentAquarium.lifecycleStatus === 'marked-for-deletion' ||
+    currentAquarium.lifecycleStatus === 'deleted') { @if (service.admin()) {
+    <button
+      mat-stroked-button
+      type="button"
+      data-testid="aquarium-restore"
+      (click)="restoreAquarium()"
+    >
+      Restore aquarium
+    </button>
+    <button
+      mat-button
+      color="warn"
+      type="button"
+      data-testid="aquarium-delete-permanently"
+      (click)="deletePermanently()"
+    >
+      Delete permanently
+    </button>
+    } } @else {
+    <a mat-stroked-button data-testid="aquarium-edit" [routerLink]="['edit']"
+      >Edit aquarium</a
+    >
+    <button
+      mat-button
+      color="warn"
+      type="button"
+      data-testid="aquarium-delete"
+      (click)="deleteAquarium()"
+    >
+      Delete aquarium
+    </button>
+    }
+  </div>
   } @else {
   <tankos-state-card
     state="not-found"

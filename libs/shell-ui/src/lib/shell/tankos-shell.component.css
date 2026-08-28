@@ -14,13 +14,19 @@
 .topbar a[mat-button] {
   border-radius: var(--tankos-radius-sm);
 }
+.topbar a[mat-button],
+.topbar button[mat-button] {
+  color: var(--mat-sys-on-primary);
+}
 .toolbar-spacer {
   flex: 1;
 }
 .account-trigger {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 1rem;
+  max-width: min(19rem, 34vw);
+  padding-inline: 0.75rem;
 }
 .account-avatar {
   display: inline-grid;
@@ -32,6 +38,7 @@
   color: var(--mat-sys-on-tertiary);
   font-size: 0.8rem;
   font-weight: 800;
+  flex: 0 0 auto;
 }
 .account-summary {
   display: grid;
@@ -42,6 +49,12 @@
 .account-summary span {
   color: var(--tankos-color-muted);
   font-size: 0.8rem;
+}
+.account-trigger > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
 }
 
 @media (max-width: 42rem) {
