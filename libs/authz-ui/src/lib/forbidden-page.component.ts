@@ -4,10 +4,11 @@ import { MatCardModule } from '@angular/material/card';
 import { RouterLink } from '@angular/router';
 
 @Component({
+  selector: 'tankos-forbidden-page',
   imports: [MatButtonModule, MatCardModule, RouterLink],
-  templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.css',
+  templateUrl: './forbidden-page.component.html',
+  styleUrl: './forbidden-page.component.css',
 })
-export class DashboardComponent {
-  protected readonly greeting = 'Good morning';
+export class ForbiddenPageComponent {
+  protected readonly page = true;
 }

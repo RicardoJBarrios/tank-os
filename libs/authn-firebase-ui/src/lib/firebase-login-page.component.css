@@ -1,18 +1,45 @@
 .login-page {
+  box-sizing: border-box;
   display: grid;
   min-height: calc(100vh - 64px);
   place-items: center;
-  padding: 24px;
+  padding: clamp(1rem, 5vw, 3rem);
+  background: linear-gradient(
+    135deg,
+    var(--tankos-color-primary-soft) 0%,
+    var(--tankos-color-surface-tint) 100%
+  );
 }
 
 mat-card {
   width: min(100%, 420px);
+  border: 1px solid var(--tankos-color-border);
+  border-radius: var(--tankos-radius-lg);
+  box-shadow: var(--tankos-shadow-dialog);
+}
+
+mat-card-header {
+  padding: 1.5rem 1.5rem 0;
+}
+
+mat-card-title {
+  font-size: 1.5rem;
+}
+
+mat-card-subtitle {
+  margin-top: 0.35rem;
 }
 
 form {
   display: grid;
   gap: 16px;
-  padding-top: 24px;
+  padding-top: 1.5rem;
+}
+
+button[type='submit'] {
+  min-height: 2.75rem;
+  margin-top: 0.25rem;
+  font-weight: 700;
 }
 
 [role='alert'] {

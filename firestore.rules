@@ -231,6 +231,151 @@ service cloud.firestore {
       );
     }
 
+    function isValidAquariumDefinition(data) {
+      return data is map
+        && data.keys().hasOnly([
+          'storageId', 'name', 'establishedByKeeperId', 'establishedAt',
+          'components', 'links', 'nameSearchTokens'
+        ])
+        && data.keys().hasAll([
+          'name', 'establishedByKeeperId', 'establishedAt',
+          'components', 'links', 'nameSearchTokens'
+        ])
+        && isBoundedText(data.name, 120)
+        && isBoundedText(data.establishedByKeeperId, 128)
+        // Aquarium DTOs persist the instant as a bounded ISO string; the
+        // adapter validates the exact ISO format at the schema boundary.
+        && isBoundedText(data.establishedAt, 64)
+        && data.components is list
+        && data.components.size() <= 100
+        && data.links is list
+        && data.links.size() <= 200
+        && data.nameSearchTokens is list
+        && data.nameSearchTokens.size() > 0
+        && data.nameSearchTokens.size() <= 256
+        && (
+          !data.keys().hasAll(['storageId'])
+          || isBoundedText(data.storageId, 256)
+        );
+    }
+
+    function isValidAquariumRecord(data) {
+      return data is map
+        && data.keys().hasOnly(['data', 'lifecycle', 'revision', 'metadata'])
+        && data.keys().hasAll(['data', 'lifecycle', 'revision', 'metadata'])
+        && isValidAquariumDefinition(data.data)
+        && data.lifecycle is map
+        && data.lifecycle.keys().hasOnly(['status'])
+        && data.lifecycle.status in [
+          'active', 'inactive', 'marked-for-deletion', 'deleted'
+        ]
+        && data.revision is int
+        && data.revision > 0
+        && data.metadata is map
+        && data.metadata.keys().hasOnly([
+          'schemaVersion', 'createdAt', 'updatedAt', 'createdBy',
+          'updatedBy', 'lifecycleChangedAt', 'lifecycleChangedBy'
+        ])
+        && data.metadata.keys().hasAll([
+          'schemaVersion', 'createdAt', 'updatedAt'
+        ])
+        && data.metadata.schemaVersion is int
+        && data.metadata.schemaVersion > 0
+        && data.metadata.createdAt is timestamp
+        && data.metadata.updatedAt is timestamp
+        && (!data.metadata.keys().hasAll(['createdBy'])
+          || isBoundedText(data.metadata.createdBy, 128))
+        && (!data.metadata.keys().hasAll(['updatedBy'])
+          || isBoundedText(data.metadata.updatedBy, 128))
+        && (!data.metadata.keys().hasAll(['lifecycleChangedAt'])
+          || data.metadata.lifecycleChangedAt is timestamp)
+        && (!data.metadata.keys().hasAll(['lifecycleChangedBy'])
+          || isBoundedText(data.metadata.lifecycleChangedBy, 128));
+    }
+
+    function isAquariumOwner(data) {
+      return isKeeper()
+        && data.establishedByKeeperId == request.auth.uid;
+    }
+
+    function isValidAquariumLifecycleTransition(current, next) {
+      return next == current
+        || (current in ['active', 'inactive'] && next == 'marked-for-deletion')
+        || (current == 'marked-for-deletion' && next == 'active');
+    }
+
+    function hasValidAquariumUpdateAudit(current, next) {
+      return next.revision == current.revision + 1
+        && next.metadata.schemaVersion == current.metadata.schemaVersion
+        && next.metadata.createdAt == current.metadata.createdAt
+        && next.metadata.keys().hasAll(['updatedAt', 'updatedBy'])
+        && next.metadata.updatedAt is timestamp
+        && next.metadata.updatedBy == request.auth.uid
+        && isValidAquariumLifecycleTransition(
+          current.lifecycle.status,
+          next.lifecycle.status,
+        )
+        && (
+          current.lifecycle.status == next.lifecycle.status
+          || (
+            next.metadata.keys().hasAll([
+              'lifecycleChangedAt', 'lifecycleChangedBy'
+            ])
+            && next.metadata.lifecycleChangedAt is timestamp
+            && next.metadata.lifecycleChangedBy == request.auth.uid
+          )
+        );
+    }
+
+    function isStorageBoundAquarium(aquariumId, data) {
+      return data.keys().hasAll(['storageId']) && data.storageId == aquariumId;
+    }
+
+    // Aquarium access is explicit here because the global catch-all denies
+    // every collection by default. This first slice uses the initial keeper
+    // association; membership grants will add a separate member lookup.
+    match /aquariums/{aquariumId} {
+      // The shared create transaction probes the generated id before writing.
+      // A missing document may be probed, but its data is never exposed.
+      allow get: if (
+          !exists(/databases/$(database)/documents/aquariums/$(aquariumId))
+          && isKeeper()
+        )
+        || isAdmin()
+        || isAquariumOwner(resource.data.data);
+      allow list: if hasBoundedListQuery() && (
+        isAdmin()
+        || (
+          isKeeper()
+          && resource.data.data.establishedByKeeperId == request.auth.uid
+        )
+      );
+      allow create: if isValidAquariumRecord(request.resource.data)
+        && isStorageBoundAquarium(aquariumId, request.resource.data.data)
+        && (
+          isAdmin()
+          || (
+            isKeeper()
+            && request.resource.data.data.establishedByKeeperId == request.auth.uid
+          )
+        );
+      allow update: if isValidAquariumRecord(request.resource.data)
+        && isStorageBoundAquarium(aquariumId, request.resource.data.data)
+        && request.resource.data.data.establishedByKeeperId
+          == resource.data.data.establishedByKeeperId
+        && hasValidAquariumUpdateAudit(resource.data, request.resource.data)
+        && (
+          isAdmin()
+          || (
+            isAquariumOwner(resource.data.data)
+            && request.resource.data.data.diff(resource.data.data).affectedKeys()
+              .hasOnly(['name', 'components', 'links', 'nameSearchTokens'])
+          )
+        );
+      allow delete: if isAdmin()
+        && resource.data.lifecycle.status in ['marked-for-deletion', 'deleted'];
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

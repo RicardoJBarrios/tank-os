@@ -6,6 +6,10 @@ import {
   signal,
   type OnInit,
 } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AUTH_SESSION } from '@tankos/authn';
@@ -13,6 +17,10 @@ import { CONFIRMATION_SERVICE, confirmAndRun } from '@tankos/feedback';
 import type { AccessContext } from '@tankos/data-access';
 import { createCrudListQueryState } from '@tankos/data-access-ui';
 import { CrudMaterialTableComponent } from '@tankos/data-access-material-ui';
+import {
+  TankosPageHeaderComponent,
+  TankosStateCardComponent,
+} from '@tankos/ui-material';
 import type { UnitDefinitionRecord } from '@tankos/units';
 import {
   unitDefinitionCapabilities,
@@ -37,7 +45,16 @@ import {
 
 /** List page owned by the units UI boundary. */
 @Component({
-  imports: [CrudMaterialTableComponent, RouterLink],
+  imports: [
+    CrudMaterialTableComponent,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    RouterLink,
+    TankosPageHeaderComponent,
+    TankosStateCardComponent,
+  ],
   templateUrl: './unit-definition-list-page.component.html',
   styleUrl: './unit-definition-list-page.component.css',
 })
@@ -76,7 +93,6 @@ export class UnitDefinitionListPageComponent implements OnInit {
   protected readonly pageIndex = this.#queryState.pageIndex;
   protected readonly pageSize = UnitDefinitionListPageComponent.PAGE_SIZE;
   #appliedFilterKey: string | undefined;
-  #forceFilterReload = false;
   protected readonly hasFilters = computed(
     () =>
       this.visibilityFilter() !== 'all' ||
@@ -114,11 +130,7 @@ export class UnitDefinitionListPageComponent implements OnInit {
           parseUnitDefinitionPageIndex(params.get('page')),
         );
         if (!this.#ready) return;
-        if (
-          this.#forceFilterReload ||
-          this.#appliedFilterKey !== this.filterKey()
-        ) {
-          this.#forceFilterReload = false;
+        if (this.#appliedFilterKey !== this.filterKey()) {
           this.loadFilteredList();
         }
       });
@@ -140,8 +152,8 @@ export class UnitDefinitionListPageComponent implements OnInit {
     record.lifecycle.status === 'marked-for-deletion' &&
     this.recordCapabilities(record).canDelete;
 
-  protected filterByVisibility(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value;
+  protected filterByVisibility(event: { value: unknown }): void {
+    const value = String(event.value);
     const visibility = isUnitDefinitionVisibilityFilter(value) ? value : 'all';
     this.visibilityFilter.set(visibility);
   }
@@ -156,7 +168,7 @@ export class UnitDefinitionListPageComponent implements OnInit {
 
   protected applyFilters(): void {
     this.#queryState.setFilter(this.draftQuery());
-    this.#forceFilterReload = true;
+    this.#appliedFilterKey = undefined;
     void this.#router.navigate([], {
       relativeTo: this.#route,
       queryParams: unitDefinitionListQueryParams(

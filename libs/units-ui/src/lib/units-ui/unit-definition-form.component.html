@@ -1,47 +1,82 @@
 <form
+  class="unit-form"
   data-testid="unit-definition-form"
   [formGroup]="form"
   (ngSubmit)="submit()"
 >
-  <label
-    >Code
-    <input
-      data-testid="unit-code"
-      formControlName="code"
-      [readOnly]="record() !== undefined"
-  /></label>
-  <label
-    >Symbol <input data-testid="unit-symbol" formControlName="symbol"
-  /></label>
-  <label
-    >ASCII fallback
-    <input data-testid="unit-ascii-fallback" formControlName="asciiFallback"
-  /></label>
-  <label
-    >Position
-    <select data-testid="unit-position" formControlName="position">
-      <option value="suffix">After the value</option>
-      <option value="prefix">Before the value</option>
-    </select></label
-  >
-  <label
-    >Spacing
-    <select data-testid="unit-spacing" formControlName="spacing">
-      <option value="narrow">With a space</option>
-      <option value="normal">With normal spacing</option>
-      <option value="none">Without a space</option>
-    </select></label
-  >
-  <p>
-    <span>Display example</span>
+  <div class="form-grid">
+    <mat-form-field appearance="outline" class="form-field-wide">
+      <mat-label>Code</mat-label>
+      <input
+        matInput
+        data-testid="unit-code"
+        formControlName="code"
+        [readOnly]="record() !== undefined"
+      />
+      <mat-hint>Unique identifier; it cannot be changed when editing.</mat-hint>
+      @if (form.controls.code.invalid && form.controls.code.touched) {
+        <mat-error>Code is required.</mat-error>
+      }
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Symbol</mat-label>
+      <input matInput data-testid="unit-symbol" formControlName="symbol" />
+      @if (form.controls.symbol.invalid && form.controls.symbol.touched) {
+        <mat-error>Symbol is required.</mat-error>
+      }
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>ASCII fallback</mat-label>
+      <input
+        matInput
+        data-testid="unit-ascii-fallback"
+        formControlName="asciiFallback"
+      />
+      @if (
+        form.controls.asciiFallback.invalid &&
+        form.controls.asciiFallback.touched
+      ) {
+        <mat-error>ASCII fallback is required.</mat-error>
+      }
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Position</mat-label>
+      <mat-select data-testid="unit-position" formControlName="position">
+        <mat-option value="suffix">After the value</mat-option>
+        <mat-option value="prefix">Before the value</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Spacing</mat-label>
+      <mat-select data-testid="unit-spacing" formControlName="spacing">
+        <mat-option value="narrow">With a space</mat-option>
+        <mat-option value="normal">With normal spacing</mat-option>
+        <mat-option value="none">Without a space</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <section class="preview-card" aria-labelledby="unit-preview-title">
+    <span class="preview-label" id="unit-preview-title">Display preview</span>
     <output data-testid="unit-display-preview">{{ displayPreview() }}</output>
-  </p>
-  <button data-testid="save-unit" type="submit">
-    {{ record() ? 'Update' : 'Save' }}
-  </button>
-  @if (record()) {
-    <button data-testid="cancel-unit" type="button" (click)="cancelled.emit()">
-      Cancel
+  </section>
+  <div class="form-actions">
+    <button
+      mat-flat-button
+      color="primary"
+      data-testid="save-unit"
+      type="submit"
+    >
+      {{ record() ? 'Update' : 'Save' }}
     </button>
-  }
+    @if (record()) {
+      <button
+        mat-stroked-button
+        data-testid="cancel-unit"
+        type="button"
+        (click)="cancelled.emit()"
+      >
+        Cancel
+      </button>
+    }
+  </div>
 </form>

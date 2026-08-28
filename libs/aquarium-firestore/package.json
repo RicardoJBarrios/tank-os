@@ -4,6 +4,7 @@
   "peerDependencies": {
     "@tankos/aquarium": "^0.0.0",
     "@tankos/aquarium-zod": "^0.0.0",
+    "@tankos/authz": "^0.0.0",
     "@tankos/data-access": "^0.0.0",
     "@tankos/data-access-firestore": "^0.0.0",
     "@tankos/time": "^0.0.0",

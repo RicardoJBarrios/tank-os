@@ -1,4 +1,8 @@
 import { Component, effect, input, output } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { ReactiveFormsModule } from '@angular/forms';
 import type {
   CustomUnitDefinitionDraft,
@@ -12,8 +16,15 @@ import {
 } from './unit-definition-form';
 @Component({
   selector: 'tankos-unit-definition-form',
-  imports: [ReactiveFormsModule],
+  imports: [
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    ReactiveFormsModule,
+  ],
   templateUrl: './unit-definition-form.component.html',
+  styleUrl: './unit-definition-form.component.css',
 })
 export class UnitDefinitionFormComponent {
   public readonly record = input<UnitDefinitionRecord>();

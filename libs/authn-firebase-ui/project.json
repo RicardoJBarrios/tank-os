@@ -2,7 +2,7 @@
   "name": "authn-firebase-ui",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/authn-firebase-ui/src",
-  "prefix": "lib",
+  "prefix": "tankos",
   "projectType": "library",
   "tags": ["scope:shared", "type:infrastructure"],
   "targets": {

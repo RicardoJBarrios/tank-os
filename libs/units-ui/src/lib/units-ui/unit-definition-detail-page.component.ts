@@ -5,6 +5,7 @@ import {
   signal,
   type OnInit,
 } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AUTH_SESSION } from '@tankos/authn';
 import { CONFIRMATION_SERVICE, confirmAndRun } from '@tankos/feedback';
@@ -15,11 +16,21 @@ import {
   type UnitDefinitionRecord,
 } from '@tankos/units';
 import { UnitDefinitionFeatureService } from './unit-definition-feature-service';
+import {
+  TankosPageHeaderComponent,
+  TankosStateCardComponent,
+} from '@tankos/ui-material';
 
 /** Read-only detail page for one versioned unit definition. */
 @Component({
-  imports: [RouterLink],
+  imports: [
+    MatButtonModule,
+    RouterLink,
+    TankosPageHeaderComponent,
+    TankosStateCardComponent,
+  ],
   templateUrl: './unit-definition-detail-page.component.html',
+  styleUrl: './unit-definition-detail-page.component.css',
 })
 export class UnitDefinitionDetailPageComponent implements OnInit {
   readonly #route = inject(ActivatedRoute);

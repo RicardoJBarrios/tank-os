@@ -1,0 +1,31 @@
+<main class="profile-page" data-testid="profile-page">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Profile</mat-card-title>
+      <mat-card-subtitle>Your TankOS access</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      @if (account(); as currentAccount) {
+        <dl>
+          <div>
+            <dt>Name</dt>
+            <dd>{{ currentAccount.principalName }}</dd>
+          </div>
+          <div>
+            <dt>Identifier</dt>
+            <dd>{{ currentAccount.principalId }}</dd>
+          </div>
+          <div>
+            <dt>Roles</dt>
+            <dd>{{ currentAccount.roles.join(', ') }}</dd>
+          </div>
+        </dl>
+      } @else {
+        <p>Loading profile…</p>
+      }
+    </mat-card-content>
+    <mat-card-actions>
+      <a mat-button routerLink="/">Back to dashboard</a>
+    </mat-card-actions>
+  </mat-card>
+</main>

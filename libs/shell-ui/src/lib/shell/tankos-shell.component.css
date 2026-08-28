@@ -1,0 +1,64 @@
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  min-height: 4rem;
+  padding: 0 clamp(0.75rem, 3vw, 2rem);
+  background: var(--tankos-color-primary);
+  color: var(--mat-sys-on-primary);
+}
+.brand {
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+.topbar a[mat-button] {
+  border-radius: var(--tankos-radius-sm);
+}
+.toolbar-spacer {
+  flex: 1;
+}
+.account-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.account-avatar {
+  display: inline-grid;
+  width: 1.75rem;
+  height: 1.75rem;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--tankos-color-accent);
+  color: var(--mat-sys-on-tertiary);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+.account-summary {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.75rem 1rem;
+  color: var(--tankos-color-ink);
+}
+.account-summary span {
+  color: var(--tankos-color-muted);
+  font-size: 0.8rem;
+}
+
+@media (max-width: 42rem) {
+  .topbar {
+    flex-wrap: wrap;
+    padding-block: 0.35rem;
+  }
+
+  .toolbar-spacer {
+    display: none;
+  }
+
+  .topbar a[mat-button] {
+    order: 3;
+  }
+
+  .account-trigger {
+    margin-inline-start: auto;
+  }
+}

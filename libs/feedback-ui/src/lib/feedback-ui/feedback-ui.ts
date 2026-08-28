@@ -29,17 +29,7 @@ const TRANSIENT_FEEDBACK_DURATION_MS = 5000;
   imports: [MatDialogModule, MatSnackBarModule],
   template: '',
   encapsulation: ViewEncapsulation.None,
-  styles: `
-    .tankos-feedback-success {
-      --mdc-snackbar-container-color: var(--mat-sys-primary-container);
-    }
-    .tankos-feedback-error {
-      --mdc-snackbar-container-color: var(--mat-sys-error-container);
-    }
-    .tankos-feedback-warning {
-      --mdc-snackbar-container-color: var(--mat-sys-tertiary-container);
-    }
-  `,
+  styleUrl: './feedback-ui.css',
 })
 export class FeedbackMaterialOutletComponent {
   readonly #feedback = inject(FEEDBACK_SERVICE);

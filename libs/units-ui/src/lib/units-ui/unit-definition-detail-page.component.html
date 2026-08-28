@@ -1,79 +1,102 @@
-<main>
-  <a routerLink="/units" queryParamsHandling="preserve">Back to units</a>
-  <h2>Unit detail</h2>
+<main class="unit-detail-page">
+  <a class="back-link" routerLink="/units" queryParamsHandling="preserve"
+    >← Back to units</a
+  >
   @if (status() === 'pending') {
-    <p role="status">Loading unit…</p>
+    <tankos-state-card state="loading" title="Loading unit…" />
   } @else if (record(); as current) {
-    <dl data-testid="unit-detail">
-      <dt>Code</dt>
-      <dd>{{ current.data.code }}</dd>
-      <dt>Symbol</dt>
-      <dd>{{ current.data.representation.symbol }}</dd>
-      <dt>ASCII fallback</dt>
-      <dd>{{ current.data.representation.asciiFallback }}</dd>
-      <dt>Display example</dt>
-      <dd data-testid="unit-display-preview">
-        {{ formatValue(12, current.data.representation) }}
-      </dd>
-      <dt>Version</dt>
-      <dd>{{ current.revision }}</dd>
-      <dt>Visibility</dt>
-      <dd>{{ current.data.visibility }}</dd>
-      <dt>Lifecycle</dt>
-      <dd>{{ current.lifecycle.status }}</dd>
-      @if (current.data.ownerName) {
-        <dt>Owner</dt>
-        <dd>{{ current.data.ownerName }}</dd>
+    <tankos-page-header
+      eyebrow="Unit detail"
+      [title]="current.data.code"
+      description="Review the representation and lifecycle of this unit."
+    >
+      <span class="status-badge">{{ current.data.visibility }}</span>
+    </tankos-page-header>
+    <section class="detail-card">
+      <dl data-testid="unit-detail">
+        <dt>Code</dt>
+        <dd>{{ current.data.code }}</dd>
+        <dt>Symbol</dt>
+        <dd>{{ current.data.representation.symbol }}</dd>
+        <dt>ASCII fallback</dt>
+        <dd>{{ current.data.representation.asciiFallback }}</dd>
+        <dt>Display example</dt>
+        <dd data-testid="unit-display-preview">
+          {{ formatValue(12, current.data.representation) }}
+        </dd>
+        <dt>Version</dt>
+        <dd>{{ current.revision }}</dd>
+        <dt>Visibility</dt>
+        <dd>{{ current.data.visibility }}</dd>
+        <dt>Lifecycle</dt>
+        <dd>{{ current.lifecycle.status }}</dd>
+        @if (current.data.ownerName) {
+          <dt>Owner</dt>
+          <dd>{{ current.data.ownerName }}</dd>
+        }
+      </dl>
+    </section>
+    <div class="detail-actions">
+      @if (canEdit()) {
+        <a
+          mat-stroked-button
+          [routerLink]="['edit']"
+          queryParamsHandling="preserve"
+          data-testid="detail-edit"
+          >Edit</a
+        >
       }
-    </dl>
-    @if (canEdit()) {
-      <a
-        [routerLink]="['edit']"
-        queryParamsHandling="preserve"
-        data-testid="detail-edit"
-        >Edit</a
-      >
-    }
-    @if (canPublish()) {
-      <button
-        type="button"
-        data-testid="detail-publish"
-        [disabled]="lifecycleStatus() === 'pending'"
-        (click)="publish()"
-      >
-        Make public
-      </button>
-    }
-    @if (canRestore()) {
-      <button
-        type="button"
-        data-testid="detail-restore"
-        [disabled]="lifecycleStatus() === 'pending'"
-        (click)="restore()"
-      >
-        Restore
-      </button>
-    } @else if (canDelete()) {
-      <button
-        type="button"
-        data-testid="detail-delete"
-        [disabled]="lifecycleStatus() === 'pending'"
-        (click)="markForDeletion()"
-      >
-        Delete
-      </button>
-    }
-    @if (canPhysicallyDelete()) {
-      <button
-        type="button"
-        data-testid="detail-physical-delete"
-        [disabled]="lifecycleStatus() === 'pending'"
-        (click)="physicallyDelete()"
-      >
-        Delete permanently
-      </button>
-    }
+      @if (canPublish()) {
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          data-testid="detail-publish"
+          [disabled]="lifecycleStatus() === 'pending'"
+          (click)="publish()"
+        >
+          Make public
+        </button>
+      }
+      @if (canRestore()) {
+        <button
+          mat-stroked-button
+          type="button"
+          data-testid="detail-restore"
+          [disabled]="lifecycleStatus() === 'pending'"
+          (click)="restore()"
+        >
+          Restore
+        </button>
+      } @else if (canDelete()) {
+        <button
+          mat-stroked-button
+          type="button"
+          data-testid="detail-delete"
+          [disabled]="lifecycleStatus() === 'pending'"
+          (click)="markForDeletion()"
+        >
+          Delete
+        </button>
+      }
+      @if (canPhysicallyDelete()) {
+        <button
+          mat-flat-button
+          color="warn"
+          type="button"
+          data-testid="detail-physical-delete"
+          [disabled]="lifecycleStatus() === 'pending'"
+          (click)="physicallyDelete()"
+        >
+          Delete permanently
+        </button>
+      }
+    </div>
   } @else {
-    <p role="alert">Unable to load the unit.</p>
+    <tankos-state-card
+      state="error"
+      title="Unable to load the unit."
+      message="The unit could not be retrieved."
+    />
   }
 </main>

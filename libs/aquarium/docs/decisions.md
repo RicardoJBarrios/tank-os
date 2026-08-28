@@ -94,6 +94,11 @@ by retries, renaming, publication or later support for multiple keepers.
 - A tab-scoped Active Context hint is untrusted and must be revalidated before
   use; logout or failed validation clears it.
 
+The shared `authn`, `authz` and `data-access` contracts are reused for this
+vertical. Aquarium does not define another role system or authentication
+session. Resource actions and the first-slice permission matrix are defined in
+[`authorization.md`](authorization.md).
+
 ## Persistence direction
 
 The minimum Aquarium data is its opaque identity, name, establishment instant

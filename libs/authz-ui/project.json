@@ -2,9 +2,9 @@
   "name": "authz-ui",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/authz-ui/src",
-  "prefix": "lib",
+  "prefix": "tankos",
   "projectType": "library",
-  "tags": ["scope:shared", "type:infrastructure"],
+  "tags": ["scope:shared", "type:ui"],
   "targets": {
     "test": {
       "options": {

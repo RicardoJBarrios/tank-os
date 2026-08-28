@@ -36,6 +36,7 @@ test.describe('aquariums authorization', () => {
     const adminAquarium = uniqueAquariumName();
     await loginAs(page);
     await createAquarium(page, keeperAquarium);
+    await page.getByTestId('account-menu-trigger').click();
     await page.getByTestId('logout').click();
     await expect(page).toHaveURL(loginUrl);
 

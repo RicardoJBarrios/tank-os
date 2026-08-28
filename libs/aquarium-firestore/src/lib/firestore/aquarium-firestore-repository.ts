@@ -16,6 +16,7 @@ import {
   type PageCursor,
 } from '@tankos/data-access';
 import type { Aquarium } from '@tankos/aquarium';
+import { AUTHORIZATION_ROLES } from '@tankos/authz';
 import {
   aquariumDtoSchema,
   aquariumSchema,
@@ -97,7 +98,7 @@ function buildAquariumQuery(
         ),
       ]
     : [];
-  const access = request.access.roles.includes('admin')
+  const access = request.access.roles.includes(AUTHORIZATION_ROLES.ADMIN)
     ? [...owner]
     : [where('data.establishedByKeeperId', '==', request.access.principalId)];
   return query(
@@ -116,12 +117,18 @@ function authorizeAquariumOperation(
 ): void {
   if (!access.principalId || !hasAquariumRole(access.roles))
     throw new Error('Aquarium access requires keeper or admin access');
-  if (operation === 'delete' && !access.roles.includes('admin'))
+  if (
+    operation === 'delete' &&
+    !access.roles.includes(AUTHORIZATION_ROLES.ADMIN)
+  )
     throw new Error('Only admins can permanently delete Aquariums');
 }
 
 function hasAquariumRole(roles: readonly string[]): boolean {
-  return roles.includes('keeper') || roles.includes('admin');
+  return (
+    roles.includes(AUTHORIZATION_ROLES.KEEPER) ||
+    roles.includes(AUTHORIZATION_ROLES.ADMIN)
+  );
 }
 
 function encodeAquariumCursor(snapshot: QueryDocumentSnapshot): PageCursor {

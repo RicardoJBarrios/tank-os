@@ -1,10 +1,13 @@
 import { Component, inject } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { Router, RouterLink } from '@angular/router';
 import { AquariumFeatureService } from './aquarium-feature-service';
 
 @Component({
   selector: 'tankos-aquarium-editor-page',
-  imports: [RouterLink],
+  imports: [MatButtonModule, MatFormFieldModule, MatInputModule, RouterLink],
   templateUrl: './aquarium-editor-page.html',
   styleUrl: './aquarium-editor-page.css',
 })

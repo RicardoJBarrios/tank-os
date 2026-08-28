@@ -53,7 +53,10 @@
       "@tankos/aquarium-firebase": ["./libs/aquarium-firebase/src/index.ts"],
       "@tankos/aquarium-ui": ["./libs/aquarium-ui/src/index.ts"],
       "@tankos/aquarium-firestore": ["./libs/aquarium-firestore/src/index.ts"],
-      "@tankos/aquarium-zod": ["./libs/aquarium-zod/src/index.ts"]
+      "@tankos/aquarium-zod": ["./libs/aquarium-zod/src/index.ts"],
+      "@tankos/ui": ["./libs/ui/src/index.ts"],
+      "@tankos/ui-material": ["./libs/ui-material/src/index.ts"],
+      "@tankos/shell-ui": ["./libs/shell-ui/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

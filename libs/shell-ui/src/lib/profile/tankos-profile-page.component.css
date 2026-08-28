@@ -1,0 +1,33 @@
+.profile-page {
+  display: grid;
+  max-width: 42rem;
+  min-height: 70vh;
+  margin: 0 auto;
+  padding: 2rem clamp(1rem, 4vw, 3rem);
+  place-items: start center;
+}
+
+mat-card {
+  width: 100%;
+  border: 1px solid var(--tankos-color-border);
+  border-radius: var(--tankos-radius-md);
+  box-shadow: var(--tankos-shadow-card);
+}
+
+dl {
+  display: grid;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+dt {
+  color: var(--tankos-color-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+dd {
+  margin: 0.25rem 0 0;
+  overflow-wrap: anywhere;
+}

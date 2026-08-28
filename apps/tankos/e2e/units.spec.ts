@@ -202,6 +202,7 @@ test.describe('custom units', () => {
     await loginAs(page);
     await openUnitCreateForm(page);
     await saveUnit(page, privateCode, 'keeper-private');
+    await page.getByTestId('account-menu-trigger').click();
     await page.getByTestId('logout').click();
     await expect(page).toHaveURL(loginPageUrl);
 

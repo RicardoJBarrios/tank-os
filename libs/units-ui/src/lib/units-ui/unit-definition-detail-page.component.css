@@ -1,0 +1,72 @@
+.unit-detail-page {
+  box-sizing: border-box;
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 2rem clamp(1rem, 4vw, 3rem) 4rem;
+  color: var(--tankos-color-ink);
+}
+.back-link {
+  color: var(--tankos-color-muted);
+  font-size: 0.875rem;
+  text-decoration: none;
+}
+.back-link:hover {
+  text-decoration: underline;
+}
+.status-badge {
+  border-radius: 99rem;
+  padding: 0.45rem 0.75rem;
+  background: var(--tankos-color-primary-soft);
+  color: var(--tankos-color-primary);
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+.detail-card {
+  border: 1px solid var(--tankos-color-border);
+  border-radius: var(--tankos-radius-md);
+  padding: clamp(1rem, 3vw, 1.5rem);
+  background: var(--tankos-color-surface);
+  box-shadow: var(--tankos-shadow-card);
+}
+.detail-card dl {
+  display: grid;
+  grid-template-columns: minmax(8rem, 0.5fr) 1fr;
+  margin: 0;
+}
+.detail-card dt,
+.detail-card dd {
+  border-bottom: 1px solid var(--tankos-color-border);
+  padding: 0.85rem 0.5rem;
+}
+.detail-card dt {
+  color: var(--tankos-color-muted);
+  font-weight: 700;
+}
+.detail-card dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+@media (max-width: 34rem) {
+  .detail-card dl {
+    grid-template-columns: 1fr;
+  }
+  .detail-card dt {
+    border-bottom: 0;
+    padding-bottom: 0.25rem;
+  }
+  .detail-card dd {
+    padding-top: 0.25rem;
+  }
+  .detail-actions a,
+  .detail-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+}

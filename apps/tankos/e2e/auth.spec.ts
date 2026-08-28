@@ -57,6 +57,8 @@ test.describe('authentication', () => {
     await page.getByTestId('login-submit').click();
     await expect(page).toHaveURL(unitsUrl);
 
+    await page.getByTestId('account-menu-trigger').click();
+    await expect(page.getByTestId('profile-link')).toBeVisible();
     await page.getByTestId('logout').click();
     await expect(page).toHaveURL(loginUrl);
     await page.goto('/units');

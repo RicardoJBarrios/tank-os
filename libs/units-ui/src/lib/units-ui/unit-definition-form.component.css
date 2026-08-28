@@ -1,0 +1,66 @@
+:host {
+  display: block;
+}
+
+.unit-form {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.form-field-wide {
+  grid-column: 1 / -1;
+}
+
+.preview-card {
+  display: grid;
+  gap: 0.4rem;
+  border: 1px solid var(--tankos-color-border);
+  border-radius: var(--tankos-radius-sm);
+  padding: 1rem;
+  background: var(--tankos-color-surface-subtle);
+}
+
+.preview-label {
+  color: var(--tankos-color-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+output {
+  color: var(--tankos-color-primary-strong);
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.form-actions button {
+  min-width: 7rem;
+}
+
+@media (max-width: 42rem) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-field-wide {
+    grid-column: auto;
+  }
+
+  .form-actions button {
+    width: 100%;
+  }
+}

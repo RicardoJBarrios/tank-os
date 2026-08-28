@@ -1,0 +1,65 @@
+:host {
+  display: block;
+}
+[data-testid='crud-material-table'] {
+  overflow: hidden;
+  border: 1px solid var(--tankos-color-border);
+  border-radius: var(--tankos-radius-md);
+  background: var(--tankos-color-surface);
+  box-shadow: var(--tankos-shadow-card);
+}
+.crud-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+}
+.crud-toolbar button {
+  min-height: 2.5rem;
+  font-weight: 700;
+}
+.crud-status {
+  margin: 0;
+  padding: 1.5rem;
+  color: #53627a;
+  text-align: center;
+}
+.crud-error {
+  color: #a12626;
+}
+.crud-empty {
+  margin: 0;
+  padding: 2rem;
+  color: #53627a;
+  text-align: center;
+}
+.crud-table-wrap {
+  overflow-x: auto;
+}
+table {
+  width: 100%;
+  min-width: 42rem;
+}
+th {
+  color: #53627a;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+td,
+th {
+  padding: 0.85rem 1rem;
+}
+tr.mat-mdc-row:hover {
+  background: #f8faff;
+}
+td:last-child {
+  white-space: nowrap;
+}
+td:last-child button {
+  margin: 0.15rem;
+}
+mat-paginator {
+  border-top: 1px solid #e8edf5;
+}

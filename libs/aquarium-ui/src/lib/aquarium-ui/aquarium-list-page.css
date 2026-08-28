@@ -3,24 +3,16 @@
   max-width: 72rem;
   margin: 0 auto;
   padding: 2rem clamp(1rem, 4vw, 3rem) 4rem;
-  color: #172033;
+  color: var(--tankos-color-ink);
 }
 .back-link {
-  color: #53627a;
+  color: var(--tankos-color-muted);
   font-size: 0.875rem;
   text-decoration: none;
 }
 .back-link:hover {
   text-decoration: underline;
 }
-.page-header {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 2rem;
-  margin: 2rem 0;
-}
-.eyebrow,
 .card-label {
   margin: 0 0 0.45rem;
   color: #53627a;
@@ -28,79 +20,6 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-}
-h1,
-h2,
-h3 {
-  margin-top: 0;
-}
-h1 {
-  margin-bottom: 0.5rem;
-  font-size: clamp(2rem, 4vw, 3rem);
-}
-.page-intro {
-  max-width: 42rem;
-  margin: 0;
-  color: #53627a;
-  line-height: 1.6;
-}
-.primary-action,
-.secondary-action {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 2.75rem;
-  box-sizing: border-box;
-  border-radius: 0.45rem;
-  padding: 0.65rem 1rem;
-  font: inherit;
-  font-weight: 700;
-  text-decoration: none;
-  cursor: pointer;
-}
-.primary-action {
-  border: 1px solid #2454a6;
-  background: #2454a6;
-  color: white;
-}
-.secondary-action {
-  border: 1px solid #b7c2d5;
-  background: white;
-  color: #2454a6;
-}
-.primary-action:hover {
-  background: #193e80;
-}
-.secondary-action:hover {
-  background: #f2f6fc;
-}
-.state-card {
-  border: 1px solid #dbe2ee;
-  border-radius: 0.75rem;
-  padding: clamp(1.5rem, 4vw, 3rem);
-  background: #f8faff;
-  text-align: center;
-}
-.state-card h2 {
-  margin-bottom: 0.5rem;
-}
-.state-card p {
-  margin: 0 auto 1.5rem;
-  color: #53627a;
-}
-.state-card-error {
-  border-color: #e7b9b9;
-  background: #fff8f8;
-}
-.state-icon {
-  display: block;
-  margin-bottom: 1rem;
-  color: #2454a6;
-  font-size: 2rem;
-  font-weight: 700;
-}
-.state-card-error .state-icon {
-  color: #a12626;
 }
 .list-summary {
   display: flex;
@@ -115,7 +34,7 @@ h1 {
 }
 .list-summary span,
 .card-meta {
-  color: #53627a;
+  color: var(--tankos-color-muted);
   font-size: 0.875rem;
 }
 .aquarium-grid {
@@ -130,11 +49,11 @@ h1 {
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 1rem;
-  border: 1px solid #dbe2ee;
-  border-radius: 0.75rem;
+  border: 1px solid var(--tankos-color-border);
+  border-radius: var(--tankos-radius-md);
   padding: 1.25rem;
-  background: white;
-  box-shadow: 0 0.2rem 0.8rem rgb(30 56 100 / 7%);
+  background: var(--tankos-color-surface);
+  box-shadow: var(--tankos-shadow-card);
 }
 .aquarium-card-icon {
   display: grid;
@@ -142,8 +61,8 @@ h1 {
   height: 2.5rem;
   place-items: center;
   border-radius: 50%;
-  background: #e5efff;
-  color: #2454a6;
+  background: var(--tankos-color-primary-soft);
+  color: var(--tankos-color-primary);
   font-size: 1.25rem;
 }
 .aquarium-card-content h3 {
@@ -157,14 +76,4 @@ h1 {
 .aquarium-card > .secondary-action {
   grid-column: 1 / -1;
   width: 100%;
-}
-@media (max-width: 42rem) {
-  .page-header {
-    align-items: stretch;
-    flex-direction: column;
-    gap: 1.25rem;
-  }
-  .page-header .primary-action {
-    width: 100%;
-  }
 }

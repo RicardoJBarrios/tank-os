@@ -1,0 +1,78 @@
+.dashboard {
+  max-width: var(--tankos-content-max-width);
+  margin: 0 auto;
+  padding: 2rem clamp(1rem, 4vw, 3rem) 4rem;
+  color: var(--tankos-color-ink);
+}
+.welcome {
+  margin-bottom: 2.5rem;
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  border: 1px solid var(--tankos-color-border);
+  border-radius: var(--tankos-radius-lg);
+  background: linear-gradient(
+    135deg,
+    var(--tankos-color-primary-soft),
+    var(--tankos-color-surface)
+  );
+  box-shadow: var(--tankos-shadow-card);
+}
+.eyebrow {
+  margin: 0 0 0.45rem;
+  color: var(--tankos-color-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+h1 {
+  margin: 0 0 0.5rem;
+  font-size: clamp(2rem, 4vw, 3rem);
+}
+.intro {
+  margin: 0;
+  color: var(--tankos-color-muted);
+  line-height: 1.6;
+}
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+mat-card {
+  border: 1px solid var(--tankos-color-border);
+  border-radius: var(--tankos-radius-md);
+  box-shadow: var(--tankos-shadow-card);
+}
+.summary-card {
+  min-height: 8rem;
+}
+.summary-card--ready {
+  border-top: 0.25rem solid var(--tankos-color-accent);
+}
+.summary-card mat-card-content,
+.tool-card mat-card-content {
+  color: var(--tankos-color-muted);
+  line-height: 1.6;
+}
+.section-heading h2 {
+  margin: 0 0 1rem;
+}
+.tool-card {
+  display: flex;
+  flex-direction: column;
+}
+.tool-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+.tool-card mat-card-actions {
+  margin-top: auto;
+  padding-top: 1rem;
+}
+@media (max-width: 42rem) {
+  .tool-grid {
+    grid-template-columns: 1fr;
+  }
+}

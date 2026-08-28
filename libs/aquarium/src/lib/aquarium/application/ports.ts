@@ -3,6 +3,8 @@ import type { Aquarium, AquariumId, AquariumName } from '../domain/aquarium';
 export interface EstablishAquariumInput {
   readonly name: AquariumName;
   readonly keeperId: string;
+  /** Only an admin may set this to a different principal. */
+  readonly ownerKeeperId?: string;
 }
 
 export interface AquariumEstablisher {

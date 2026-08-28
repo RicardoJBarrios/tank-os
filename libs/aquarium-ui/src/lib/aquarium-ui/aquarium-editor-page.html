@@ -1,5 +1,5 @@
 <main class="aquarium-editor-page" data-testid="aquarium-editor">
-  <a class="back-link" routerLink="/aquariums">Back to aquariums</a>
+  <a class="back-link" routerLink="/aquariums">← Back to aquariums</a>
   <section class="editor-card">
     <p class="eyebrow">Aquarium setup</p>
     <h1>Create aquarium</h1>
@@ -8,30 +8,32 @@
       connections afterwards.
     </p>
     <form data-testid="aquarium-form" (submit)="submit($event)">
-      <label for="aquarium-name">Name</label>
-      <input
-        data-testid="aquarium-name"
-        id="aquarium-name"
-        name="name"
-        [value]="name"
-        (input)="name = $any($event.target).value"
-        required
-        maxlength="120"
-        autocomplete="off"
-      />
-      <span class="field-hint"
-        >Use a name that helps you identify the system.</span
-      >
+      <mat-form-field appearance="outline">
+        <mat-label>Name</mat-label>
+        <input
+          matInput
+          data-testid="aquarium-name"
+          id="aquarium-name"
+          name="name"
+          [value]="name"
+          (input)="name = $any($event.target).value"
+          required
+          maxlength="120"
+          autocomplete="off"
+        />
+        <mat-hint>Use a name that helps you identify the system.</mat-hint>
+      </mat-form-field>
       <div class="form-actions">
         <button
-          class="primary-action"
+          mat-flat-button
+          color="primary"
           data-testid="aquarium-save"
           type="submit"
           [disabled]="service.saving()"
         >
           {{ service.saving() ? 'Creating…' : 'Create aquarium' }}
         </button>
-        <a class="secondary-action" routerLink="/aquariums">Cancel</a>
+        <a mat-stroked-button routerLink="/aquariums">Cancel</a>
       </div>
     </form>
   </section>

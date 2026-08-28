@@ -37,6 +37,7 @@ export function crudMaterialDisplayedColumns<TData>(
     MatTableModule,
   ],
   templateUrl: './crud-material-table.component.html',
+  styleUrl: './crud-material-table.component.css',
 })
 export class CrudMaterialTableComponent<TData> {
   public readonly items = input.required<readonly CrudRecord<TData>[]>();

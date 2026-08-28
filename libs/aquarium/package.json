@@ -1,5 +1,8 @@
 {
   "name": "@tankos/aquarium",
   "version": "0.0.1",
+  "peerDependencies": {
+    "@tankos/authz": "^0.0.0"
+  },
   "sideEffects": false
 }

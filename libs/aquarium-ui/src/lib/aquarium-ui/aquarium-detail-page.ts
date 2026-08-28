@@ -1,12 +1,22 @@
 import { Component, inject, signal, type OnInit } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AUTH_SESSION } from '@tankos/authn';
 import type { AquariumListItem } from '@tankos/aquarium';
+import {
+  TankosPageHeaderComponent,
+  TankosStateCardComponent,
+} from '@tankos/ui-material';
 import { ACCESSIBLE_AQUARIUM_READER } from './aquarium-tokens';
 
 @Component({
   selector: 'tankos-aquarium-detail-page',
-  imports: [RouterLink],
+  imports: [
+    MatButtonModule,
+    RouterLink,
+    TankosPageHeaderComponent,
+    TankosStateCardComponent,
+  ],
   templateUrl: './aquarium-detail-page.html',
   styleUrl: './aquarium-detail-page.css',
 })

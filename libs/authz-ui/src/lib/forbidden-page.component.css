@@ -1,0 +1,11 @@
+.forbidden-page {
+  display: grid;
+  min-height: 70vh;
+  place-items: center;
+  padding: 1rem;
+}
+
+mat-card {
+  width: 100%;
+  max-width: 32rem;
+}

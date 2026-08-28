@@ -1,51 +1,45 @@
 <main class="aquarium-page" data-testid="aquarium-list">
-  <a class="back-link" routerLink="/">Back to TankOS</a>
-  <header class="page-header">
-    <div>
-      <p class="eyebrow">TankOS workspace</p>
-      <h1>My aquariums</h1>
-      <p class="page-intro">
-        Manage your aquarium systems, their physical areas and connected
-        equipment.
-      </p>
-    </div>
-    <a class="primary-action" data-testid="aquarium-create" routerLink="new"
+  <a class="back-link" routerLink="/">← Back to TankOS</a>
+  <tankos-page-header
+    eyebrow="TankOS workspace"
+    title="My aquariums"
+    description="Manage your aquarium systems, their physical areas and connected equipment."
+  >
+    <a
+      mat-flat-button
+      color="primary"
+      data-testid="aquarium-create"
+      routerLink="new"
       >Create aquarium</a
     >
-  </header>
+  </tankos-page-header>
   @if (service.status() === 'loading') {
-  <section
-    class="state-card"
+  <tankos-state-card
     data-testid="aquarium-list-status"
-    aria-live="polite"
-  >
-    <span class="state-icon" aria-hidden="true">◌</span>
-    <h2>Loading aquariums…</h2>
-    <p>We are retrieving the aquariums available to your account.</p>
-  </section>
+    state="loading"
+    title="Loading aquariums…"
+    message="We are retrieving the aquariums available to your account."
+  />
   } @else if (service.status() === 'error') {
-  <section
-    class="state-card state-card-error"
+  <tankos-state-card
     data-testid="aquarium-list-status"
-    role="alert"
+    state="error"
+    title="Aquariums could not be loaded."
+    message="Check your connection and try again."
   >
-    <span class="state-icon" aria-hidden="true">!</span>
-    <h2>Aquariums could not be loaded.</h2>
-    <p>Check your connection and try again.</p>
-    <button type="button" class="secondary-action" (click)="service.load()">
+    <button type="button" mat-stroked-button (click)="service.load()">
       Try again
     </button>
-  </section>
+  </tankos-state-card>
   } @else if (service.items().length === 0) {
-  <section
-    class="state-card state-card-empty"
+  <tankos-state-card
     data-testid="aquarium-list-status"
+    state="empty"
+    title="No aquariums yet."
+    message="Create your first aquarium to start modelling its system."
   >
-    <span class="state-icon" aria-hidden="true">◎</span>
-    <h2>No aquariums yet.</h2>
-    <p>Create your first aquarium to start modelling its system.</p>
-    <a class="primary-action" routerLink="new">Create aquarium</a>
-  </section>
+    <a mat-flat-button color="primary" routerLink="new">Create aquarium</a>
+  </tankos-state-card>
   } @else {
   <section class="list-summary">
     <h2>Your aquarium systems</h2>
@@ -64,7 +58,7 @@
         <p class="card-meta">Ready to configure</p>
       </div>
       <a
-        class="secondary-action"
+        mat-stroked-button
         data-testid="aquarium-detail"
         [routerLink]="[aquarium.id]"
         >Open workspace</a

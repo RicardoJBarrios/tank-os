@@ -1,0 +1,35 @@
+:host {
+  display: block;
+}
+.state-card {
+  border: 1px solid var(--tankos-color-border);
+  border-radius: var(--tankos-radius-md);
+  padding: clamp(1.5rem, 4vw, 3rem);
+  background: var(--tankos-color-surface-subtle);
+  text-align: center;
+}
+.state-card-error {
+  border-color: color-mix(in srgb, var(--tankos-color-danger) 35%, white);
+  background: var(--tankos-color-danger-soft);
+}
+.state-icon {
+  display: block;
+  margin-bottom: 1rem;
+  color: var(--tankos-color-primary);
+  font-size: 2rem;
+  font-weight: 700;
+}
+.state-card-error .state-icon {
+  color: var(--tankos-color-danger);
+}
+h2 {
+  margin: 0 0 0.5rem;
+}
+p {
+  margin: 0 auto 1.5rem;
+  color: var(--tankos-color-muted);
+  line-height: 1.6;
+}
+.actions:empty {
+  display: none;
+}

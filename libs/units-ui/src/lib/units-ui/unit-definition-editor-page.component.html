@@ -1,19 +1,38 @@
-<main>
-  <a routerLink="/units" queryParamsHandling="preserve">Back to units</a>
-  <h2>{{ isEdit ? 'Edit unit' : 'Create unit' }}</h2>
-  @if (!isEdit || recordStatus() === 'ready') {
-    <tankos-unit-definition-form
-      [record]="record()"
-      (submitted)="save($event)"
-      (cancelled)="cancel()"
-    />
-  } @else if (recordStatus() === 'pending') {
-    <p role="status">Loading unit…</p>
-  } @else {
-    <p role="alert">Unable to load the unit.</p>
-  }
-  @if (saveError()) {
-    <p role="alert">Unable to save the unit.</p>
-  }
-  <span data-testid="save-status" aria-live="polite">{{ saveStatus() }}</span>
+<main class="unit-editor-page">
+  <a class="back-link" routerLink="/units" queryParamsHandling="preserve"
+    >Back to units</a
+  >
+  <tankos-page-header
+    [title]="isEdit ? 'Edit unit' : 'Create unit'"
+    [description]="
+      isEdit
+        ? 'Update the unit representation without changing its identifier.'
+        : 'Add a unit to the TankOS catalogue.'
+    "
+  />
+  <section class="editor-card">
+    @if (!isEdit || recordStatus() === 'ready') {
+      <tankos-unit-definition-form
+        [record]="record()"
+        (submitted)="save($event)"
+        (cancelled)="cancel()"
+      />
+    } @else if (recordStatus() === 'pending') {
+      <p role="status">Loading unit…</p>
+    } @else {
+      <tankos-state-card
+        state="error"
+        title="Unable to load the unit."
+        message="The unit could not be retrieved."
+      />
+    }
+    @if (saveError()) {
+      <tankos-state-card
+        state="error"
+        title="Unable to save the unit."
+        message="Check the values and try again."
+      />
+    }
+    <span data-testid="save-status" aria-live="polite">{{ saveStatus() }}</span>
+  </section>
 </main>

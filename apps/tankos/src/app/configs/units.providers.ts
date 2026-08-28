@@ -6,8 +6,11 @@ import { createDefaultUnitDefinitionFirestoreRepository } from '@tankos/units-fi
 import { UNIT_DEFINITION_MANAGEMENT_SERVICE } from '@tankos/units-composition';
 import { tankosFirestore } from './firebase';
 
-/** Firebase composition loaded only when the units feature is requested. */
-export function provideTankosUnits(): Provider {
+/**
+ * TankOS-specific Firebase composition loaded only when the units feature is
+ * requested. The domain and UI consume the neutral composition token.
+ */
+export function provideTankosUnitsFirestoreAdapter(): Provider {
   return {
     provide: UNIT_DEFINITION_MANAGEMENT_SERVICE,
     useFactory: () =>

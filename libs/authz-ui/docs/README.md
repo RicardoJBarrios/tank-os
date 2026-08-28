@@ -3,9 +3,13 @@
 ## Purpose
 
 `@tankos/authz-ui` adapts the provider-neutral authorization boundary to
-Angular Router. It centralizes the navigation outcome for protected routes:
+Angular Router. It centralizes the navigation outcome for protected routes
+and owns the reusable forbidden page:
 an unauthenticated session goes to `/login`, while an authenticated session
 whose route policy denies access goes to `/forbidden`.
+
+The host application only mounts the exported route and provides the concrete
+policy. The page does not know about TankOS domains or Firebase.
 
 ## Architecture
 

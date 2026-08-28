@@ -1,81 +1,118 @@
 <main class="units-page">
-  <a routerLink="/">Back to TankOS</a>
-  <h2>Units</h2>
-  <p>Manage the public and private unit catalogue.</p>
-  <span data-testid="lifecycle-status" aria-live="polite">{{
-    lifecycleStatus()
-  }}</span>
-  <span data-testid="unit-list-status" aria-live="polite">{{
-    list.status()
-  }}</span>
-
-  <h3>Units</h3>
-  <form class="unit-filters" (submit)="$event.preventDefault(); applyFilters()">
-    <label for="unit-visibility-filter">Visibility</label>
-    <select
-      id="unit-visibility-filter"
-      data-testid="unit-visibility-filter"
-      [value]="visibilityFilter()"
-      (change)="filterByVisibility($event)"
-    >
-      <option value="all">All</option>
-      <option value="public">Public</option>
-      <option value="private">Private</option>
-      @if (admin()) {
-        <option value="deleted">Deleted</option>
-      }
-    </select>
-    <label for="unit-record-filter">Record</label>
-    <input
-      id="unit-record-filter"
-      data-testid="unit-record-filter"
-      type="search"
-      [value]="recordFilter()"
-      (input)="filterByRecord($event)"
-    />
-    @if (admin()) {
-      <label for="unit-owner-filter">Owner (keeper)</label>
-      <input
-        id="unit-owner-filter"
-        data-testid="unit-owner-filter"
-        type="search"
-        [value]="ownerFilter()"
-        (input)="filterByOwner($event)"
-      />
-    }
-    <button type="submit" data-testid="apply-unit-filters">Search</button>
-  </form>
-  @if (list.isEmpty() && hasFilters()) {
-    <p data-testid="unit-empty-filtered">No units match these filters.</p>
-    <button
-      type="button"
-      data-testid="clear-unit-filters"
-      (click)="clearFilters()"
-    >
-      Clear filters
+  <a class="back-link" routerLink="/">← Back to TankOS</a>
+  <tankos-page-header
+    eyebrow="TankOS catalogue"
+    title="Units"
+    description="Manage the public and private unit catalogue used throughout TankOS."
+  >
+    <button mat-flat-button color="primary" type="button" (click)="create()">
+      Create unit
     </button>
-  }
-  <tankos-crud-material-table
-    [items]="list.items()"
-    [loading]="list.status() === 'loading'"
-    [error]="list.error()"
-    [disabled]="lifecycleStatus() === 'pending'"
-    [label]="label"
-    [columns]="columns()"
-    [selectable]="false"
-    [canEdit]="canEdit"
-    [pageIndex]="pageIndex()"
-    [pageSize]="pageSize"
-    (pageRequested)="pageRequested($event)"
-    [canMarkForDeletion]="canMarkForDeletion"
-    [canPublish]="canPublish"
-    [canPhysicallyDelete]="canPhysicallyDelete"
-    (createRequested)="create()"
-    (editRequested)="edit($event)"
-    (detailRequested)="detail($event)"
-    (markForDeletionRequested)="markForDeletion($event)"
-    (restoreRequested)="restore($event)"
-    (publishRequested)="publish($event)"
-    (physicalDeleteRequested)="physicallyDelete($event)"
-  />
+  </tankos-page-header>
+  <div class="technical-status" aria-live="polite">
+    <span data-testid="lifecycle-status">{{ lifecycleStatus() }}</span>
+    <span data-testid="unit-list-status">{{ list.status() }}</span>
+  </div>
+
+  <section class="units-content">
+    <div class="section-heading">
+      <div>
+        <h2>Unit catalogue</h2>
+        <p>Search by record, visibility or owner.</p>
+      </div>
+    </div>
+    <form
+      class="unit-filters"
+      (submit)="$event.preventDefault(); applyFilters()"
+    >
+      <mat-form-field appearance="outline">
+        <mat-label>Visibility</mat-label>
+        <mat-select
+          id="unit-visibility-filter"
+          data-testid="unit-visibility-filter"
+          [value]="visibilityFilter()"
+          (selectionChange)="filterByVisibility($event)"
+        >
+          <mat-option value="all">All</mat-option>
+          <mat-option value="public">Public</mat-option>
+          <mat-option value="private">Private</mat-option>
+          @if (admin()) {
+            <mat-option value="deleted">Deleted</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Record</mat-label>
+        <input
+          matInput
+          id="unit-record-filter"
+          data-testid="unit-record-filter"
+          type="search"
+          [value]="recordFilter()"
+          (input)="filterByRecord($event)"
+        />
+      </mat-form-field>
+      @if (admin()) {
+        <mat-form-field appearance="outline">
+          <mat-label>Owner (keeper)</mat-label>
+          <input
+            matInput
+            id="unit-owner-filter"
+            data-testid="unit-owner-filter"
+            type="search"
+            [value]="ownerFilter()"
+            (input)="filterByOwner($event)"
+          />
+        </mat-form-field>
+      }
+      <button
+        mat-flat-button
+        color="primary"
+        type="submit"
+        data-testid="apply-unit-filters"
+      >
+        Search
+      </button>
+    </form>
+    @if (list.isEmpty() && hasFilters()) {
+      <tankos-state-card
+        data-testid="unit-empty-filtered"
+        state="empty"
+        title="No units match these filters."
+        message="Try a different search or clear the filters to see the full catalogue."
+      >
+        <button
+          mat-stroked-button
+          type="button"
+          data-testid="clear-unit-filters"
+          (click)="clearFilters()"
+        >
+          Clear filters
+        </button>
+      </tankos-state-card>
+    }
+    <tankos-crud-material-table
+      [items]="list.items()"
+      [loading]="list.status() === 'loading'"
+      [error]="list.error()"
+      [disabled]="lifecycleStatus() === 'pending'"
+      [label]="label"
+      [columns]="columns()"
+      [selectable]="false"
+      [canEdit]="canEdit"
+      [pageIndex]="pageIndex()"
+      [pageSize]="pageSize"
+      (pageRequested)="pageRequested($event)"
+      [canMarkForDeletion]="canMarkForDeletion"
+      [canPublish]="canPublish"
+      [canPhysicallyDelete]="canPhysicallyDelete"
+      (createRequested)="create()"
+      (editRequested)="edit($event)"
+      (detailRequested)="detail($event)"
+      (markForDeletionRequested)="markForDeletion($event)"
+      (restoreRequested)="restore($event)"
+      (publishRequested)="publish($event)"
+      (physicalDeleteRequested)="physicallyDelete($event)"
+    />
+  </section>
 </main>

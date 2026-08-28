@@ -1,0 +1,48 @@
+<mat-toolbar class="topbar" aria-label="TankOS navigation">
+  <span class="brand">{{ title }}</span>
+  <span class="toolbar-spacer"></span>
+  <a mat-button routerLink="/aquariums">Aquariums</a>
+  <a mat-button routerLink="/units">Units</a>
+  <button
+    mat-button
+    type="button"
+    class="account-trigger"
+    [matMenuTriggerFor]="accountMenu"
+    data-testid="account-menu-trigger"
+    (menuOpened)="refreshAccount()"
+  >
+    <span class="account-avatar" aria-hidden="true">{{
+      accountInitial()
+    }}</span>
+    <span>{{ accountLabel() }}</span>
+  </button>
+</mat-toolbar>
+
+<mat-menu #accountMenu="matMenu" aria-label="Account menu">
+  @if (loadingAccount()) {
+    <button mat-menu-item disabled>Loading account…</button>
+  } @else if (account(); as currentAccount) {
+    <div class="account-summary">
+      <strong>{{ currentAccount.principalName }}</strong>
+      <span>{{ currentAccount.roles.join(', ') }}</span>
+    </div>
+    <a mat-menu-item routerLink="/profile" data-testid="profile-link">
+      View profile
+    </a>
+    <button
+      mat-menu-item
+      type="button"
+      data-testid="logout"
+      [disabled]="loggingOut()"
+      (click)="logout()"
+    >
+      {{ loggingOut() ? 'Signing out…' : 'Sign out' }}
+    </button>
+  } @else if (accountResolved()) {
+    <a mat-menu-item routerLink="/login" data-testid="login-link"> Sign in </a>
+  } @else {
+    <button mat-menu-item disabled>Account</button>
+  }
+</mat-menu>
+<router-outlet />
+<tankos-feedback-outlet />

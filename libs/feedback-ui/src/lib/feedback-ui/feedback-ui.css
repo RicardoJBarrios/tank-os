@@ -1,0 +1,21 @@
+.cdk-overlay-pane {
+  max-width: min(92vw, 32rem);
+}
+.mat-mdc-dialog-container {
+  --mdc-dialog-container-shape: 1rem;
+}
+.mat-mdc-snack-bar-container {
+  --mdc-snackbar-container-shape: 0.5rem;
+}
+.tankos-feedback-success {
+  --mdc-snackbar-container-color: var(--mat-sys-primary-container);
+  --mdc-snackbar-supporting-text-color: var(--mat-sys-on-primary-container);
+}
+.tankos-feedback-error {
+  --mdc-snackbar-container-color: var(--mat-sys-error-container);
+  --mdc-snackbar-supporting-text-color: var(--mat-sys-on-error-container);
+}
+.tankos-feedback-warning {
+  --mdc-snackbar-container-color: var(--mat-sys-tertiary-container);
+  --mdc-snackbar-supporting-text-color: var(--mat-sys-on-tertiary-container);
+}

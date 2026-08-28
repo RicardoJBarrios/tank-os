@@ -3,11 +3,21 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import type { CustomUnitDefinitionDraft } from '@tankos/units';
 import { UnitDefinitionFormComponent } from './unit-definition-form.component';
 import { UnitDefinitionFeatureService } from './unit-definition-feature-service';
+import {
+  TankosPageHeaderComponent,
+  TankosStateCardComponent,
+} from '@tankos/ui-material';
 
 /** Create/edit page; the route decides whether the operation is a create or replacement. */
 @Component({
-  imports: [RouterLink, UnitDefinitionFormComponent],
+  imports: [
+    RouterLink,
+    UnitDefinitionFormComponent,
+    TankosPageHeaderComponent,
+    TankosStateCardComponent,
+  ],
   templateUrl: './unit-definition-editor-page.component.html',
+  styleUrl: './unit-definition-editor-page.component.css',
 })
 export class UnitDefinitionEditorPageComponent implements OnInit {
   readonly #route = inject(ActivatedRoute);

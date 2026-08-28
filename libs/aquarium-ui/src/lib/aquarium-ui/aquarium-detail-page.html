@@ -1,21 +1,15 @@
 <main class="aquarium-detail-page" data-testid="aquarium-detail-page">
   <a class="back-link" routerLink="/aquariums">Back to aquariums</a>
   @if (loading()) {
-  <section class="state-card" aria-live="polite">
-    <span class="state-icon" aria-hidden="true">◌</span>
-    <h1>Loading aquarium…</h1>
-  </section>
+  <tankos-state-card state="loading" title="Loading aquarium…" />
   } @else if (aquarium(); as currentAquarium) {
-  <header class="detail-header">
-    <div>
-      <p class="eyebrow">Aquarium workspace</p>
-      <h1>{{ currentAquarium.name }}</h1>
-      <p class="page-intro">
-        Your system overview and configuration workspace.
-      </p>
-    </div>
+  <tankos-page-header
+    eyebrow="Aquarium workspace"
+    [title]="currentAquarium.name"
+    description="Your system overview and configuration workspace."
+  >
     <span class="status-badge">Accessible</span>
-  </header>
+  </tankos-page-header>
   <section class="overview-card">
     <div class="overview-icon" aria-hidden="true">◉</div>
     <div>
@@ -32,10 +26,10 @@
     </p>
   </section>
   } @else {
-  <section class="state-card state-card-error" role="alert">
-    <span class="state-icon" aria-hidden="true">!</span>
-    <h1>Aquarium not found.</h1>
-    <p>This aquarium may have been removed or is no longer available to you.</p>
-  </section>
+  <tankos-state-card
+    state="not-found"
+    title="Aquarium not found."
+    message="This aquarium may have been removed or is no longer available to you."
+  />
   }
 </main>

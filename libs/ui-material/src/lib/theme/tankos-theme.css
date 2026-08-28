@@ -1,0 +1,77 @@
+/*
+ * TankOS Ocean Indigo theme.
+ * Hosts import this file once at the application boundary. Components use the
+ * --tankos-* tokens and Material system variables instead of defining a
+ * feature-specific palette.
+ */
+:root {
+  color-scheme: light;
+
+  --tankos-color-primary: #2454a6;
+  --tankos-color-primary-strong: #193e80;
+  --tankos-color-primary-soft: #e5efff;
+  --tankos-color-accent: #d95d39;
+  --tankos-color-ink: #172033;
+  --tankos-color-muted: #53627a;
+  --tankos-color-border: #dbe2ee;
+  --tankos-color-border-strong: #aebbd0;
+  --tankos-color-surface: #ffffff;
+  --tankos-color-surface-subtle: #f8faff;
+  --tankos-color-surface-tint: #f2f6fc;
+  --tankos-color-success: #17643b;
+  --tankos-color-success-soft: #e4f5eb;
+  --tankos-color-danger: #a12626;
+  --tankos-color-danger-soft: #fff8f8;
+  --tankos-radius-sm: 0.5rem;
+  --tankos-radius-md: 0.75rem;
+  --tankos-radius-lg: 1rem;
+  --tankos-shadow-card: 0 0.2rem 0.8rem rgb(30 56 100 / 7%);
+  --tankos-shadow-dialog: 0 1rem 2.5rem rgb(30 56 100 / 12%);
+  --tankos-content-max-width: 72rem;
+
+  --mat-sys-primary: var(--tankos-color-primary);
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: var(--tankos-color-primary-soft);
+  --mat-sys-on-primary-container: var(--tankos-color-primary-strong);
+  --mat-sys-tertiary: var(--tankos-color-accent);
+  --mat-sys-on-tertiary: #ffffff;
+  --mat-sys-tertiary-container: #ffe8df;
+  --mat-sys-on-tertiary-container: #6f2411;
+  --mat-sys-error: var(--tankos-color-danger);
+  --mat-sys-error-container: var(--tankos-color-danger-soft);
+  --mat-sys-on-error-container: #5f1111;
+  --mat-sys-surface: var(--tankos-color-surface);
+  --mat-sys-on-surface: var(--tankos-color-ink);
+  --mat-sys-outline: var(--tankos-color-border-strong);
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--tankos-color-surface-tint);
+  color: var(--tankos-color-ink);
+  font-family: Inter, Roboto, 'Helvetica Neue', sans-serif;
+  line-height: 1.5;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--tankos-color-accent) 75%, white);
+  outline-offset: 3px;
+}
+
+.mat-mdc-button,
+.mat-mdc-unelevated-button,
+.mat-mdc-outlined-button,
+.mat-mdc-raised-button {
+  min-height: 2.75rem;
+  border-radius: var(--tankos-radius-sm) !important;
+}

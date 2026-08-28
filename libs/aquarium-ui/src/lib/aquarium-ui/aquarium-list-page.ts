@@ -1,10 +1,20 @@
 import { Component, inject, type OnInit } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
+import {
+  TankosPageHeaderComponent,
+  TankosStateCardComponent,
+} from '@tankos/ui-material';
 import { AquariumFeatureService } from './aquarium-feature-service';
 
 @Component({
   selector: 'tankos-aquarium-list-page',
-  imports: [RouterLink],
+  imports: [
+    MatButtonModule,
+    RouterLink,
+    TankosPageHeaderComponent,
+    TankosStateCardComponent,
+  ],
   templateUrl: './aquarium-list-page.html',
   styleUrl: './aquarium-list-page.css',
 })

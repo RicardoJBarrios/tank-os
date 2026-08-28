@@ -1,8 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
+import { authGuard } from '@tankos/authn';
 import { appRoutes } from './app.routes';
 
-vi.mock('./dashboard/dashboard.component', () => ({
-  DashboardComponent: class DashboardComponent {
+vi.mock('@tankos/shell-ui', () => ({
+  TankosDashboardComponent: class TankosDashboardComponent {
+    public readonly marker = true;
+  },
+  TankosProfilePageComponent: class TankosProfilePageComponent {
     public readonly marker = true;
   },
 }));
@@ -14,7 +18,12 @@ vi.mock('@tankos/authn-firebase-ui', () => ({
 vi.mock('@tankos/units-ui', () => ({
   unitsRoutes: [{ path: '' }],
 }));
-vi.mock('./forbidden/forbidden-page.component', () => ({
+vi.mock('@tankos/aquarium-ui', () => ({
+  aquariumRoutes: [{ path: '' }],
+  ACCESSIBLE_AQUARIUM_READER: Symbol('reader'),
+  AQUARIUM_ESTABLISHER: Symbol('establisher'),
+}));
+vi.mock('@tankos/authz-ui', () => ({
   ForbiddenPageComponent: class ForbiddenPageComponent {
     public readonly marker = true;
   },
@@ -31,10 +40,14 @@ describe('appRoutes', () => {
     await expect(unitsRoute?.loadChildren?.()).resolves.toBeDefined();
   });
 
-  it('keeps the dashboard as the root route', async () => {
+  it('Given the Aquarium route, When its lazy feature is loaded, Then it resolves the feature routes', async () => {
+    const aquariumRoute = appRoutes.find((route) => route.path === 'aquariums');
+    await expect(aquariumRoute?.loadChildren?.()).resolves.toBeDefined();
+  });
+
+  it('keeps the shared dashboard as the root route', () => {
     const dashboardRoute = appRoutes.find((route) => route.path === '');
-    expect(dashboardRoute?.loadComponent).toBeTypeOf('function');
-    await expect(dashboardRoute?.loadComponent?.()).resolves.toBeDefined();
+    expect(dashboardRoute?.component).toBeDefined();
   });
 
   it('loads the public login route without authentication', async () => {
@@ -48,5 +61,11 @@ describe('appRoutes', () => {
       (route) => route.path === 'forbidden',
     );
     await expect(forbiddenRoute?.loadComponent?.()).resolves.toBeDefined();
+  });
+
+  it('protects the profile route and loads the shared profile page', async () => {
+    const profileRoute = appRoutes.find((route) => route.path === 'profile');
+    expect(profileRoute?.canActivate).toContain(authGuard);
+    expect(profileRoute?.component).toBeDefined();
   });
 });
