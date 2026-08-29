@@ -16,8 +16,8 @@ command = "/bin/zsh"
 args = [ "-lc", "export GITHUB_PERSONAL_ACCESS_TOKEN=\"$(gh auth token)\"; exec github-mcp-server stdio --toolsets=repos,issues,pull_requests,actions,code_security,secret_protection" ]
 
 [mcp_servers.codegraph]
-command = "/Users/ricardo/.local/bin/cgr"
-args = [ "mcp-server" ]
+command = "/bin/zsh"
+args = [ "-lc", "cd /tmp && exec cgr mcp-server" ]
 
 [mcp_servers.codegraph.env]
 CODEGRAPH_TELEMETRY = "off"
