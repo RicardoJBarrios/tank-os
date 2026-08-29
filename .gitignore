@@ -65,5 +65,8 @@ firestore-debug.log
 # local structural graph data (CodeGraph normally stores this outside the repo)
 .codegraph/
 *.codegraph.log
+.cgr-hash-cache.json
+.cgr-dir-mtimes.json
+.cgr-parser-fingerprint
 
 /test-results/

@@ -6,6 +6,14 @@ destructive changes, secret access, pushes or production mutations.
 - **Nx:** projects, targets, generators, dependency graph and boundaries.
 - **CodeGraph:** local imports, callers, callees and structural impact after
   exact search shows that relationships matter.
+- **Code-Graph-RAG (CGR):** the official `cgr` CLI maintains the local
+  Memgraph/Qdrant graph. Install it with `uv tool install
+  'code-graph-rag[treesitter-full]'` (Python 3.12), then run
+  `cgr daemon up` and `cgr start --repo-path . --update-graph`. This checkout
+  tracks a `post-commit` hook under `.githooks/`; enable it once with
+  `git config core.hooksPath .githooks`. The hook updates structure and call
+  relationships without generating embeddings, and never stores graph caches
+  or credentials in Git.
 - **Firebase:** current Auth, Firestore, Rules, Emulator Suite and Hosting
   guidance; local emulator execution remains the validation authority.
 - **GitHub:** repository, issues, pull requests and external delivery state.
