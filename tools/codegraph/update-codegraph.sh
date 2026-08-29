@@ -9,6 +9,10 @@ if ! command -v cgr >/dev/null 2>&1; then
   exit 0
 fi
 
+# Run from a neutral directory so CGR does not interpret the repository's
+# application `.env` as its own configuration file.
+cd /tmp || exit 0
+
 exec cgr --quiet start \
   --repo-path "$repo_root" \
   --update-graph \
