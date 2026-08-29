@@ -8,7 +8,7 @@ destructive changes, secret access, pushes or production mutations.
   exact search shows that relationships matter.
 - **Code-Graph-RAG (CGR):** the official `cgr` CLI maintains the local
   Memgraph/Qdrant graph. Install it with `uv tool install
-  'code-graph-rag[treesitter-full]'` (Python 3.12), then run
+  'code-graph-rag[treesitter-full,ast-grep]'` (Python 3.12), then run
   `cgr daemon up` and `cgr start --repo-path . --update-graph`. This checkout
   tracks a `post-commit` hook under `.githooks/`; enable it once with
   `git config core.hooksPath .githooks`. The hook updates structure and call
