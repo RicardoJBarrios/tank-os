@@ -27,7 +27,7 @@ import {
   AQUARIUM_MANAGER,
   AQUARIUM_ESTABLISHER,
 } from '@tankos/aquarium-ui';
-import { TIME_CLOCK } from '@tankos/time';
+import { TIME_CLOCK } from '@tankos/time-angular';
 import { tankosFirestore } from './firebase';
 
 /** Firebase composition loaded only when the Aquarium feature is requested. */

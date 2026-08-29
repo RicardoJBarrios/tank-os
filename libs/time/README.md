@@ -1,27 +1,45 @@
 # TankOS Time
 
-`@tankos/time` contains provider-independent temporal contracts, native
-JavaScript implementations, Angular composition and presentation pipes.
-
-Optional boundaries are physically isolated packages:
+`@tankos/time` es el contrato temporal independiente de la implementación.
+Exporta `Instant`, `LocalDate`, `Duration`, los puertos, `TimeRuntime` y los
+esquemas Zod canónicos. No selecciona ni conoce `Date`, `Intl`, Angular o
+Firebase.
 
 ```ts
-import { createFirestoreTimeAdapter } from '@tankos/time-firestore';
-import { createJsonHttpTimeAdapter } from '@tankos/time-json-http';
-import { createZodTimeSchemas } from '@tankos/time-zod';
+import { createZodTimeSchemas, type TimePort } from '@tankos/time';
+
+const schemas = createZodTimeSchemas(timePort, timeZoneDatabase);
+const instant = schemas.instant.parse(input.occurredAt);
 ```
 
-The primary package does not import Firebase, Zod or transport adapters. Each
-boundary has its own source tree, tests, documentation, peer dependencies and
-`ng-packagr-lite` build.
+Las librerías de dominio y aplicación dependen de este paquete. No deben crear
+valores `Date`: la raíz de composición suministra un `TimeRuntime` concreto.
+Zod permanece aquí porque es una decisión arquitectónica cerrada y la frontera
+de parseo de la aplicación, no un runtime temporal opcional.
 
-Commands:
+## Regla estructural
+
+Cada función o clase temporal tiene un fichero, TSDoc y prueba unitaria
+específica. Los casos límite pertenecen a la operación más concreta; las
+factorías de objetos solo componen esas operaciones y prueban el cableado o un
+recorrido feliz. Los `index.ts` de cada directorio limitan la API pública: que
+una operación interna se exporte desde su fichero para probarla no la convierte
+en API del paquete.
+
+## Deuda conocida de adopción
+
+El agregado `Aquarium` todavía utiliza `Date` para `establishedAt` y aún no
+modela su zona IANA. Su migración debe cambiar de forma atómica dominio, DTO
+Zod, formulario y representación Firestore. No debe introducirse una conversión
+parcial que oculte la incompatibilidad.
+
+Comandos de calidad:
 
 - `pnpm nx run time:build`
 - `pnpm nx run time:test`
 - `pnpm nx run time:lint`
-- `pnpm nx run time-firestore:build`
-- `pnpm nx run time-json-http:test`
-- `pnpm nx run time-zod:test`
+- `pnpm nx run time-date-intl:test`
+- `pnpm nx run time-angular:test`
+- `pnpm nx run time-firestore:test`
 
-See [`docs/README.md`](docs/README.md) for the complete temporal contract.
+Consulta [`docs/README.md`](docs/README.md) para ver el contrato completo.

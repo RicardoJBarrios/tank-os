@@ -11,7 +11,8 @@ import {
   createObservability,
   type Logger,
 } from '@tankos/observability';
-import { provideTankOsTime } from '@tankos/time';
+import { provideTimeAngular } from '@tankos/time-angular';
+import { createDateIntlRuntime } from '@tankos/time-date-intl';
 import { DecimalError } from '@tankos/decimal';
 import { DataAccessError } from '@tankos/data-access';
 import { UnitError } from '@tankos/units';
@@ -47,6 +48,8 @@ const tankosObservability = createObservability({
   minimumLogLevel: isDevMode() ? 'debug' : 'warn',
   logSinks: [createConsoleLogSink()],
 });
+
+const tankosTimeRuntime = createDateIntlRuntime();
 
 function createTankosErrorReporter(feedback: FeedbackService): ErrorReporter {
   return {
@@ -137,7 +140,7 @@ export const appConfig: ApplicationConfig = {
         deleteSelected: $localize`:@@crud.deleteSelected:Eliminar seleccionados`,
       }),
     },
-    provideTankOsTime(),
+    provideTimeAngular(tankosTimeRuntime),
     provideAuthSession(tankosAuthSession),
     { provide: TANKOS_LOGGER, useValue: tankosObservability.logger },
     { provide: LOGGER, useValue: tankosObservability.logger },

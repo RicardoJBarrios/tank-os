@@ -20,6 +20,11 @@ UI -> Signal Store -> application -> ports <- adapters
   Angular code. Use `#private` for real private implementation state.
 - One file has one primary responsibility; exported behavior has a focused
   contract test and public declarations have TSDoc.
+- In `time*`, each module declares at most one exported function or class. A
+  callable with meaningful independent behavior has a colocated focused unit
+  test; directory barrels expose only the supported public surface. Object
+  factories compose separately defined operations instead of implementing
+  those operations inline.
 
 ## Tests and quality
 
@@ -30,6 +35,8 @@ UI -> Signal Store -> application -> ports <- adapters
   branches, including public API/breaking contracts.
 - Test every permitted input representation and relevant edge case at the
   parser/validator that owns the contract; keep facade tests focused.
+- Composition tests verify wiring or one representative happy path. Angular
+  integration uses Spectator with Vitest; browser journeys use Playwright.
 - Run the affected Nx lint, test, build and formatting targets. Never use
   production Firebase for local development or CI.
 

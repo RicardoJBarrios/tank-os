@@ -1,5 +1,6 @@
 import noMultipleComparisonsInCondition from './rules/no-multiple-comparisons-in-condition.mjs';
 import noConsecutiveSameReturnGuards from './rules/no-consecutive-same-return-guards.mjs';
+import oneExportedCallablePerFile from './rules/one-exported-callable-per-file.mjs';
 
 /**
  * Local rules owned by the workspace because no external plugin expresses the
@@ -9,5 +10,6 @@ export default {
   rules: {
     'no-multiple-comparisons-in-condition': noMultipleComparisonsInCondition,
     'no-consecutive-same-return-guards': noConsecutiveSameReturnGuards,
+    'one-exported-callable-per-file': oneExportedCallablePerFile,
   },
 };

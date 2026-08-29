@@ -1,0 +1,44 @@
+{
+  "name": "time-angular",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/time-angular/src",
+  "prefix": "tankos",
+  "projectType": "library",
+  "tags": ["scope:shared", "scope:tankos", "type:time-angular"],
+  "targets": {
+    "build": {
+      "executor": "@nx/angular:ng-packagr-lite",
+      "dependsOn": ["time:build"],
+      "outputs": ["{workspaceRoot}/dist/{projectRoot}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "project": "libs/time-angular/ng-package.json",
+        "tsConfig": "libs/time-angular/tsconfig.lib.json"
+      },
+      "configurations": {
+        "production": {
+          "tsConfig": "libs/time-angular/tsconfig.lib.prod.json"
+        },
+        "development": {}
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "nx-release-publish": {
+      "options": {
+        "packageRoot": "dist/{projectRoot}"
+      }
+    },
+    "test": {
+      "outputs": [
+        "{projectRoot}/{options.coverage.reportsDirectory}",
+        "{workspaceRoot}/coverage/libs/time-angular"
+      ],
+      "options": {
+        "coverage": true,
+        "coverage.reportsDirectory": "../../coverage/libs/time-angular"
+      }
+    }
+  }
+}

@@ -25,6 +25,9 @@ const workspaceRules = {
         '^.*/eslint(\\.base)?\\.config\\.[cm]?[jt]s$',
         '^.*\\.spec\\.[cm]?[jt]s$',
         '^.*(?:vite|vitest)\\.config\\.[cm]?[jt]s$',
+        // The Date/Intl runtime is a test fixture for adapter contract tests;
+        // production imports are restricted separately to app composition.
+        '^@tankos/time-date-intl$',
       ],
       depConstraints: [
         {
@@ -38,6 +41,22 @@ const workspaceRules = {
         {
           sourceTag: 'scope:tankos',
           onlyDependOnLibsWithTags: ['scope:tankos'],
+        },
+        {
+          sourceTag: 'type:time-core',
+          onlyDependOnLibsWithTags: ['type:time-core'],
+        },
+        {
+          sourceTag: 'type:time-runtime',
+          onlyDependOnLibsWithTags: ['type:time-core'],
+        },
+        {
+          sourceTag: 'type:time-angular',
+          onlyDependOnLibsWithTags: ['type:time-core'],
+        },
+        {
+          sourceTag: 'type:time-transport',
+          onlyDependOnLibsWithTags: ['type:time-core'],
         },
       ],
     },
@@ -128,7 +147,13 @@ const architecturalElements = [
   { type: 'adapters', pattern: 'libs/*/src/lib/firestore/*' },
   { type: 'adapters', pattern: 'libs/*/src/lib/zod/*' },
   { type: 'composition', pattern: 'libs/*/src/lib/*/composition/*' },
+  { type: 'composition', pattern: 'libs/*/src/lib/*/composition/**/*' },
   { type: 'presentation', pattern: 'libs/*/src/lib/*/presentation/*' },
+  { type: 'presentation', pattern: 'libs/*/src/lib/*/presentation/**/*' },
+  {
+    type: 'presentation',
+    pattern: 'libs/time-angular/src/lib/time-angular/contracts/*',
+  },
   { type: 'presentation', pattern: 'libs/data-access-ui/src/lib/*' },
   { type: 'presentation', pattern: 'libs/*/src/lib/*-ui/*' },
   { type: 'core', pattern: 'libs/data-access/src/*' },
@@ -223,6 +248,56 @@ export function createWorkspaceEslintConfig() {
       rules: workspaceRules,
     },
     {
+      files: ['libs/*/src/lib/**/{core,domain,application}/**/*.ts'],
+      ignores: [
+        '**/*.spec.ts',
+        '**/*.test.ts',
+        // Existing Date-based aquarium fields are migration debt; no new
+        // domain or application code may introduce another native Date.
+        'libs/aquarium/src/lib/aquarium/domain/aquarium.ts',
+        'libs/aquarium/src/lib/aquarium/domain/aquarium-system.ts',
+      ],
+      rules: {
+        'no-restricted-globals': [
+          'error',
+          {
+            name: 'Date',
+            message:
+              'Domain and application code must use @tankos/time values and ports.',
+          },
+          {
+            name: 'Intl',
+            message:
+              'Intl belongs in a selected time runtime or presentation adapter.',
+          },
+        ],
+      },
+    },
+    {
+      files: ['apps/**/*.ts', 'libs/**/*.ts'],
+      ignores: [
+        'apps/*/src/app/configs/**/*.ts',
+        'libs/time-date-intl/**/*.ts',
+        'libs/time-angular/src/test-setup.ts',
+        '**/*.spec.ts',
+        '**/*.test.ts',
+      ],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            patterns: [
+              {
+                group: ['@tankos/time-date-intl'],
+                message:
+                  'Select the concrete time runtime only in an app composition root.',
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
       files: ['**/*.ts'],
       ignores: ['**/*.spec.ts', '**/*.test.ts'],
       plugins: {
@@ -233,6 +308,21 @@ export function createWorkspaceEslintConfig() {
         unicorn,
       },
       rules: libraryQualityRules,
+    },
+    {
+      files: ['libs/time*/src/**/*.ts'],
+      ignores: ['**/*.spec.ts', '**/*.test.ts', '**/test-setup.ts'],
+      plugins: { tankos: localRules },
+      rules: {
+        'tankos/one-exported-callable-per-file': 'error',
+      },
+    },
+    {
+      files: ['**/*.spec.ts', '**/*.test.ts'],
+      rules: {
+        'boundaries/no-unknown-dependencies': 'off',
+        'boundaries/dependencies': 'off',
+      },
     },
     {
       files: intentionallyPromiseShapedAdapters,

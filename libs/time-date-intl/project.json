@@ -1,0 +1,25 @@
+{
+  "name": "time-date-intl",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/time-date-intl/src",
+  "projectType": "library",
+  "tags": ["scope:shared", "scope:tankos", "type:time-runtime"],
+  "// targets": "to see all targets run: nx show project time-date-intl --web",
+  "targets": {
+    "nx-release-publish": {
+      "options": {
+        "packageRoot": "dist/{projectRoot}"
+      }
+    },
+    "test": {
+      "outputs": [
+        "{projectRoot}/{options.coverage.reportsDirectory}",
+        "{workspaceRoot}/coverage/libs/time-date-intl"
+      ],
+      "options": {
+        "coverage": true,
+        "coverage.reportsDirectory": "../../coverage/libs/time-date-intl"
+      }
+    }
+  }
+}

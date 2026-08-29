@@ -6,4 +6,6 @@ export interface CalendarPort {
   parseLocalDate(value: LocalDateInput): LocalDate;
   /** Returns whether an unknown value is accepted as a calendar-date input. */
   isValidLocalDate(value: unknown): value is LocalDateInput;
+  /** Serializes a calendar date as a canonical YYYY-MM-DD string. */
+  toLocalDateString(value: LocalDateInput): string;
 }

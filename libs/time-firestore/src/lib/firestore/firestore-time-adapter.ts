@@ -1,6 +1,4 @@
-import { padLeft } from '@tankos/formatting';
 import { Timestamp } from 'firebase/firestore';
-import { firestoreTimestampSchema } from './firestore-schemas';
 import {
   Instant,
   InstantInput,
@@ -12,10 +10,12 @@ import {
   Duration,
   DurationInput,
 } from '@tankos/time';
-import {
-  truncateMilliseconds,
-  truncateTimestampMilliseconds,
-} from '@tankos/time';
+import { fromFirestoreDuration } from './from-firestore-duration';
+import { fromFirestoreLocalDate } from './from-firestore-local-date';
+import { fromFirestoreTimestamp } from './from-firestore-timestamp';
+import { toFirestoreDuration } from './to-firestore-duration';
+import { toFirestoreLocalDate } from './to-firestore-local-date';
+import { toFirestoreTimestamp } from './to-firestore-timestamp';
 
 /** Firestore representation used for a normalized TankOS instant. */
 export type FirestoreInstant = Timestamp;
@@ -44,49 +44,11 @@ export function createFirestoreTimeAdapter(
   timePort: CalendarPort & DurationPort & InstantPort,
 ): FirestoreTimeAdapter {
   return {
-    toTimestamp(value) {
-      return Timestamp.fromMillis(
-        timePort.parseInstant(value).epochMilliseconds,
-      );
-    },
-    fromTimestamp(value) {
-      if (!(value instanceof Timestamp)) {
-        throw new RangeError('Expected a Firestore Timestamp');
-      }
-      const timestamp = firestoreTimestampSchema.parse(value);
-      const milliseconds = truncateTimestampMilliseconds(
-        timestamp.seconds,
-        timestamp.nanoseconds,
-      );
-      return timePort.parseInstant(milliseconds);
-    },
-    toLocalDate(value) {
-      return toLocalDateString(timePort.parseLocalDate(value));
-    },
-    fromLocalDate(value) {
-      if (typeof value !== 'string') {
-        throw new RangeError('Expected a Firestore local date string');
-      }
-      return timePort.parseLocalDate(value);
-    },
-    toDuration(value) {
-      return timePort.parseDuration(value).milliseconds;
-    },
-    fromDuration(value) {
-      if (
-        typeof value !== 'number' ||
-        !Number.isSafeInteger(Math.trunc(value))
-      ) {
-        throw new RangeError('Expected finite duration milliseconds');
-      }
-      return timePort.parseDuration(truncateMilliseconds(value));
-    },
+    toTimestamp: toFirestoreTimestamp.bind(undefined, timePort),
+    fromTimestamp: fromFirestoreTimestamp.bind(undefined, timePort),
+    toLocalDate: toFirestoreLocalDate.bind(undefined, timePort),
+    fromLocalDate: fromFirestoreLocalDate.bind(undefined, timePort),
+    toDuration: toFirestoreDuration.bind(undefined, timePort),
+    fromDuration: fromFirestoreDuration.bind(undefined, timePort),
   };
-}
-
-function toLocalDateString(value: LocalDate): string {
-  return `${padLeft(value.year.toString(), 4)}-${padLeft(
-    value.month.toString(),
-    2,
-  )}-${padLeft(value.day.toString(), 2)}`;
 }

@@ -32,9 +32,43 @@ improve navigation UX, never authorization.
 
 ## Time, units and measurements
 
-Time normalizes transport values to UTC and delegates localized display to the
-Angular-facing edge. Units manage standards, symbols and conversions only.
-Measurements own quantity, method, provenance and Aquarium/System context.
+Time is split by reason to change:
+
+- `@tankos/time` owns runtime-neutral value types, ports, arithmetic contracts
+  and canonical Zod schemas. It cannot import Angular/Firebase or use `Date`/`Intl`.
+- `@tankos/time-date-intl` is the replaceable implementation using today's
+  JavaScript `Date` and `Intl` APIs.
+- `@tankos/time-angular` owns DI, services, localized display and pipes. It uses
+  Angular `LOCALE_ID` and does not select a temporal runtime.
+- `@tankos/time-firestore` owns Firestore persistence conversions. JSON/REST
+  uses the core Zod schemas and is not a separate package.
+
+Only an app composition root imports the concrete runtime. Its runtime factory
+composes one neutral `TimeRuntime` (`clock`, `timePort` and
+`timeZoneDatabase`) and passes it to `provideTimeAngular`. The Angular package
+must not construct or select Date/Intl from a partial set of arguments.
+Domain/application code consumes the neutral core; Angular consumers use the
+Angular integration.
+
+An `Instant` is on the UTC timeline. `LocalDate`, `Duration` and an IANA zone are
+not values to convert to UTC. Stored instants use UTC. Presentation precedence
+is explicit zone, aquarium zone, user zone, then UTC; Angular localization is
+independent from zone selection. Nx tags and ESLint enforce these boundaries.
+
+Known adoption debt: `Aquarium.establishedAt` still uses `Date` and the
+aggregate does not yet model its IANA zone. Migrate domain, Zod DTO, form and
+Firestore representation together; a partial conversion is not an acceptable
+intermediate architecture.
+
+Known UI debt: create reusable date and time form components for Angular's
+dynamic forms. They should consume the contracts from `@tankos/time-angular`,
+preserve the semantics of `LocalDate`, `Instant` and IANA zones, and keep
+temporal logic out of feature components. This remains deferred until the
+dynamic-form contract is defined; it must be implemented as a coordinated UI
+workstream rather than as isolated controls.
+
+Units manage standards, symbols and conversions only. Measurements own
+quantity, method, provenance and Aquarium/System context.
 
 ## Technology decisions
 

@@ -15,6 +15,6 @@ export default [
   ...createSecurityEslintConfig(),
   ...createTSDocEslintConfig(),
   {
-    ignores: ['**/vitest.config.*.timestamp*'],
+    ignores: ['**/vitest.config.*.timestamp*', '**/vite.config.*.timestamp*'],
   },
 ];
