@@ -2,9 +2,11 @@ import * as publicApi from './index';
 import type { DecimalArithmeticPort, DecimalValue } from './index';
 
 describe('Decimal public entry point', () => {
-  it('Given the public entry point, When imported, Then exposes the Decimal service and provider', () => {
-    expect(publicApi.DecimalService).toEqual(expect.any(Function));
-    expect(publicApi.provideTankOsDecimal).toEqual(expect.any(Function));
+  it('Given the public entry point, When imported, Then exposes only neutral Decimal contracts', () => {
+    expect(publicApi.createDecimalRuntime).toEqual(expect.any(Function));
+    expect(publicApi.createZodDecimalSchemas).toEqual(expect.any(Function));
+    expect('DecimalService' in publicApi).toBe(false);
+    expect('provideDecimalAngular' in publicApi).toBe(false);
   });
 
   it('Given the public entry point, When imported, Then exposes the supported rounding modes', () => {
@@ -26,6 +28,7 @@ describe('Decimal public entry point', () => {
       divide: (left) => left,
       remainder: (left) => left,
       power: (left) => left,
+      round: (value) => value,
       negate: (left) => left,
       compare: () => 0,
     };
@@ -33,7 +36,7 @@ describe('Decimal public entry point', () => {
     expect(arithmetic.add('1' as DecimalValue, '2' as DecimalValue)).toBe('12');
   });
 
-  it('Given the public entry point, When imported, Then does not expose the internal Decimal factory or runtime implementation', () => {
+  it('Given the public entry point, When imported, Then does not expose the internal Decimal implementation', () => {
     expect('createDecimal' in publicApi).toBe(false);
     expect('DecimalValueObject' in publicApi).toBe(false);
   });

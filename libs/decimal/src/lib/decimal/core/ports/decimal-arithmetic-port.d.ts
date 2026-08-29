@@ -31,6 +31,8 @@ export interface DecimalArithmeticPort {
     exponent: DecimalValue,
     context?: DecimalContext,
   ): DecimalValue;
+  /** Rounds a value using the explicitly supplied decimal context. */
+  round(value: DecimalValue, context: DecimalContext): DecimalValue;
   /** Returns the additive inverse of a decimal value. */
   negate(value: DecimalValue): DecimalValue;
   /** Compares two values as less than, equal to or greater than. */

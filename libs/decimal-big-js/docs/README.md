@@ -1,4 +1,9 @@
-# Decimal Big.js adapter
+# Runtime decimal basado en Big.js
 
-Physical Big.js arithmetic adapter for `@tankos/decimal`. Only this package
-depends on Big.js and maps its implementation details to the Decimal port.
+Este paquete implementa `DecimalArithmeticPort` con Big.js y traduce sus fallos
+al modelo de errores de `@tankos/decimal`. La factoría de runtime compone el
+adaptador junto a `createDecimalRuntime()`; no decide inyección Angular,
+persistencia ni formato regional.
+
+Un runtime alternativo debe conservar los valores canónicos, el contexto de
+redondeo explícito y los errores públicos del núcleo.

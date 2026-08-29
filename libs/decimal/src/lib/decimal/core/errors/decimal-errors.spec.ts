@@ -5,7 +5,7 @@ import {
   DecimalError,
   DecimalRangeError,
   InvalidDecimalError,
-} from './decimal-errors';
+} from './index';
 
 describe('Decimal errors', () => {
   it('Given a base decimal error, When created, Then exposes its stable code', () => {

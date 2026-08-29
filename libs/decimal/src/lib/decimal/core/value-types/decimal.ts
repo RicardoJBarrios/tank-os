@@ -24,6 +24,8 @@ export interface Decimal {
   remainder(right: DecimalOperand): Decimal;
   /** Raises this value to an integer exponent. */
   power(exponent: DecimalOperand, context?: DecimalContext): Decimal;
+  /** Rounds this value with an explicit decimal context. */
+  round(context: DecimalContext): Decimal;
   /** Returns the additive inverse of this value. */
   negate(): Decimal;
   /** Compares this value with another decimal operand. */

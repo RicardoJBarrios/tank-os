@@ -1,17 +1,19 @@
-# TankOS Decimal
+# Decimal de TankOS
 
-`@tankos/decimal` contains the provider-independent Decimal value model,
-arithmetic port, application service and Angular composition.
+`@tankos/decimal` define el contrato neutral para cálculos decimales seguros.
+Representa cada valor como una cadena canónica, integra la validación Zod
+cerrada del workspace y no conoce Angular, Big.js, Firebase ni formatos de UI.
 
-Optional implementations are physical packages:
+La aplicación selecciona un runtime externo, por ejemplo
+`createBigJsDecimalRuntime()`, y los consumidores de dominio dependen solo de
+este paquete. Los límites JSON y Firestore guardan la cadena canónica y usan
+`createZodDecimalSchemas()` para validarla.
 
-```ts
-import { createBigJsDecimalAdapter } from '@tankos/decimal-big-js';
-import { decimalValueSchema } from '@tankos/decimal-zod';
-```
+No se aceptan `number` en el límite decimal: una precisión binaria perdida no
+puede recuperarse. Para enteros JavaScript exactamente representables existe
+`decimalFromSafeInteger()`.
 
-The primary package does not import Big.js or Zod. Each adapter owns its source,
-tests, documentation, peer dependencies and independent `ng-packagr-lite`
-build.
+- `pnpm nx run decimal:build`
+- `pnpm nx run decimal:test`
 
-See [`docs/README.md`](docs/README.md) for the Decimal contract.
+Consulta [docs/README.md](docs/README.md).

@@ -70,6 +70,21 @@ workstream rather than as isolated controls.
 Units manage standards, symbols and conversions only. Measurements own
 quantity, method, provenance and Aquarium/System context.
 
+Decimal is split by replacement boundary:
+
+- `@tankos/decimal` owns canonical decimal strings, exact arithmetic ports,
+  rounding contexts, typed errors and the closed Zod boundary schemas. It does
+  not import Angular, Big.js, Firebase or formatting helpers.
+- `@tankos/decimal-big-js` is the replaceable Big.js runtime.
+- `@tankos/decimal-angular` owns DI and locale-aware presentation through
+  Angular `LOCALE_ID`; it must not use `DecimalPipe`, which coerces values to
+  JavaScript `number` and can lose precision.
+
+Decimal persistence and JSON/HTTP use canonical strings validated by the core
+schemas, so they do not require dedicated transport packages. Core transport
+input is a string: JavaScript numbers may only enter through the explicit
+safe-integer conversion because lost binary precision cannot be restored.
+
 ## Technology decisions
 
 - Use stable compatible Angular 22, Nx 23 and Angular Material/CDK releases.

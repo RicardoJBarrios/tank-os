@@ -4,7 +4,7 @@
   "sourceRoot": "libs/decimal/src",
   "prefix": "tankos",
   "projectType": "library",
-  "tags": ["scope:shared", "scope:tankos", "type:feature"],
+  "tags": ["npm:public", "scope:shared", "scope:tankos", "type:decimal-core"],
   "targets": {
     "build": {
       "executor": "@nx/angular:ng-packagr-lite",
@@ -15,10 +15,15 @@
       },
       "configurations": {
         "production": {
-          "tsConfig": "libs/decimal/tsconfig.lib.json"
+          "tsConfig": "libs/decimal/tsconfig.lib.prod.json"
         }
       },
       "defaultConfiguration": "production"
+    },
+    "nx-release-publish": {
+      "options": {
+        "packageRoot": "dist/{projectRoot}"
+      }
     },
     "test": {
       "outputs": [

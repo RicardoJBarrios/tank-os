@@ -43,6 +43,8 @@ export function createBigJsDecimalAdapter(): DecimalArithmeticPort {
       exponent: DecimalValue,
       context?: DecimalContext,
     ) => power(base, exponent, context),
+    round: (value: DecimalValue, context: DecimalContext) =>
+      round(value, context),
     negate: (value: DecimalValue) =>
       executeDecimal('negate', () => Big(toBigValue(value)).times(-1)),
     compare: (left: DecimalValue, right: DecimalValue) =>
@@ -89,6 +91,28 @@ function power(
     );
 
     return configuredBig(normalizedBase).pow(numericExponent);
+  });
+}
+
+function round(value: DecimalValue, context: DecimalContext): DecimalValue {
+  return executeDecimal('round', () => {
+    const normalizedValue = toBigValue(value);
+    const validatedContext = createDecimalContext(
+      context.decimalPlaces,
+      context.rounding,
+    );
+    const configuredBig = Big();
+    configuredBig.DP = validatedContext.decimalPlaces;
+    const roundingMode = toBigRoundingMode(
+      validatedContext.rounding,
+      normalizedValue,
+      normalizeDecimalInput('1'),
+    );
+    configuredBig.RM = roundingMode;
+    return configuredBig(normalizedValue).round(
+      validatedContext.decimalPlaces,
+      roundingMode,
+    );
   });
 }
 

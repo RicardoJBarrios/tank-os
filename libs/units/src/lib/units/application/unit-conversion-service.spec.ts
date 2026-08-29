@@ -62,7 +62,7 @@ describe('createUnitConversionService', () => {
     ]);
 
     expect(
-      service.convert({ value: 25, ...units('UN/CEFACT:CEL', 'UN/CEFACT:KEL') })
+      service.convert({ value: '25', ...units('UN/CEFACT:CEL', 'UN/CEFACT:KEL') })
         .value,
     ).toBe('298.15');
   });

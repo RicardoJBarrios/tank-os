@@ -26,7 +26,6 @@
       ],
       "@tankos/time-firestore": ["./libs/time-firestore/src/index.ts"],
       "@tankos/decimal-big-js": ["./libs/decimal-big-js/src/index.ts"],
-      "@tankos/decimal-zod": ["./libs/decimal-zod/src/index.ts"],
       "@tankos/units-zod": ["./libs/units-zod/src/index.ts"],
       "@tankos/units-firestore": ["./libs/units-firestore/src/index.ts"],
       "@tankos/data-access-ui": ["./libs/data-access-ui/src/index.ts"],
@@ -56,7 +55,8 @@
       "@tankos/ui-material": ["./libs/ui-material/src/index.ts"],
       "@tankos/shell-ui": ["./libs/shell-ui/src/index.ts"],
       "@tankos/time-date-intl": ["./libs/time-date-intl/src/index.ts"],
-      "@tankos/time-angular": ["./libs/time-angular/src/index.ts"]
+      "@tankos/time-angular": ["./libs/time-angular/src/index.ts"],
+      "@tankos/decimal-angular": ["./libs/decimal-angular/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

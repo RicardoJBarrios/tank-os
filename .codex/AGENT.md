@@ -10,10 +10,11 @@ brackish, planted, reef, shrimp, snail and mixed aquariums. `Aquarium` is the
 central domain aggregate root; TankOS is the product, never an Aquarium.
 
 Technical identifiers and documentation use English. Spanish is reserved for
-user-facing application content. The root `libs/time*/README.md` files and the
-operational documentation under `libs/time*/docs/` are the explicit exception:
-they are maintained in Spanish so the temporal contracts and guardrails are
-directly usable by the product team.
+user-facing application content. The root `libs/time*/README.md` and
+`libs/decimal*/README.md` files, together with the operational documentation
+under their `docs/` directories, are the explicit exception: they are
+maintained in Spanish so these shared contracts and guardrails are directly
+usable by the product team.
 
 ## Non-negotiable rules
 

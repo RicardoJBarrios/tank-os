@@ -5,19 +5,12 @@ import {
 } from '@tankos/units';
 import {
   createDecimalContext,
-  normalizeDecimalInput,
+  createZodDecimalSchemas,
   ROUNDING_MODES,
 } from '@tankos/decimal';
 import { z } from 'zod';
 
-const decimalInputSchema = z.union([z.string(), z.number()]).refine((value) => {
-  try {
-    normalizeDecimalInput(value);
-    return true;
-  } catch {
-    return false;
-  }
-}, 'Must be a finite decimal number');
+const decimalInputSchema = createZodDecimalSchemas().value;
 
 const factorSchema = z.strictObject({
   numerator: decimalInputSchema,

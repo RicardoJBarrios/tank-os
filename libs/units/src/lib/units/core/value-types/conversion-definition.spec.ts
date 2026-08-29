@@ -18,7 +18,7 @@ describe('createConversionDefinition', () => {
   it('Given a valid definition, When created, Then canonicalizes decimal fields and freezes the definition', () => {
     const result = createConversionDefinition({
       ...base,
-      factor: { numerator: '001000', denominator: 1 },
+      factor: { numerator: '001000', denominator: '1' },
       offset: '0.00',
     });
 
@@ -58,7 +58,7 @@ describe('createConversionDefinition', () => {
     expect(() =>
       createConversionDefinition({
         ...base,
-        factor: { numerator: 1, denominator: '0' },
+        factor: { numerator: '1', denominator: '0' },
       }),
     ).toThrow(TypeError);
   });

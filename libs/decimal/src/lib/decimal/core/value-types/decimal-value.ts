@@ -1,11 +1,10 @@
-import { trimTrailingZeros } from '@tankos/formatting';
 import { InvalidDecimalError } from '../errors';
 
 /** A canonical, finite decimal represented without locale formatting. */
 export type DecimalValue = string & { readonly __decimalValue: unique symbol };
 
 /** Values accepted at the decimal input boundary. */
-export type DecimalInput = number | string;
+export type DecimalInput = string;
 
 const DECIMAL_PATTERN = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/iu;
 const DECIMAL_PARTS_PATTERN =
@@ -68,8 +67,7 @@ function parseDecimalParts(
 
 /** Normalizes and validates a decimal input into its canonical string form. */
 export function normalizeDecimalInput(value: DecimalInput): DecimalValue {
-  /* c8 ignore next -- V8 reports the compile-time DecimalInput dispatch as a synthetic branch. */
-  const source = typeof value === 'number' ? normalizeNumber(value) : value;
+  const source = value;
   /* c8 ignore next -- V8 reports the assertion narrowing as a synthetic branch. */
   assertDecimalText(value, source);
   const { sign, digits, decimalPosition } = parseDecimalParts(value, source);
@@ -82,11 +80,6 @@ function addSign(sign: string, unsigned: string): DecimalValue {
   if (unsigned === '0') return '0' as DecimalValue;
   if (sign === '-') return `-${unsigned}` as DecimalValue;
   return unsigned as DecimalValue;
-}
-
-function normalizeNumber(value: number): string {
-  if (!Number.isFinite(value)) throw new InvalidDecimalError(value);
-  return String(value);
 }
 
 function formatDigits(digits: string, decimalPosition: number): string {
@@ -115,4 +108,12 @@ function formatDigits(digits: string, decimalPosition: number): string {
   return normalizedFractional
     ? `${normalizedInteger}.${normalizedFractional}`
     : normalizedInteger;
+}
+
+function trimTrailingZeros(value: string): string {
+  let lastNonZero = value.length;
+  while (lastNonZero > 0 && value.charCodeAt(lastNonZero - 1) === 48) {
+    lastNonZero -= 1;
+  }
+  return value.slice(0, lastNonZero);
 }

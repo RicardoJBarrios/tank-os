@@ -212,6 +212,15 @@ describe('createBigJsDecimalAdapter', () => {
     expect(adapter.negate('-2.5' as never)).toBe('2.5');
   });
 
+  it('Given a decimal, When explicitly rounded, Then applies the supplied context', () => {
+    expect(
+      adapter.round(
+        '1.235' as never,
+        createDecimalContext(2, 'half-up'),
+      ),
+    ).toBe('1.24');
+  });
+
   it('Given an invalid canonical input at the adapter boundary, When added, Then throws the shared input error', () => {
     expect(() => adapter.add('not-a-decimal' as never, '1' as never)).toThrow(
       InvalidDecimalError,

@@ -9,7 +9,7 @@ describe('conversionDefinitionSchema', () => {
     targetUnit: 'UN/CEFACT:MLT',
     family: 'volume',
     kind: 'linear' as const,
-    factor: { numerator: '1000', denominator: 1 },
+    factor: { numerator: '1000', denominator: '1' },
     offset: '0',
     divisionContext: { decimalPlaces: 4, rounding: 'half-up' as const },
     provenance: 'UN/CEFACT-Rev17-aquarium-core',
@@ -34,7 +34,7 @@ describe('conversionDefinitionSchema', () => {
     const result = conversionDefinitionSchema.parse({
       ...validDefinition,
       kind: 'affine',
-      offset: { numerator: 32, denominator: 1 },
+      offset: { numerator: '32', denominator: '1' },
     });
 
     expect(result.offset).toEqual({ numerator: '32', denominator: '1' });

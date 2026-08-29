@@ -3,6 +3,9 @@ packages:
   - 'libs/time-angular'
   - 'libs/time-date-intl'
   - 'libs/time-firestore'
+  - 'libs/decimal'
+  - 'libs/decimal-angular'
+  - 'libs/decimal-big-js'
 
 allowBuilds:
   '@firebase/util': true

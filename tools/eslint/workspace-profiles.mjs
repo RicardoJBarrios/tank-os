@@ -28,6 +28,9 @@ const workspaceRules = {
         // The Date/Intl runtime is a test fixture for adapter contract tests;
         // production imports are restricted separately to app composition.
         '^@tankos/time-date-intl$',
+        // Big.js is a test fixture for the Angular integration contracts;
+        // production composition remains outside the Angular library.
+        '^@tankos/decimal-big-js$',
       ],
       depConstraints: [
         {
@@ -57,6 +60,18 @@ const workspaceRules = {
         {
           sourceTag: 'type:time-transport',
           onlyDependOnLibsWithTags: ['type:time-core'],
+        },
+        {
+          sourceTag: 'type:decimal-core',
+          onlyDependOnLibsWithTags: ['type:decimal-core'],
+        },
+        {
+          sourceTag: 'type:decimal-runtime',
+          onlyDependOnLibsWithTags: ['type:decimal-core'],
+        },
+        {
+          sourceTag: 'type:decimal-angular',
+          onlyDependOnLibsWithTags: ['type:decimal-core'],
         },
       ],
     },
