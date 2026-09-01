@@ -14,6 +14,8 @@ import {
 import { provideTimeAngular } from '@tankos/time-angular';
 import { createDateIntlRuntime } from '@tankos/time-date-intl';
 import { DecimalError } from '@tankos/decimal';
+import { provideDecimalAngular } from '@tankos/decimal-angular';
+import { createBigJsDecimalRuntime } from '@tankos/decimal-big-js';
 import { DataAccessError } from '@tankos/data-access';
 import { UnitError } from '@tankos/units';
 import { provideAuthSession } from '@tankos/authn';
@@ -50,6 +52,7 @@ const tankosObservability = createObservability({
 });
 
 const tankosTimeRuntime = createDateIntlRuntime();
+const tankosDecimalRuntime = createBigJsDecimalRuntime();
 
 function createTankosErrorReporter(feedback: FeedbackService): ErrorReporter {
   return {
@@ -141,6 +144,7 @@ export const appConfig: ApplicationConfig = {
       }),
     },
     provideTimeAngular(tankosTimeRuntime),
+    ...provideDecimalAngular(tankosDecimalRuntime),
     provideAuthSession(tankosAuthSession),
     { provide: TANKOS_LOGGER, useValue: tankosObservability.logger },
     { provide: LOGGER, useValue: tankosObservability.logger },

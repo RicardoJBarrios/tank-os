@@ -45,6 +45,12 @@ importers:
       '@ngrx/signals':
         specifier: 22.0.0
         version: 22.0.0(@angular/core@22.1.3(@angular/compiler@22.1.3)(rxjs@7.8.2)(zone.js@0.15.0))(rxjs@7.8.2)
+      '@tankos/decimal-angular':
+        specifier: workspace:*
+        version: link:libs/decimal-angular
+      '@tankos/decimal-big-js':
+        specifier: workspace:*
+        version: link:libs/decimal-big-js
       big.js:
         specifier: 7.0.1
         version: 7.0.1

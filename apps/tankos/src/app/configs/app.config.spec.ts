@@ -1,6 +1,7 @@
 import { ErrorHandler } from '@angular/core';
 import { DataAccessError } from '@tankos/data-access';
 import { DecimalError } from '@tankos/decimal';
+import { DecimalService } from '@tankos/decimal-angular';
 import { UnitError } from '@tankos/units';
 import { TestBed } from '@angular/core/testing';
 import { describe, expect, it, vi } from 'vitest';
@@ -8,7 +9,15 @@ import { appConfig } from './app.config';
 
 describe('appConfig', () => {
   it('Given the application configuration, When its providers are inspected, Then the TankOS platform providers are registered', () => {
-    expect(appConfig.providers).toHaveLength(13);
+    expect(appConfig.providers).toHaveLength(15);
+  });
+
+  it('composes the Big.js decimal runtime for Angular consumers', () => {
+    TestBed.configureTestingModule({ providers: appConfig.providers });
+
+    const result = TestBed.inject(DecimalService).decimal('1.25').add('2.5');
+
+    expect(result.value).toBe('3.75');
   });
 
   it('reports unexpected errors at the application boundary', () => {
