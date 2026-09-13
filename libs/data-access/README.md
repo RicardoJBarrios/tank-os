@@ -1,31 +1,16 @@
-# TankOS Data Access
+# `@tankos/data-access`
 
-`@tankos/data-access` is the provider-independent package for CRUD, lifecycle,
-pagination, caching and asynchronous batch contracts. It contains no Firebase,
-HTTP or server-runtime implementation.
+Provider-neutral persistence contracts for CRUD records, lifecycle,
+cursor pagination, optimistic concurrency and atomic version replacement.
 
-Provider adapters are physically isolated publishable packages:
+The package contains no Angular, authentication, authorization, Firebase,
+HTTP, cache or batch engine. Domain application services authorize requests
+before passing technical queries and mutation metadata to these contracts.
 
-```ts
-import { createFirestoreCrudRepository } from '@tankos/data-access-firestore';
-import { createJsonHttpCrudRepository } from '@tankos/data-access-json-http';
-import { runForegroundBatch } from '@tankos/data-access';
-```
+Provider and framework integrations are separate packages:
 
-The primary package can therefore be used without installing Firebase, Zod or
-Firebase Admin. For the browser-only Firebase application, use the client
-Firestore adapter and `runForegroundBatch`; the Admin packages are not runtime
-dependencies. Each adapter has its own source tree, public barrel, tests,
-documentation, peer dependencies and build artifact.
+- `@tankos/data-access-firestore` implements the Firestore persistence port;
+- `@tankos/data-access-angular` provides reusable Angular list state;
+- `@tankos/data-access-material-ui` provides Material presentation.
 
-Commands:
-
-- `pnpm nx run data-access:build`
-- `pnpm nx run data-access:test`
-- `pnpm nx run data-access:lint`
-- `pnpm nx run data-access-firestore:build`
-- `pnpm nx run data-access-firestore:test`
-- `pnpm nx run data-access-firestore:test-integration`
-
-The architectural decisions and current contract are documented in
-[`docs/README.md`](docs/README.md).
+See [`docs/README.md`](docs/README.md) for the complete boundary.

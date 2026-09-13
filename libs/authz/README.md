@@ -1,8 +1,8 @@
 # `@tankos/authz`
 
-Provider-neutral ABAC contracts and policy composition for TankOS. This
-library carries subjects, actions, resources and opaque attributes without
-knowing any business domain or persistence provider.
+Provider- and framework-neutral authorization contracts for TankOS. The
+package translates AuthN principals into authorization subjects and supplies
+the policy vocabulary used by domain application services.
 
-See [`docs/README.md`](docs/README.md) for the complete architecture, security
-boundary, limits and extension guide.
+It does not own Angular guards, provider SDKs or domain policies. See
+[`docs/README.md`](docs/README.md) for the full boundary.

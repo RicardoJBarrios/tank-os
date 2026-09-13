@@ -1,4 +1,4 @@
-import type { AccessContext } from '@tankos/data-access';
+import type { AuthenticatedPrincipal } from './authenticated-principal';
 
 /** Opaque credentials understood by the selected authentication adapter. */
 export type AuthCredentials = Readonly<Record<string, unknown>>;
@@ -15,9 +15,9 @@ export class AuthRequiredError extends Error {
 export interface AuthSessionPort {
   /** Notifies consumers when the authenticated principal changes. */
   readonly subscribe?: (listener: () => void) => () => void;
-  readonly access: () => Promise<AccessContext>;
+  readonly principal: () => Promise<AuthenticatedPrincipal>;
   readonly signIn: (credentials: AuthCredentials) => Promise<void>;
   readonly signOut: () => Promise<void>;
-  /** Forces credential renewal and returns the refreshed authorization context. */
-  readonly refresh: () => Promise<AccessContext>;
+  /** Forces credential renewal and returns the refreshed identity facts. */
+  readonly refresh: () => Promise<AuthenticatedPrincipal>;
 }

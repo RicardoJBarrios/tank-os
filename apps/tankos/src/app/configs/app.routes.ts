@@ -1,5 +1,5 @@
 import type { Route } from '@angular/router';
-import { authGuard } from '@tankos/authn';
+import { authGuard } from '@tankos/authn-angular';
 import {
   TankosDashboardComponent,
   TankosProfilePageComponent,
@@ -20,7 +20,7 @@ export const appRoutes: Route[] = [
   {
     path: 'forbidden',
     loadComponent: () =>
-      import('@tankos/authz-ui').then(
+      import('@tankos/authz-angular').then(
         ({ ForbiddenPageComponent }) => ForbiddenPageComponent,
       ),
   },

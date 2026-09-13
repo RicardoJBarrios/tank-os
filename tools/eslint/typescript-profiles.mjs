@@ -17,6 +17,7 @@ const typedParserOptions = {
       'apps/*/e2e/*/*.ts',
       'apps/*/vitest.integration.config.ts',
       'tools/testing/vitest-reporting.ts',
+      'tools/testing/vitest-config.ts',
     ],
   },
   tsconfigRootDir: repositoryRoot,
@@ -62,6 +63,7 @@ const duplicatedStylisticRules = new Set([
 // values even though their TypeScript contracts describe validated values.
 // Their null/object guards are therefore meaningful at runtime.
 const runtimeValidationFiles = [
+  '**/parse-local-time.ts',
   '**/core/value-types/access-context.ts',
   '**/core/value-types/batch-operation.ts',
   '**/firestore/firestore-local-cache.ts',

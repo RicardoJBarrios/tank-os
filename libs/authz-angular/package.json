@@ -1,0 +1,14 @@
+{
+  "name": "@tankos/authz-angular",
+  "version": "0.0.0",
+  "private": true,
+  "sideEffects": false,
+  "peerDependencies": {
+    "@angular/core": "^22.1.3",
+    "@angular/material": "^22.1.3",
+    "@angular/router": "^22.1.3",
+    "@tankos/authn": "^0.0.0",
+    "@tankos/authn-angular": "^0.0.0",
+    "@tankos/authz": "^0.0.0"
+  }
+}

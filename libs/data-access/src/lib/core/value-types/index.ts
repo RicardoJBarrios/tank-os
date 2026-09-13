@@ -1,10 +1,6 @@
-export * from './batch-operation';
-export * from './cache-scope';
-export type * from './batch-result';
-export type * from './batch-scope';
-export * from './access-context';
 export type * from './crud-record';
 export type * from './crud-request';
+export * from './mutation-metadata';
 export * from './entity-id';
 export * from './lifecycle';
 export * from './page-cursor';

@@ -6,6 +6,6 @@ export default createVitestConfig({
   angular: false,
   staticCopy: false,
   aliases: {
-    '@tankos/data-access': '../data-access/src/index.ts',
+    '@tankos/authn': '../authn/src/index.ts',
   },
 });

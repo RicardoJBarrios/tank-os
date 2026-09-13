@@ -1,6 +1,7 @@
 import type { WritableSignal } from '@angular/core';
 import type { AuthSessionPort } from '@tankos/authn';
-import type { CrudListStoreInstance } from '@tankos/data-access-ui';
+import { authorizationSubjectFromPrincipal } from '@tankos/authz';
+import type { CrudListStoreInstance } from '@tankos/data-access-angular';
 import type { FeedbackService } from '@tankos/feedback';
 import type { Logger } from '@tankos/observability';
 import type {
@@ -30,7 +31,7 @@ export function createUnitDefinitionFeatureActions(
   authSession: AuthSessionPort,
   list: UnitDefinitionListStore,
   lifecycle: Pick<
-    CrudListStoreInstance<UnitDefinition, unknown, unknown>,
+    CrudListStoreInstance<UnitDefinition, unknown>,
     'markForDeletion' | 'restore'
   >,
   editingRecord: WritableSignal<UnitDefinitionRecord | undefined>,
@@ -103,7 +104,7 @@ function createUnitDefinitionLifecycleActions(
   authSession: AuthSessionPort,
   list: UnitDefinitionListStore,
   lifecycle: Pick<
-    CrudListStoreInstance<UnitDefinition, unknown, unknown>,
+    CrudListStoreInstance<UnitDefinition, unknown>,
     'markForDeletion' | 'restore'
   >,
   lifecycleError: WritableSignal<unknown>,
@@ -171,10 +172,11 @@ function createUnitDefinitionPublishAction(
       lifecycleError.set(undefined);
       lifecycleStatus.set('pending');
       return authSession
-        .access()
-        .then((access) =>
+        .principal()
+        .then(authorizationSubjectFromPrincipal)
+        .then((subject) =>
           service.publish({
-            access,
+            subject,
             id: record.id,
             expectedRevision: record.revision,
             current: record.data,
@@ -208,10 +210,11 @@ function createUnitDefinitionPhysicalDeleteAction(
       lifecycleError.set(undefined);
       lifecycleStatus.set('pending');
       return authSession
-        .access()
-        .then((access) =>
+        .principal()
+        .then(authorizationSubjectFromPrincipal)
+        .then((subject) =>
           service.delete({
-            access,
+            subject,
             id: record.id,
             expectedRevision: record.revision,
           }),
@@ -261,18 +264,20 @@ async function saveUnitDefinition(
   feedback: FeedbackService,
 ): Promise<void> {
   try {
-    const access = await authSession.access();
+    const subject = authorizationSubjectFromPrincipal(
+      await authSession.principal(),
+    );
     const record = editingRecord();
     if (record) {
       await service.save({
-        access,
+        subject,
         id: record.id,
         expectedRevision: record.revision,
         current: record.data,
         draft,
       });
     } else {
-      await service.save({ access, draft });
+      await service.save({ subject, draft });
     }
     editingRecord.set(undefined);
     await list.load();

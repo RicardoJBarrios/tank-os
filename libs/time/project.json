@@ -6,7 +6,16 @@
   "projectType": "library",
   "tags": ["scope:shared", "scope:tankos", "type:time-core"],
   "targets": {
+    "browser-test": {
+      "executor": "nx:run-commands",
+      "dependsOn": [
+        "build",
+        { "target": "build", "projects": ["time-luxon"] }
+      ],
+      "options": { "command": "node libs/time/tests/browser/check.mjs" }
+    },
     "build": {
+      "dependsOn": [],
       "executor": "@nx/angular:ng-packagr-lite",
       "outputs": ["{workspaceRoot}/dist/libs/time"],
       "options": {

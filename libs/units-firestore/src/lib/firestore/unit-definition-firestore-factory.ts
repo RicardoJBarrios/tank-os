@@ -9,7 +9,6 @@ import {
   createUnitDefinitionFirestoreRepository,
   type UnitDefinitionFirestoreRepositoryOptions,
 } from './unit-definition-firestore-repository';
-import { authorizeUnitDefinitionOperation } from './unit-definition-firestore-authorization';
 import {
   createUnitDefinitionId,
   createUnitDefinitionReplacementId,
@@ -37,7 +36,6 @@ export function createDefaultUnitDefinitionFirestoreRepository(
       const decoded = parseUnitDefinitionCursor(cursor);
       return startAfter(decoded.code, decoded.id);
     },
-    authorize: authorizeUnitDefinitionOperation,
   };
   return createUnitDefinitionFirestoreRepository(repositoryOptions);
 }

@@ -21,13 +21,18 @@ const workspaceRules = {
     'error',
     {
       enforceBuildableLibDependency: true,
+      // Secondary package entry points may import their own primary contract.
+      allowCircularSelfDependency: true,
+      // Time's adapter contract tests compose its runtime; production imports
+      // remain forbidden below outside the app composition root.
+      ignoredCircularDependencies: [['time', 'time-luxon']],
       allow: [
         '^.*/eslint(\\.base)?\\.config\\.[cm]?[jt]s$',
         '^.*\\.spec\\.[cm]?[jt]s$',
         '^.*(?:vite|vitest)\\.config\\.[cm]?[jt]s$',
         // The Date/Intl runtime is a test fixture for adapter contract tests;
         // production imports are restricted separately to app composition.
-        '^@tankos/time-date-intl$',
+        '^@tankos/time-luxon$',
         // Big.js is a test fixture for the Angular integration contracts;
         // production composition remains outside the Angular library.
         '^@tankos/decimal-big-js$',
@@ -51,14 +56,6 @@ const workspaceRules = {
         },
         {
           sourceTag: 'type:time-runtime',
-          onlyDependOnLibsWithTags: ['type:time-core'],
-        },
-        {
-          sourceTag: 'type:time-angular',
-          onlyDependOnLibsWithTags: ['type:time-core'],
-        },
-        {
-          sourceTag: 'type:time-transport',
           onlyDependOnLibsWithTags: ['type:time-core'],
         },
         {
@@ -167,9 +164,9 @@ const architecturalElements = [
   { type: 'presentation', pattern: 'libs/*/src/lib/*/presentation/**/*' },
   {
     type: 'presentation',
-    pattern: 'libs/time-angular/src/lib/time-angular/contracts/*',
+    pattern: 'libs/time/src/lib/angular/contracts/*',
   },
-  { type: 'presentation', pattern: 'libs/data-access-ui/src/lib/*' },
+  { type: 'presentation', pattern: 'libs/data-access-angular/src/lib/*' },
   { type: 'presentation', pattern: 'libs/*/src/lib/*-ui/*' },
   { type: 'core', pattern: 'libs/data-access/src/*' },
 ];
@@ -292,8 +289,8 @@ export function createWorkspaceEslintConfig() {
       files: ['apps/**/*.ts', 'libs/**/*.ts'],
       ignores: [
         'apps/*/src/app/configs/**/*.ts',
-        'libs/time-date-intl/**/*.ts',
-        'libs/time-angular/src/test-setup.ts',
+        'libs/time-luxon/**/*.ts',
+        'libs/time/src/test-setup.ts',
         '**/*.spec.ts',
         '**/*.test.ts',
       ],
@@ -303,7 +300,7 @@ export function createWorkspaceEslintConfig() {
           {
             patterns: [
               {
-                group: ['@tankos/time-date-intl'],
+                group: ['@tankos/time-luxon'],
                 message:
                   'Select the concrete time runtime only in an app composition root.',
               },

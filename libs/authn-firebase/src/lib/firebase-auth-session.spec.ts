@@ -43,14 +43,14 @@ describe('Firebase auth session', () => {
       roles: ['keeper'],
     });
 
-    const access = await session.access();
+    const access = await session.principal();
 
-    expect(access.principalId).toBe('current-user');
-    expect(access.roles).toEqual(['keeper']);
+    expect(access.id).toBe('current-user');
+    expect(access.claims).toEqual({});
     expect(signInWithEmailAndPassword).not.toHaveBeenCalled();
 
     await expect(session.refresh()).resolves.toMatchObject({
-      principalId: 'current-user',
+      id: 'current-user',
     });
     expect(authStateReady).toHaveBeenCalledTimes(2);
   });
@@ -94,10 +94,10 @@ describe('Firebase auth session', () => {
       roles: ['fallback'],
     });
 
-    await expect(session.access()).resolves.toMatchObject({
-      principalId: 'claims-user',
-      principalName: 'Claims User',
-      roles: ['admin', 'keeper'],
+    await expect(session.principal()).resolves.toMatchObject({
+      id: 'claims-user',
+      displayName: 'Claims User',
+      claims: { roles: ['admin', 'keeper'] },
     });
   });
 
@@ -120,8 +120,8 @@ describe('Firebase auth session', () => {
     });
 
     await expect(session.refresh()).resolves.toMatchObject({
-      principalId: 'refresh-user',
-      roles: ['editor'],
+      id: 'refresh-user',
+      claims: { roles: [123], role: 'editor' },
     });
     expect(getIdToken).toHaveBeenCalledWith(true);
     expect(getIdTokenResult).toHaveBeenCalledOnce();
@@ -142,9 +142,9 @@ describe('Firebase auth session', () => {
       roles: ['fallback'],
     });
 
-    await expect(session.access()).resolves.toMatchObject({
-      principalId: 'fallback-user',
-      roles: ['fallback'],
+    await expect(session.principal()).resolves.toMatchObject({
+      id: 'fallback-user',
+      claims: { roles: [] },
     });
   });
 
@@ -156,11 +156,11 @@ describe('Firebase auth session', () => {
       auth: { currentUser: null } as Auth,
       email: 'keeper@example.test',
       password: 'password',
-      roles: ['keeper'],
+      claims: {},
     });
 
-    await expect(session.access()).resolves.toMatchObject({
-      principalId: 'signed-in',
+    await expect(session.principal()).resolves.toMatchObject({
+      id: 'signed-in',
     });
     expect(createUserWithEmailAndPassword).not.toHaveBeenCalled();
   });
@@ -176,9 +176,9 @@ describe('Firebase auth session', () => {
       currentUser: null,
     } as Auth);
 
-    await expect(session.access()).resolves.toMatchObject({
-      principalId: 'created-user',
-      roles: ['keeper'],
+    await expect(session.principal()).resolves.toMatchObject({
+      id: 'created-user',
+      claims: {},
     });
     expect(createUserWithEmailAndPassword).toHaveBeenCalledWith(
       expect.anything(),
@@ -198,8 +198,8 @@ describe('Firebase auth session', () => {
         currentUser: null,
       } as Auth);
 
-      await expect(session.access()).resolves.toMatchObject({
-        principalId: 'created-user-with-new-code',
+      await expect(session.principal()).resolves.toMatchObject({
+        id: 'created-user-with-new-code',
       });
     },
   );
@@ -254,8 +254,8 @@ describe('Firebase auth session', () => {
       roles: ['keeper'],
     });
 
-    await expect(session.access()).resolves.toMatchObject({
-      principalId: 'concurrent-user',
+    await expect(session.principal()).resolves.toMatchObject({
+      id: 'concurrent-user',
     });
   });
 
@@ -272,7 +272,7 @@ describe('Firebase auth session', () => {
       roles: ['keeper'],
     });
 
-    await expect(session.access()).rejects.toBe(creationError);
+    await expect(session.principal()).rejects.toBe(creationError);
   });
 
   it('synchronizes the local keeper claim before reading access', async () => {
@@ -292,9 +292,9 @@ describe('Firebase auth session', () => {
       autoSignIn: false,
     });
 
-    await expect(session.access()).resolves.toMatchObject({
-      principalId: 'local-keeper',
-      roles: ['keeper'],
+    await expect(session.principal()).resolves.toMatchObject({
+      id: 'local-keeper',
+      claims: {},
     });
     expect(getIdToken).toHaveBeenCalledWith(true);
     const authWithoutTokenRefresh = {
@@ -308,12 +308,12 @@ describe('Firebase auth session', () => {
       { autoSignIn: false },
     );
     await expect(session.refresh()).resolves.toMatchObject({
-      principalId: 'local-keeper',
-      roles: ['keeper'],
+      id: 'local-keeper',
+      claims: {},
     });
     await expect(sessionWithoutTokenRefresh.refresh()).resolves.toMatchObject({
-      principalId: 'local-keeper-without-refresh',
-      roles: ['keeper'],
+      id: 'local-keeper-without-refresh',
+      claims: {},
     });
     expect(fetchMock).toHaveBeenCalledWith(
       expect.stringContaining('/projects/demo-tankos/accounts:update'),
@@ -342,9 +342,9 @@ describe('Firebase auth session', () => {
       autoSignIn: false,
     });
 
-    await expect(session.access()).resolves.toMatchObject({
-      principalId: 'local-admin',
-      roles: ['admin'],
+    await expect(session.principal()).resolves.toMatchObject({
+      id: 'local-admin',
+      claims: { roles: ['admin'] },
     });
     expect(fetch).toHaveBeenCalledWith(
       expect.any(String),
@@ -374,9 +374,9 @@ describe('Firebase auth session', () => {
       autoSignIn: false,
     });
 
-    await expect(session.access()).resolves.toMatchObject({
-      principalId: 'local-guest',
-      roles: ['guest'],
+    await expect(session.principal()).resolves.toMatchObject({
+      id: 'local-guest',
+      claims: { roles: ['guest'] },
     });
     vi.unstubAllGlobals();
   });
@@ -391,7 +391,7 @@ describe('Firebase auth session', () => {
       autoSignIn: false,
     });
 
-    await expect(session.access()).rejects.toThrow(
+    await expect(session.principal()).rejects.toThrow(
       'Unable to configure the local Firebase Auth role claim',
     );
     vi.unstubAllGlobals();
@@ -407,7 +407,7 @@ describe('Firebase auth session', () => {
       roles: ['keeper'],
     });
 
-    await expect(session.access()).rejects.toBe(failure);
+    await expect(session.principal()).rejects.toBe(failure);
     expect(createUserWithEmailAndPassword).not.toHaveBeenCalled();
   });
 
@@ -491,6 +491,6 @@ describe('Firebase auth session', () => {
       autoSignIn: false,
     });
 
-    await expect(session.access()).rejects.toBeInstanceOf(AuthRequiredError);
+    await expect(session.principal()).rejects.toBeInstanceOf(AuthRequiredError);
   });
 });

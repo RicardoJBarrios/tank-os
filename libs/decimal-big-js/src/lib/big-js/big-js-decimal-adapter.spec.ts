@@ -214,10 +214,7 @@ describe('createBigJsDecimalAdapter', () => {
 
   it('Given a decimal, When explicitly rounded, Then applies the supplied context', () => {
     expect(
-      adapter.round(
-        '1.235' as never,
-        createDecimalContext(2, 'half-up'),
-      ),
+      adapter.round('1.235' as never, createDecimalContext(2, 'half-up')),
     ).toBe('1.24');
   });
 

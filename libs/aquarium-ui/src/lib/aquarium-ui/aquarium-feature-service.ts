@@ -1,6 +1,10 @@
 import { signal } from '@angular/core';
 import { computed } from '@angular/core';
 import type { AuthSessionPort } from '@tankos/authn';
+import {
+  authorizationSubjectFromPrincipal,
+  type AuthorizationSubject,
+} from '@tankos/authz';
 import type {
   AccessibleAquariumReader,
   AquariumManager,
@@ -17,11 +21,9 @@ export class AquariumFeatureService {
   );
   public readonly error = signal<unknown>(undefined);
   public readonly saving = signal(false);
-  public readonly access = signal<
-    Awaited<ReturnType<AuthSessionPort['access']>> | undefined
-  >(undefined);
+  public readonly subject = signal<AuthorizationSubject | undefined>(undefined);
   public readonly admin = computed(
-    () => this.access()?.roles.includes('admin') ?? false,
+    () => this.subject()?.roles.includes('admin') ?? false,
   );
 
   public constructor(
@@ -36,10 +38,11 @@ export class AquariumFeatureService {
     this.status.set('loading');
     this.error.set(undefined);
     return this.auth
-      .access()
-      .then((access) => {
-        this.access.set(access);
-        return this.reader.listAccessible(access.principalId);
+      .principal()
+      .then(authorizationSubjectFromPrincipal)
+      .then((subject) => {
+        this.subject.set(subject);
+        return this.reader.listAccessible(subject);
       })
       .then((items) => {
         this.items.set(items);
@@ -55,11 +58,12 @@ export class AquariumFeatureService {
   public establish(name: string): Promise<void> {
     this.saving.set(true);
     return this.auth
-      .access()
-      .then((access) =>
-        this.establisher.establish({
+      .principal()
+      .then(authorizationSubjectFromPrincipal)
+      .then((subject) =>
+        this.establisher.establish(subject, {
           name: name.trim() as AquariumName,
-          keeperId: access.principalId,
+          keeperId: subject.id,
         }),
       )
       .then(() => {
@@ -78,49 +82,51 @@ export class AquariumFeatureService {
 
   public rename(id: string, name: string): Promise<void> {
     return this.command(
-      (access) =>
-        this.manager.rename(access, id as never, name.trim() as never),
+      (subject) =>
+        this.manager.rename(subject, id as never, name.trim() as never),
       'Aquarium updated.',
     );
   }
 
   public markForDeletion(id: string): Promise<void> {
     return this.command(
-      (access) => this.manager.markForDeletion(access, id as never),
+      (subject) => this.manager.markForDeletion(subject, id as never),
       'Aquarium moved to the recycle bin.',
     );
   }
 
   public restore(id: string): Promise<void> {
     return this.command(
-      (access) => this.manager.restore(access, id as never),
+      (subject) => this.manager.restore(subject, id as never),
       'Aquarium restored.',
     );
   }
 
   public deletePermanently(id: string): Promise<void> {
     return this.command(
-      (access) => this.manager.deletePermanently(access, id as never),
+      (subject) => this.manager.deletePermanently(subject, id as never),
       'Aquarium permanently deleted.',
     );
   }
 
   public get(id: string) {
-    return this.auth.access().then((access) => {
-      this.access.set(access);
-      return this.manager.get(access, id as never);
-    });
+    return this.auth
+      .principal()
+      .then(authorizationSubjectFromPrincipal)
+      .then((subject) => {
+        this.subject.set(subject);
+        return this.manager.get(subject, id as never);
+      });
   }
 
   private command(
-    action: (
-      access: Awaited<ReturnType<AuthSessionPort['access']>>,
-    ) => Promise<void>,
+    action: (subject: AuthorizationSubject) => Promise<void>,
     successMessage: string,
   ): Promise<void> {
     this.saving.set(true);
     return this.auth
-      .access()
+      .principal()
+      .then(authorizationSubjectFromPrincipal)
       .then(action)
       .then(() => {
         this.feedback.success(successMessage);

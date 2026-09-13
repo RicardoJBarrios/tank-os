@@ -1,45 +1,71 @@
 # TankOS Time
 
-`@tankos/time` es el contrato temporal independiente de la implementación.
-Exporta `Instant`, `LocalDate`, `Duration`, los puertos, `TimeRuntime` y los
-esquemas Zod canónicos. No selecciona ni conoce `Date`, `Intl`, Angular o
-Firebase.
+Un único módulo para los valores temporales y su uso en TankOS: lógica,
+validación Zod, persistencia Firestore, servicios/pipes Angular y controles
+Angular Material. Solo el motor sustituible permanece en `time-luxon`.
+
+| Importación              | Responsabilidad                                  |
+| ------------------------ | ------------------------------------------------ |
+| `@tankos/time`           | Valores, puertos, cálculos y esquemas Zod        |
+| `@tankos/time/angular`   | Composición, servicios, pipes y `TimeField`      |
+| `@tankos/time/firestore` | Conversión de valores a representación Firestore |
+| `@tankos/time-luxon`     | Implementación Luxon elegida por la app          |
+
+Las tres primeras entradas pertenecen al **mismo proyecto Nx y paquete**.
+Separan las importaciones, no multiplican librerías ni configuraciones.
+El núcleo sigue sin depender de Angular, Firebase o Material.
 
 ```ts
-import { createZodTimeSchemas, type TimePort } from '@tankos/time';
+// Raíz de composición de la aplicación
+import { provideTimeAngular } from '@tankos/time/angular';
+import { createLuxonRuntime } from '@tankos/time-luxon';
 
-const schemas = createZodTimeSchemas(timePort, timeZoneDatabase);
-const instant = schemas.instant.parse(input.occurredAt);
+const providers = [provideTimeAngular(createLuxonRuntime())];
 ```
 
-Las librerías de dominio y aplicación dependen de este paquete. No deben crear
-valores `Date`: la raíz de composición suministra un `TimeRuntime` concreto.
-Zod permanece aquí porque es una decisión arquitectónica cerrada y la frontera
-de parseo de la aplicación, no un runtime temporal opcional.
+`TimeField` usa el calendario y el selector de hora de Material. Se conecta
+a `FormControl`/`FormGroup` o a Signal Forms mediante el puente CVA de Angular.
+Sus valores son `LocalDate | null`, `LocalTime | null` o `Instant | null`
+según `kind`; nunca un `Date`.
 
-## Regla estructural
+Consulta el [contrato](docs/README.md), los
+[ejemplos de formularios](docs/forms.md) y la
+[representación Firestore](docs/firestore.md).
 
-Cada función o clase temporal tiene un fichero, TSDoc y prueba unitaria
-específica. Los casos límite pertenecen a la operación más concreta; las
-factorías de objetos solo componen esas operaciones y prueban el cableado o un
-recorrido feliz. Los `index.ts` de cada directorio limitan la API pública: que
-una operación interna se exporte desde su fichero para probarla no la convierte
-en API del paquete.
+`TimeField` usa el adaptador oficial Material/Luxon, con `locale` del usuario y
+`timeZone` del contexto reactivos. No publica DateTime como valor de formulario.
+La [auditoría](docs/localization-audit.md) recoge la API ampliada, las diferencias
+deliberadas frente a DatePipe y las pruebas de localización.
 
-## Deuda conocida de adopción
+## Verificación
 
-El agregado `Aquarium` todavía utiliza `Date` para `establishedAt` y aún no
-modela su zona IANA. Su migración debe cambiar de forma atómica dominio, DTO
-Zod, formulario y representación Firestore. No debe introducirse una conversión
-parcial que oculte la incompatibilidad.
+```sh
+NX_DAEMON=false pnpm nx run-many -p time,time-luxon -t lint,typecheck,test,build --skip-nx-cache --parallel=2
+```
 
-Comandos de calidad:
+Los tests de Time incluyen el núcleo, Zod, las conversiones Firestore y la
+integración Material con las dos APIs de formularios. No requieren acceder a
+Firebase: estas conversiones no escriben documentos.
 
-- `pnpm nx run time:build`
-- `pnpm nx run time:test`
-- `pnpm nx run time:lint`
-- `pnpm nx run time-date-intl:test`
-- `pnpm nx run time-angular:test`
-- `pnpm nx run time-firestore:test`
+Validación de Time (2026-09-07): 384 pruebas, con cobertura V8 del 100 % en
+líneas, sentencias, funciones y ramas. La simplificación usa directamente el
+adaptador oficial de Material/Luxon, sin parser estricto propio. Las pruebas
+incluyen ambas APIs de formularios y cambios reactivos de locale y zona sin
+emitir modificaciones. El runtime separado también usa Luxon; su
+[contrato](../time-luxon/docs/README.md) documenta los cambios de parsing,
+normalización DST y serialización frente al motor anterior.
+El recorrido Chromium sobre los artefactos compilados comprueba entrada regional,
+límites, errores al enviar, teclado/foco, Signal Forms y cambios de preferencias.
 
-Consulta [`docs/README.md`](docs/README.md) para ver el contrato completo.
+Avisos del entorno: JSDOM no interpreta las reglas CSS `@layer` de los overlays
+de CDK y no implementa scroll; el test adapta únicamente `scrollIntoView`.
+La compilación de las librerías y el recorrido Chromium pasan. Con Luxon como
+runtime, TankOS alcanza 1,01 MB iniciales y su build de producción falla por
+11,2 kB sobre el límite de error de 1 MB (aviso: 900 kB). No se ha ampliado
+el presupuesto: resolverlo exige aceptar el nuevo coste u optimizar el arranque.
+
+## Adopción del producto
+
+`Aquarium.establishedAt` todavía utiliza `Date` y el agregado aún no modela
+su zona IANA. La migración debe modificar conjuntamente dominio, DTO, formulario
+y persistencia. Que este módulo sea reutilizable no cierra esa deuda vertical.

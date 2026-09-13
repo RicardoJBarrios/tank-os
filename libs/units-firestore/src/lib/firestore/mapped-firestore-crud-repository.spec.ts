@@ -32,7 +32,7 @@ describe('createMappedFirestoreCrudRepository', () => {
       repository.replace({ id: 'id' } as never, '4'),
     ).resolves.toEqual(expect.objectContaining({ data: 4 }));
     await expect(
-      repository.replaceVersioned?.({ id: 'id' } as never, '4'),
+      repository.replaceVersioned({ id: 'id' } as never, '4'),
     ).resolves.toEqual(expect.objectContaining({ data: 4 }));
     await expect(
       repository.markForDeletion({ id: 'id' } as never),
@@ -80,7 +80,7 @@ describe('createMappedFirestoreCrudRepository', () => {
     const repository = createMappedFirestoreCrudRepository(source, Number);
 
     await expect(
-      repository.replaceVersioned?.({ id: 'id' } as never, '1'),
+      repository.replaceVersioned({ id: 'id' } as never, '1'),
     ).resolves.toEqual(expect.objectContaining({ data: 1 }));
     expect(source.calls).toBe(1);
   });

@@ -1,7 +1,8 @@
 import { Component, inject, signal, type OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { AUTH_SESSION } from '@tankos/authn';
+import { AUTH_SESSION } from '@tankos/authn-angular';
+import { authorizationSubjectFromPrincipal } from '@tankos/authz';
 import { CONFIRMATION_SERVICE, confirmAndRun } from '@tankos/feedback';
 import type { AquariumListItem } from '@tankos/aquarium';
 import {
@@ -38,10 +39,9 @@ export class AquariumDetailPage implements OnInit {
       return;
     }
     void this.#auth
-      .access()
-      .then((access) =>
-        this.#reader.getAccessible(access.principalId, id as never),
-      )
+      .principal()
+      .then(authorizationSubjectFromPrincipal)
+      .then((subject) => this.#reader.getAccessible(subject, id as never))
       .then((aquarium) => {
         this.aquarium.set(aquarium);
         this.loading.set(false);

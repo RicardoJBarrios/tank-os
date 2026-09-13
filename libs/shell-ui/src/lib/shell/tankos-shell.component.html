@@ -23,8 +23,8 @@
     <button mat-menu-item disabled>Loading account…</button>
   } @else if (account(); as currentAccount) {
     <div class="account-summary">
-      <strong>{{ currentAccount.principalName }}</strong>
-      <span>{{ currentAccount.roles.join(', ') }}</span>
+      <strong>{{ currentAccount.displayName }}</strong>
+      <span>{{ roles().join(', ') }}</span>
     </div>
     <a mat-menu-item routerLink="/profile" data-testid="profile-link">
       View profile

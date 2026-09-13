@@ -7,7 +7,9 @@ import { formatAngularDecimal } from './format-angular-decimal';
 export class DecimalPipe implements PipeTransform {
   readonly #locale = inject(LOCALE_ID);
 
-  public transform(value: DecimalValue | string | null | undefined): string | null {
+  public transform(
+    value: DecimalValue | string | null | undefined,
+  ): string | null {
     return value === null || value === undefined
       ? null
       : formatAngularDecimal(value, this.#locale);

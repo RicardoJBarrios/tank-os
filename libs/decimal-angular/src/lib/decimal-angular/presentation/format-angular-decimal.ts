@@ -20,6 +20,8 @@ export function formatAngularDecimal(
     localeData.secondaryGroupingSize,
     localeData.group,
   );
-  const fraction = fractionalPart ? `${localeData.decimal}${fractionalPart}` : '';
+  const fraction = fractionalPart
+    ? `${localeData.decimal}${fractionalPart}`
+    : '';
   return `${sign}${groupedInteger}${fraction}`;
 }

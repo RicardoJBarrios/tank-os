@@ -1,7 +1,12 @@
 import * as firestoreSdk from 'firebase/firestore';
 import type { Transaction } from 'firebase/firestore';
-import type { CrudRecord, EntityId, RecordCommand } from '@tankos/data-access';
-import { createDataAccessError, type AccessContext } from '@tankos/data-access';
+import type {
+  CrudRecord,
+  EntityId,
+  MutationMetadata,
+  RecordCommand,
+} from '@tankos/data-access';
+import { createDataAccessError } from '@tankos/data-access';
 import type {
   FirestoreCrudRepositoryOptions,
   FirestoreRecordDto,
@@ -21,7 +26,7 @@ async function replaceInTransaction<TData, TCreate, TUpdate, TFilter>(
   replacementReference: ReturnType<typeof firestoreSdk.doc>,
   request: RecordCommand,
   input: TUpdate,
-  access: AccessContext,
+  metadata: MutationMetadata,
   updatedAt: firestoreSdk.Timestamp,
 ): Promise<CrudRecord<TData>> {
   const currentSnapshot = await transaction.get(currentReference);
@@ -41,8 +46,8 @@ async function replaceInTransaction<TData, TCreate, TUpdate, TFilter>(
       schemaVersion,
       createdAt: updatedAt,
       updatedAt,
-      createdBy: access.principalId,
-      updatedBy: access.principalId,
+      createdBy: metadata.actorId,
+      updatedBy: metadata.actorId,
     },
   };
   transaction.set(replacementReference, replacement);
@@ -50,9 +55,9 @@ async function replaceInTransaction<TData, TCreate, TUpdate, TFilter>(
     lifecycle: { status: 'marked-for-deletion' },
     revision: request.expectedRevision + 1,
     'metadata.updatedAt': updatedAt,
-    'metadata.updatedBy': access.principalId,
+    'metadata.updatedBy': metadata.actorId,
     'metadata.lifecycleChangedAt': updatedAt,
-    'metadata.lifecycleChangedBy': access.principalId,
+    'metadata.lifecycleChangedBy': metadata.actorId,
   });
   return {
     id: replacementReference.id as unknown as EntityId,
@@ -63,8 +68,8 @@ async function replaceInTransaction<TData, TCreate, TUpdate, TFilter>(
       schemaVersion: replacement.metadata.schemaVersion,
       createdAt: timestamp(updatedAt),
       updatedAt: timestamp(updatedAt),
-      createdBy: access.principalId,
-      updatedBy: access.principalId,
+      createdBy: metadata.actorId,
+      updatedBy: metadata.actorId,
     },
   } satisfies CrudRecord<TData>;
 }
@@ -81,15 +86,15 @@ export async function replaceVersionedFirestoreRecord<
   recordReference: (id: string) => ReturnType<typeof firestoreSdk.doc>,
   request: RecordCommand,
   input: TUpdate,
-  access: AccessContext,
+  metadata: MutationMetadata,
 ): Promise<CrudRecord<TData>> {
   const currentReference = recordReference(request.id);
   const replacementId = (
     options.createReplacementId ??
-    ((value: TUpdate, replacementAccess: AccessContext) =>
-      options.createId(value as unknown as TCreate, replacementAccess))
+    ((value: TUpdate, replacementMetadata: MutationMetadata) =>
+      options.createId(value as unknown as TCreate, replacementMetadata))
   )(input, {
-    ...access,
+    ...metadata,
     requestId: `${request.id}:replacement:${String(request.expectedRevision)}`,
   });
   const replacementReference = recordReference(replacementId);
@@ -105,7 +110,7 @@ export async function replaceVersionedFirestoreRecord<
         replacementReference,
         request,
         input,
-        access,
+        metadata,
         updatedAt,
       ),
     );

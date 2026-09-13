@@ -11,15 +11,18 @@ import {
   createObservability,
   type Logger,
 } from '@tankos/observability';
-import { provideTimeAngular } from '@tankos/time-angular';
-import { createDateIntlRuntime } from '@tankos/time-date-intl';
+import { provideTimeAngular } from '@tankos/time/angular';
+import { createLuxonRuntime } from '@tankos/time-luxon';
 import { DecimalError } from '@tankos/decimal';
 import { provideDecimalAngular } from '@tankos/decimal-angular';
 import { createBigJsDecimalRuntime } from '@tankos/decimal-big-js';
 import { DataAccessError } from '@tankos/data-access';
 import { UnitError } from '@tankos/units';
-import { provideAuthSession } from '@tankos/authn';
-import { CRUD_UI_LABELS, createCrudUiLabels } from '@tankos/data-access-ui';
+import { provideAuthSession } from '@tankos/authn-angular';
+import {
+  CRUD_UI_LABELS,
+  createCrudUiLabels,
+} from '@tankos/data-access-angular';
 import {
   ERROR_REPORTER,
   createAppError,
@@ -51,7 +54,7 @@ const tankosObservability = createObservability({
   logSinks: [createConsoleLogSink()],
 });
 
-const tankosTimeRuntime = createDateIntlRuntime();
+const tankosTimeRuntime = createLuxonRuntime();
 const tankosDecimalRuntime = createBigJsDecimalRuntime();
 
 function createTankosErrorReporter(feedback: FeedbackService): ErrorReporter {

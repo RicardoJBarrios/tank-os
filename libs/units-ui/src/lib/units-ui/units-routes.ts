@@ -1,6 +1,6 @@
 import type { Route } from '@angular/router';
 import { inject } from '@angular/core';
-import { AUTH_SESSION } from '@tankos/authn';
+import { AUTH_SESSION } from '@tankos/authn-angular';
 import { FEEDBACK_SERVICE } from '@tankos/feedback';
 import { LOGGER } from '@tankos/observability-ui';
 import { UNIT_DEFINITION_MANAGEMENT_SERVICE } from './units-tokens';

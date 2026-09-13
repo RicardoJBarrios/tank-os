@@ -5,7 +5,7 @@ export default createVitestConfig({
   root: __dirname,
   aliases: {
     '@tankos/data-access': '../data-access/src/index.ts',
-    '@tankos/data-access-ui': '../data-access-ui/src/index.ts',
+    '@tankos/data-access-angular': '../data-access-angular/src/index.ts',
   },
   dedupe: ['@angular/common', '@angular/compiler', '@angular/core'],
   inlineAngularDependencies: true,

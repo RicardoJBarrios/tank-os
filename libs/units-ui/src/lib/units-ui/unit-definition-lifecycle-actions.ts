@@ -2,13 +2,13 @@ import type { WritableSignal } from '@angular/core';
 import type { AuthSessionPort } from '@tankos/authn';
 import type { FeedbackService } from '@tankos/feedback';
 import type { Logger } from '@tankos/observability';
-import type { CrudListStoreInstance } from '@tankos/data-access-ui';
+import type { CrudListStoreInstance } from '@tankos/data-access-angular';
 import type { UnitDefinition, UnitDefinitionRecord } from '@tankos/units';
 import type { FeatureOperationStatus } from './unit-definition-feature-store';
 
 export function runUnitDefinitionLifecycle(
   list: Pick<
-    CrudListStoreInstance<UnitDefinition, unknown, unknown>,
+    CrudListStoreInstance<UnitDefinition, unknown>,
     'markForDeletion' | 'restore'
   >,
   authSession: AuthSessionPort,
@@ -39,7 +39,7 @@ export function runUnitDefinitionLifecycle(
 
 async function executeLifecycle(
   list: Pick<
-    CrudListStoreInstance<UnitDefinition, unknown, unknown>,
+    CrudListStoreInstance<UnitDefinition, unknown>,
     'markForDeletion' | 'restore'
   >,
   authSession: AuthSessionPort,
@@ -51,9 +51,9 @@ async function executeLifecycle(
   feedback: FeedbackService,
 ): Promise<void> {
   try {
-    const access = await authSession.access();
+    const principal = await authSession.principal();
     const request = {
-      access,
+      metadata: { actorId: principal.id },
       id: record.id,
       expectedRevision: record.revision,
     };

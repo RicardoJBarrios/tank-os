@@ -9,15 +9,15 @@
         <dl>
           <div>
             <dt>Name</dt>
-            <dd>{{ currentAccount.principalName }}</dd>
+            <dd>{{ currentAccount.displayName }}</dd>
           </div>
           <div>
             <dt>Identifier</dt>
-            <dd>{{ currentAccount.principalId }}</dd>
+            <dd>{{ currentAccount.id }}</dd>
           </div>
           <div>
             <dt>Roles</dt>
-            <dd>{{ currentAccount.roles.join(', ') }}</dd>
+            <dd>{{ roles().join(', ') }}</dd>
           </div>
         </dl>
       } @else {

@@ -19,12 +19,3 @@ export class UnitCodeError extends UnitError {
     this.name = 'UnitCodeError';
   }
 }
-
-/** Indicates that a requested unit conversion cannot be executed. */
-export class UnitConversionError extends UnitError {
-  /** Creates a structured conversion failure. */
-  public constructor(code: string, message: string) {
-    super(code, message);
-    this.name = 'UnitConversionError';
-  }
-}

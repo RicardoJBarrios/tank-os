@@ -1,4 +1,3 @@
-import type { EntityId } from './entity-id';
 import type { Instant } from '@tankos/time';
 
 /** Technical persistence timestamp represented by the workspace-wide Time contract. */
@@ -13,11 +12,11 @@ export interface RecordMetadata {
   /** Technical persistence timestamp of the latest normal lifecycle change. */
   readonly updatedAt: TechnicalTimestamp;
   /** Actor that created the record, when the persistence boundary knows it. */
-  readonly createdBy?: EntityId;
+  readonly createdBy?: string;
   /** Actor that performed the latest normal lifecycle change. */
-  readonly updatedBy?: EntityId;
+  readonly updatedBy?: string;
   /** Technical timestamp of the latest lifecycle transition, when distinct. */
   readonly lifecycleChangedAt?: TechnicalTimestamp;
   /** Actor that performed the latest lifecycle transition. */
-  readonly lifecycleChangedBy?: EntityId;
+  readonly lifecycleChangedBy?: string;
 }

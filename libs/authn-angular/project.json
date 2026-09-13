@@ -1,0 +1,19 @@
+{
+  "name": "authn-angular",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/authn-angular/src",
+  "prefix": "lib",
+  "projectType": "library",
+  "tags": ["scope:shared", "scope:tankos", "type:infrastructure"],
+  "targets": {
+    "test": {
+      "options": {
+        "coverage": true,
+        "coverage.reportsDirectory": "../../coverage/libs/authn-angular"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

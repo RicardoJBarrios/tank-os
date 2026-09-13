@@ -20,6 +20,18 @@ improve navigation UX, never authorization.
 
 ## Data and Firestore
 
+- `@tankos/data-access` is a provider- and framework-neutral persistence
+  vocabulary: CRUD records, lifecycle, cursor pagination, optimistic revisions
+  and atomic version replacement. It contains no authentication,
+  authorization, Angular, cache, batch or speculative transport engine.
+- Reads carry technical query data only. Writes carry `MutationMetadata` for
+  audit/idempotency correlation only; neither request shape is an authorization
+  context.
+- The owning domain application service authorizes each use case and scopes
+  its query before invoking persistence. Repositories and provider adapters do
+  not interpret roles.
+- A versioned workflow requires `VersionedCrudRepositoryPort` and its atomic
+  `replaceVersioned` capability. A create-then-retire fallback is forbidden.
 - Firestore is NoSQL: no relational foreign keys or cascade assumptions.
 - Store immutable/versioned contracts with explicit logical identifiers and
   snapshots where historical meaning requires them.
@@ -30,27 +42,49 @@ improve navigation UX, never authorization.
 - Keep indexes, Firebase configuration, Rules and deployment in the app layer;
   reusable libraries provide ports and adapters, not project deployment.
 
+## Authentication and authorization
+
+- `@tankos/authn` owns the framework-neutral session contract and raw
+  `AuthenticatedPrincipal`. It identifies the caller but does not interpret
+  roles or permissions.
+- Provider implementations such as `@tankos/authn-firebase` return identity
+  facts and raw claims. Angular DI and authentication guards live in
+  `@tankos/authn-angular`.
+- `@tankos/authz` owns authorization subjects, role interpretation, resource
+  identifiers, decisions and errors. Each domain owns its resource actions,
+  attributes and policy.
+- `@tankos/authz-angular` owns Router integration. Guards and hidden controls
+  are navigation/presentation aids, never the persisted-data boundary.
+- Provider Security Rules or a trusted backend independently enforce access.
+  Domain application authorization does not allow a repository to accept or
+  infer permissions from roles.
+
 ## Time, units and measurements
 
-Time is split by reason to change:
+Time is one capability with internal hexagonal boundaries and one replaceable runtime:
 
-- `@tankos/time` owns runtime-neutral value types, ports, arithmetic contracts
-  and canonical Zod schemas. It cannot import Angular/Firebase or use `Date`/`Intl`.
-- `@tankos/time-date-intl` is the replaceable implementation using today's
-  JavaScript `Date` and `Intl` APIs.
-- `@tankos/time-angular` owns DI, services, localized display and pipes. It uses
-  Angular `LOCALE_ID` and does not select a temporal runtime.
-- `@tankos/time-firestore` owns Firestore persistence conversions. JSON/REST
-  uses the core Zod schemas and is not a separate package.
+- The `time` project owns temporal logic, canonical Zod schemas, Firestore
+  conversions, Angular composition, localized pipes and Material form controls.
+  These fixed application technologies do not justify separate Nx libraries.
+- Its primary entry point, `@tankos/time`, exposes only neutral values, ports
+  and Zod schemas. The internal core cannot import Angular/Firebase or use
+  `Date`/`Intl`; it cannot import its own Angular or Firestore entry points.
+- `@tankos/time-luxon` is the replaceable implementation using Luxon for
+  ISO parsing, calendar arithmetic, clock and time-zone resolution.
+- `@tankos/time/angular` and `@tankos/time/firestore` are secondary import
+  entry points in that same package, not separately configured projects.
+  They keep framework-specific imports out of neutral consumers and the runtime.
+  JSON/REST uses the canonical Zod schemas, without a separate package.
 
 Only an app composition root imports the concrete runtime. Its runtime factory
 composes one neutral `TimeRuntime` (`clock`, `timePort` and
 `timeZoneDatabase`) and passes it to `provideTimeAngular`. The Angular package
-must not construct or select Date/Intl from a partial set of arguments.
-Domain/application code consumes the neutral core; Angular consumers use the
-Angular integration.
+must not construct or select the runtime from a partial set of arguments.
+Domain/application code consumes the neutral entry point; Angular consumers
+use the Angular entry point. Material widget adaptation does not select the
+business runtime; native widget values never leave the control.
 
-An `Instant` is on the UTC timeline. `LocalDate`, `Duration` and an IANA zone are
+An `Instant` is on the UTC timeline. `LocalDate`, `LocalTime`, `Duration` and an IANA zone are
 not values to convert to UTC. Stored instants use UTC. Presentation precedence
 is explicit zone, aquarium zone, user zone, then UTC; Angular localization is
 independent from zone selection. Nx tags and ESLint enforce these boundaries.
@@ -60,15 +94,50 @@ aggregate does not yet model its IANA zone. Migrate domain, Zod DTO, form and
 Firestore representation together; a partial conversion is not an acceptable
 intermediate architecture.
 
-Known UI debt: create reusable date and time form components for Angular's
-dynamic forms. They should consume the contracts from `@tankos/time-angular`,
-preserve the semantics of `LocalDate`, `Instant` and IANA zones, and keep
-temporal logic out of feature components. This remains deferred until the
-dynamic-form contract is defined; it must be implemented as a coordinated UI
-workstream rather than as isolated controls.
+`TimeField` is a standalone Angular Material editor for `LocalDate`, `LocalTime`
+or `Instant`. It uses Angular's `ControlValueAccessor`/`Validator` contract for
+both Reactive Forms (`FormControl`/`FormGroup`) and Signal Forms' supported CVA
+bridge. Do not add a dynamic-form engine or duplicate model state just to support
+both APIs. An instant editor requires an explicit IANA zone. Luxon resolves
+DST gaps and overlaps using its defaults. Prefer library behavior over custom Time policies
+unless a product requirement establishes otherwise. The page
+supplies the user's regional locale (with an application fallback)
+and passes it explicitly, with `LOCALE_ID` only as fallback. Time does not own
+that preference policy. Pipes accept locale arguments; the field must support
+a reactive instance-local locale, consistent manual parsing and reformatting
+without editing the domain value. Angular i18n governs UI text independently;
+neither chooses a time zone. Material owns the calendar/clock UX.
 
-Units manage standards, symbols and conversions only. Measurements own
-quantity, method, provenance and Aquarium/System context.
+Material's official Luxon adapter is the selected editor implementation, not an
+Angular-mandated default. DateTime stays inside the widgets; public form values
+remain neutral Time values. Use framework signals, forms events, DateAdapter
+and MAT_DATE_FORMATS before custom mechanisms. Use LuxonDateAdapter directly:
+accept its parsing fallbacks and normalizations instead of maintaining a custom
+strict parser. Configure UTC and the Gregorian calendar through official options.
+The domain runtime is also Luxon; no previous Date/Intl runtime or compatibility
+alias remains. ISO parsing and serialization follow Luxon; unzoned instant ISO
+input is explicitly interpreted in UTC, never in the browser's zone. Calendar
+duration units use Luxon's default approximate conversion to milliseconds;
+calendar-sensitive operations use CalendarPeriod instead. See
+[`Time localization audit`](../libs/time/docs/localization-audit.md) for evidence
+and acceptance criteria. Keep the implementation within Time's existing Angular
+integration, without separate Nx locale libraries or a preferences abstraction.
+
+`@tankos/units` owns qualified identities, standards, symbols, catalogue
+metadata and its canonical Zod boundary schemas. Zod is part of the unit
+architecture and is not published as a separate package. Units do not own or
+execute conversions. Measurements own values, quantity, method, provenance,
+Aquarium/System context and any transformations required by their use cases. A
+reusable conversion engine may be introduced later as a separate capability
+only when concrete consumers justify it.
+
+Known Angular integration debt: the current `units-ui` project contains the
+Units Angular integration, while `units-composition` separately contains one
+composition token. The agreed target is `units-angular`, including Angular
+services, stores, tokens, providers, guards, routes and presentation under one
+integration boundary. Keep the current projects until Data Access and
+authentication/authorization contracts have been reviewed; do not treat their
+names or separation as the target architecture.
 
 Decimal is split by replacement boundary:
 

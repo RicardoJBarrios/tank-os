@@ -7,6 +7,5 @@ export default createVitestConfig({
   staticCopy: false,
   aliases: {
     '@tankos/authz': '../authz/src/index.ts',
-    '@tankos/data-access': '../data-access/src/index.ts',
   },
 });

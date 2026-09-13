@@ -34,26 +34,26 @@ export interface AquariumAuthorizationAttributes {
 export function aquariumAuthorizationPolicy(
   request: AuthorizationRequest<AquariumAuthorizationAttributes>,
 ): boolean {
-    if (
-      hasAuthorizationRole(request.subject, AUTHORIZATION_ROLES.ADMIN)
-    ) {
-      return request.action !== AQUARIUM_ACTIONS.DELETE_PHYSICALLY ||
-        request.resource.attributes.lifecycleStatus === 'marked-for-deletion';
-    }
-
-    if (!hasAuthorizationRole(request.subject, AUTHORIZATION_ROLES.KEEPER))
-      return false;
-
-    if (request.action === AQUARIUM_ACTIONS.CREATE) {
-      return request.resource.attributes.ownerKeeperId === request.subject.id;
-    }
-
-    const grantedActions = request.resource.attributes.grantedActions ?? [];
-    if (grantedActions.includes(request.action)) return true;
-
+  if (hasAuthorizationRole(request.subject, AUTHORIZATION_ROLES.ADMIN)) {
     return (
-      request.resource.attributes.ownerKeeperId === request.subject.id &&
-      !request.resource.attributes.grantedActions &&
-      request.action !== AQUARIUM_ACTIONS.DELETE_PHYSICALLY
+      request.action !== AQUARIUM_ACTIONS.DELETE_PHYSICALLY ||
+      request.resource.attributes.lifecycleStatus === 'marked-for-deletion'
     );
+  }
+
+  if (!hasAuthorizationRole(request.subject, AUTHORIZATION_ROLES.KEEPER))
+    return false;
+
+  if (request.action === AQUARIUM_ACTIONS.CREATE) {
+    return request.resource.attributes.ownerKeeperId === request.subject.id;
+  }
+
+  const grantedActions = request.resource.attributes.grantedActions ?? [];
+  if (grantedActions.includes(request.action)) return true;
+
+  return (
+    request.resource.attributes.ownerKeeperId === request.subject.id &&
+    !request.resource.attributes.grantedActions &&
+    request.action !== AQUARIUM_ACTIONS.DELETE_PHYSICALLY
+  );
 }

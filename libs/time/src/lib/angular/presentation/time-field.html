@@ -1,0 +1,119 @@
+@if (kind() !== 'local-time') {
+<mat-form-field
+  [appearance]="options().appearance ?? defaults?.appearance ?? 'fill'"
+  [floatLabel]="options().floatLabel ?? defaults?.floatLabel ?? 'auto'"
+  [hideRequiredMarker]="options().hideRequiredMarker ?? defaults?.hideRequiredMarker ?? false"
+  [subscriptSizing]="options().subscriptSizing ?? defaults?.subscriptSizing ?? 'fixed'"
+>
+  <mat-label
+    >@if (options().dateLabel ?? label()) { {{ options().dateLabel ?? label() }}
+    } @else { <span i18n="@@time.date">Fecha</span> }</mat-label
+  >
+  <input
+    #dateInput
+    matInput
+    [matDatepicker]="calendar"
+    [formControl]="dateControl"
+    [id]="inputId() ? inputId() + '-date' : dateInput.id"
+    [name]="name() ? name() + '-date' : ''"
+    [placeholder]="options().datePlaceholder ?? ''"
+    [attr.aria-label]="options().dateAriaLabel ?? null"
+    [attr.aria-labelledby]="options().dateLabelledBy ?? null"
+    [aria-describedby]="options().describedBy ?? ''"
+    [min]="materialBound('min', 'date')"
+    [max]="materialBound('max', 'date')"
+    [matDatepickerFilter]="calendarFilter()"
+    [required]="required()"
+    [readonly]="readonly()"
+    [errorStateMatcher]="errorState"
+    (blur)="markTouched()"
+  />
+  <mat-datepicker-toggle
+    matIconSuffix
+    [for]="calendar"
+    [disabled]="isDisabled() || readonly()"
+  />
+  <ng-content select="[timeDatePrefix]" ngProjectAs="[matPrefix]" />
+  <ng-content select="[timeDateSuffix]" ngProjectAs="[matSuffix]" />
+  <mat-datepicker
+    #calendar
+    [disabled]="isDisabled() || readonly()"
+    [startAt]="calendarDate(options().startAt)"
+    [calendarHeaderComponent]="options().calendarHeaderComponent ?? defaultCalendarHeader"
+    [startView]="options().startView ?? 'month'"
+    [touchUi]="options().touchUi ?? false"
+    [restoreFocus]="options().restoreFocus ?? true"
+    [dateClass]="calendarClass()"
+    [panelClass]="options().panelClass ?? ''"
+    [xPosition]="options().xPosition ?? 'start'"
+    [yPosition]="options().yPosition ?? 'below'"
+    (opened)="opened.emit('date')"
+    (closed)="closed.emit('date')"
+  />
+  @if (options().hint) { <mat-hint>{{ options().hint }}</mat-hint> }
+  <mat-error
+    >@if (options().errorText) { {{ options().errorText }} } @else {
+    <span i18n="@@time.invalid">Revisa el valor temporal y sus límites.</span>
+    }</mat-error
+  >
+</mat-form-field>
+} @if (kind() !== 'local-date') {
+<mat-form-field
+  [appearance]="options().appearance ?? defaults?.appearance ?? 'fill'"
+  [floatLabel]="options().floatLabel ?? defaults?.floatLabel ?? 'auto'"
+  [hideRequiredMarker]="options().hideRequiredMarker ?? defaults?.hideRequiredMarker ?? false"
+  [subscriptSizing]="options().subscriptSizing ?? defaults?.subscriptSizing ?? 'fixed'"
+>
+  <mat-label
+    >@if (options().timeLabel ?? label()) { {{ options().timeLabel ?? label() }}
+    } @else { <span i18n="@@time.clock">Hora</span> }</mat-label
+  >
+  <input
+    #clockInput
+    matInput
+    [matTimepicker]="picker"
+    [formControl]="clockControl"
+    [id]="inputId() ? inputId() + '-clock' : clockInput.id"
+    [name]="name() ? name() + '-clock' : ''"
+    [placeholder]="options().timePlaceholder ?? ''"
+    [attr.aria-label]="options().timeAriaLabel ?? null"
+    [attr.aria-labelledby]="options().timeLabelledBy ?? null"
+    [aria-describedby]="options().describedBy ?? ''"
+    [min]="materialBound('min', 'clock')"
+    [max]="materialBound('max', 'clock')"
+    [required]="required()"
+    [readonly]="readonly()"
+    [matTimepickerOpenOnClick]="!readonly() && (options().openOnClick ?? true)"
+    [errorStateMatcher]="errorState"
+    (blur)="markTouched()"
+  />
+  <mat-timepicker-toggle
+    aria-label="Abrir selector de hora"
+    i18n-aria-label="@@time.openClock"
+    matIconSuffix
+    [for]="picker"
+    [disabled]="isDisabled() || readonly()"
+  />
+  <mat-timepicker
+    #picker
+    [interval]="options().interval ?? (clockOptions() ? null : clockDefaults?.interval ?? null)"
+    [options]="clockOptions()"
+    [panelClass]="options().panelClass"
+    [disableRipple]="options().disableRipple ?? false"
+    (opened)="opened.emit('clock')"
+    (closed)="closed.emit('clock')"
+    aria-label="Seleccionar hora"
+    i18n-aria-label="@@time.selectClock"
+  />
+  <ng-content select="[timeClockPrefix]" ngProjectAs="[matPrefix]" />
+  <ng-content select="[timeClockSuffix]" ngProjectAs="[matSuffix]" />
+  <mat-hint
+    >{{ options().hint ?? (kind() === 'instant' ? timeZone() : '') }}</mat-hint
+  >
+  <mat-error
+    >@if (options().errorText) { {{ options().errorText }} } @else {
+    <span i18n="@@time.invalid">Revisa el valor temporal y sus límites.</span>
+    }</mat-error
+  >
+</mat-form-field>
+}

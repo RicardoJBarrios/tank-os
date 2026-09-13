@@ -2,24 +2,23 @@ import * as firestoreSdk from 'firebase/firestore';
 import type {
   CreateRequest,
   CrudRecord,
-  CrudRepositoryPort,
+  VersionedCrudRepositoryPort,
   GetRequest,
   ListRequest,
   Page,
   RecordCommand,
 } from '@tankos/data-access';
 import {
-  createAccessContext,
   createDataAccessError,
+  createMutationMetadata,
   createPageRequest,
+  validateLifecycleSelection,
 } from '@tankos/data-access';
 import type {
   FirestoreCrudRepositoryOptions,
   FirestoreRecordDto,
 } from './firestore-crud-repository';
 import {
-  authorizeFirestoreAccess,
-  authorizeFirestoreLifecycleRead,
   createFirestoreTimestampFactory,
   deleteFirestoreRecord,
   handleFirestoreError,
@@ -40,7 +39,7 @@ export class FirestoreCrudRepositoryImplementation<
   TCreate,
   TUpdate,
   TFilter,
-> implements CrudRepositoryPort<TData, TCreate, TUpdate, TFilter> {
+> implements VersionedCrudRepositoryPort<TData, TCreate, TUpdate, TFilter> {
   readonly #options: FirestoreCrudRepositoryOptions<
     TData,
     TCreate,
@@ -70,14 +69,8 @@ export class FirestoreCrudRepositoryImplementation<
   public async list(
     request: ListRequest<TFilter>,
   ): Promise<Page<CrudRecord<TData>>> {
-    const access = createAccessContext(request.access);
     createPageRequest(request.page);
-    await authorizeFirestoreLifecycleRead(
-      this.#options,
-      access,
-      request.lifecycle,
-      'list',
-    );
+    validateLifecycleSelection(request.lifecycle);
     try {
       const builtQuery = this.#options.buildQuery(this.#reference, request);
       const cursorConstraint = createFirestoreCursorConstraint(
@@ -116,13 +109,7 @@ export class FirestoreCrudRepositoryImplementation<
   }
 
   public async get(request: GetRequest) {
-    const access = createAccessContext(request.access);
-    await authorizeFirestoreLifecycleRead(
-      this.#options,
-      access,
-      request.lifecycle,
-      'get',
-    );
+    validateLifecycleSelection(request.lifecycle);
     try {
       const result = await firestoreSdk.getDoc(
         this.#recordReference(request.id),
@@ -144,10 +131,9 @@ export class FirestoreCrudRepositoryImplementation<
   }
 
   public async create(request: CreateRequest<TCreate>) {
-    const access = createAccessContext(request.access);
-    await authorizeFirestoreAccess(this.#options, access, 'create');
+    const metadata = createMutationMetadata(request.metadata);
     const target = this.#recordReference(
-      this.#options.createId(request.input, access),
+      this.#options.createId(request.input, metadata),
     );
     const createdAt = this.#timestampNow();
     const dto: FirestoreRecordDto<TData> = {
@@ -158,8 +144,8 @@ export class FirestoreCrudRepositoryImplementation<
         schemaVersion: this.#schemaVersion,
         createdAt,
         updatedAt: createdAt,
-        createdBy: access.principalId,
-        updatedBy: access.principalId,
+        createdBy: metadata.actorId,
+        updatedBy: metadata.actorId,
       },
     };
     try {
@@ -183,10 +169,8 @@ export class FirestoreCrudRepositoryImplementation<
           schemaVersion: dto.metadata.schemaVersion,
           createdAt: timestamp(dto.metadata.createdAt),
           updatedAt: timestamp(dto.metadata.updatedAt),
-          createdBy: dto.metadata
-            .createdBy as CrudRecord<TData>['metadata']['createdBy'],
-          updatedBy: dto.metadata
-            .updatedBy as CrudRecord<TData>['metadata']['updatedBy'],
+          createdBy: dto.metadata.createdBy,
+          updatedBy: dto.metadata.updatedBy,
         },
       } satisfies CrudRecord<TData>;
     } catch (error) {
@@ -199,11 +183,7 @@ export class FirestoreCrudRepositoryImplementation<
   }
 
   public async replace(request: RecordCommand, input: TUpdate) {
-    await authorizeFirestoreAccess(
-      this.#options,
-      createAccessContext(request.access),
-      'replace',
-    );
+    createMutationMetadata(request.metadata);
     return transactFirestoreUpdate(
       this.#options,
       this.#timestampNow,
@@ -217,8 +197,7 @@ export class FirestoreCrudRepositoryImplementation<
   }
 
   public async replaceVersioned(request: RecordCommand, input: TUpdate) {
-    const access = createAccessContext(request.access);
-    await authorizeFirestoreAccess(this.#options, access, 'replace');
+    const metadata = createMutationMetadata(request.metadata);
     return replaceVersionedFirestoreRecord(
       this.#options,
       this.#timestampNow,
@@ -226,16 +205,12 @@ export class FirestoreCrudRepositoryImplementation<
       this.#recordReference.bind(this),
       request,
       input,
-      access,
+      metadata,
     );
   }
 
   public async markForDeletion(request: RecordCommand) {
-    await authorizeFirestoreAccess(
-      this.#options,
-      createAccessContext(request.access),
-      'mark',
-    );
+    createMutationMetadata(request.metadata);
     return transactFirestoreUpdate(
       this.#options,
       this.#timestampNow,
@@ -249,11 +224,7 @@ export class FirestoreCrudRepositoryImplementation<
   }
 
   public async restore(request: RecordCommand) {
-    await authorizeFirestoreAccess(
-      this.#options,
-      createAccessContext(request.access),
-      'restore',
-    );
+    createMutationMetadata(request.metadata);
     return transactFirestoreUpdate(
       this.#options,
       this.#timestampNow,
@@ -267,11 +238,7 @@ export class FirestoreCrudRepositoryImplementation<
   }
 
   public async delete(request: RecordCommand): Promise<void> {
-    await authorizeFirestoreAccess(
-      this.#options,
-      createAccessContext(request.access),
-      'delete',
-    );
+    createMutationMetadata(request.metadata);
     try {
       await firestoreSdk.runTransaction(
         this.#options.firestore,

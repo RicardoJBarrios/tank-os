@@ -9,9 +9,9 @@ describe('Units public entry point', () => {
     expect(publicApi.createUnitDefinition).toBeTypeOf('function');
   });
 
-  it('Given the public entry point, When imported, Then exposes custom conversion CRUD', () => {
-    expect(publicApi.createConversionDefinitionCrudService).toBeTypeOf(
-      'function',
-    );
+  it('Given the public entry point, When imported, Then exposes its canonical Zod boundary', () => {
+    expect(publicApi.unitDefinitionDtoSchema).toBeDefined();
+    expect(publicApi.unitDefinitionSchema).toBeDefined();
+    expect(publicApi.unitDefinitionToDto).toBeTypeOf('function');
   });
 });

@@ -12,10 +12,13 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { AUTH_SESSION } from '@tankos/authn';
+import { AUTH_SESSION } from '@tankos/authn-angular';
 import { CONFIRMATION_SERVICE, confirmAndRun } from '@tankos/feedback';
-import type { AccessContext } from '@tankos/data-access';
-import { createCrudListQueryState } from '@tankos/data-access-ui';
+import {
+  authorizationSubjectFromPrincipal,
+  type AuthorizationSubject,
+} from '@tankos/authz';
+import { createCrudListQueryState } from '@tankos/data-access-angular';
 import { CrudMaterialTableComponent } from '@tankos/data-access-material-ui';
 import {
   TankosPageHeaderComponent,
@@ -59,14 +62,13 @@ import {
   styleUrl: './unit-definition-list-page.component.css',
 })
 export class UnitDefinitionListPageComponent implements OnInit {
-  private static readonly PAGE_SIZE = 10;
   readonly #router = inject(Router);
   readonly #route = inject(ActivatedRoute);
   readonly #destroyRef = inject(DestroyRef);
   readonly #service = inject(UnitDefinitionFeatureService);
   readonly #authSession = inject(AUTH_SESSION);
   readonly #confirmation = inject(CONFIRMATION_SERVICE);
-  readonly #access = signal<AccessContext | undefined>(undefined);
+  readonly #subject = signal<AuthorizationSubject | undefined>(undefined);
   #ready = false;
 
   protected readonly list = this.#service.list;
@@ -80,8 +82,8 @@ export class UnitDefinitionListPageComponent implements OnInit {
   protected readonly capabilities = computed<
     UnitDefinitionCapabilities | undefined
   >(() => {
-    const access = this.#access();
-    return access ? unitDefinitionCapabilities(access) : undefined;
+    const subject = this.#subject();
+    return subject ? unitDefinitionCapabilities(subject) : undefined;
   });
   protected readonly recordFilter = signal('');
   protected readonly ownerFilter = signal('');
@@ -91,7 +93,7 @@ export class UnitDefinitionListPageComponent implements OnInit {
     owner: '',
   });
   protected readonly pageIndex = this.#queryState.pageIndex;
-  protected readonly pageSize = UnitDefinitionListPageComponent.PAGE_SIZE;
+  protected readonly pageSize = 10;
   #appliedFilterKey: string | undefined;
   protected readonly hasFilters = computed(
     () =>
@@ -134,8 +136,8 @@ export class UnitDefinitionListPageComponent implements OnInit {
           this.loadFilteredList();
         }
       });
-    void this.#authSession.access().then((access) => {
-      this.#access.set(access);
+    void this.#authSession.principal().then((principal) => {
+      this.#subject.set(authorizationSubjectFromPrincipal(principal));
       this.#ready = true;
       this.loadFilteredList();
     });
@@ -313,9 +315,9 @@ export class UnitDefinitionListPageComponent implements OnInit {
   private recordCapabilities(
     record: UnitDefinitionRecord,
   ): UnitDefinitionCapabilities {
-    const access = this.#access();
-    return access
-      ? unitDefinitionCapabilities(access, record.data)
+    const subject = this.#subject();
+    return subject
+      ? unitDefinitionCapabilities(subject, record.data)
       : noUnitDefinitionCapabilities;
   }
 }

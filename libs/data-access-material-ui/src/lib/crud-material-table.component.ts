@@ -10,8 +10,8 @@ import type { CrudRecord, EntityId } from '@tankos/data-access';
 import type {
   CrudListBatchOperation,
   CrudListColumn,
-} from '@tankos/data-access-ui';
-import { CRUD_UI_LABELS } from '@tankos/data-access-ui';
+} from '@tankos/data-access-angular';
+import { CRUD_UI_LABELS } from '@tankos/data-access-angular';
 
 const DEFAULT_PAGE_SIZE = 10;
 

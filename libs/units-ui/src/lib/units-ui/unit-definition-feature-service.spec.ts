@@ -12,10 +12,10 @@ describe('UnitDefinitionFeatureService', () => {
     const record = createRecord();
     const management = createManagementService(record);
     const authSession = {
-      access: vi.fn(() =>
+      principal: vi.fn(() =>
         Promise.resolve({
-          principalId: createEntityId('keeper'),
-          roles: ['keeper'],
+          id: createEntityId('keeper') as never,
+          claims: { roles: ['keeper'] },
         }),
       ),
       refresh: vi.fn(),
@@ -60,8 +60,8 @@ describe('UnitDefinitionFeatureService', () => {
       expect(service.recordStatus()).toBe('ready');
       expect(service.selectedRecord()).toBe(record);
       expect(management.getSpy).toHaveBeenCalledWith({
-        access: expect.anything(),
         id: record.id,
+        subject: expect.objectContaining({ id: 'keeper', roles: ['keeper'] }),
       });
     });
   });
@@ -76,8 +76,8 @@ describe('UnitDefinitionFeatureService', () => {
 
     await vi.waitFor(() => {
       expect(management.getSpy).toHaveBeenCalledWith({
-        access: expect.anything(),
         id: record.id,
+        subject: expect.objectContaining({ id: 'keeper', roles: ['admin'] }),
         lifecycle: ['active', 'inactive', 'marked-for-deletion'],
       });
     });
@@ -96,7 +96,7 @@ describe('UnitDefinitionFeatureService', () => {
     expect(service.recordError()).toBeInstanceOf(Error);
 
     const failure = new Error('offline');
-    authSession.accessSpy.mockRejectedValueOnce(failure);
+    authSession.principalSpy.mockRejectedValueOnce(failure);
     service.loadRecord('unavailable');
     await vi.waitFor(() => {
       expect(service.recordError()).toBe(failure);
@@ -105,15 +105,15 @@ describe('UnitDefinitionFeatureService', () => {
   });
 
   function createAuthSession(roles: readonly string[] = ['keeper']) {
-    const accessSpy = vi.fn(() =>
+    const principalSpy = vi.fn(() =>
       Promise.resolve({
-        principalId: createEntityId('keeper'),
-        roles,
+        id: createEntityId('keeper') as never,
+        claims: { roles },
       }),
     );
     return {
-      access: accessSpy,
-      accessSpy,
+      principal: principalSpy,
+      principalSpy,
       refresh: vi.fn(),
       signIn: vi.fn(),
       signOut: vi.fn(),

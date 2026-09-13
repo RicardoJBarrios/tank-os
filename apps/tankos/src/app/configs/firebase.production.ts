@@ -15,7 +15,6 @@ export const tankosAuthSession = createFirebaseAuthSession({
   auth: tankosAuth,
   email: '',
   password: '',
-  roles: [],
   autoSignIn: false,
 });
 export const tankosFirestore = getFirestore(firebaseApp);

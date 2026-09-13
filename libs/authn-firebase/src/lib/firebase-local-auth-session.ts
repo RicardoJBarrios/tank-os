@@ -22,15 +22,14 @@ export function createLocalFirebaseAuthSession(
     // This credential is only used against the local Auth emulator.
     // eslint-disable-next-line ai-guard/no-hardcoded-secret, sonarjs/no-hardcoded-passwords
     password: 'tankos-local-dev',
-    roles: ['keeper'],
     autoSignIn: options.autoSignIn ?? true,
   });
 
   return {
     ...session,
-    access: async () => {
+    principal: async () => {
       await ensureLocalRoleClaim(auth);
-      return session.access();
+      return session.principal();
     },
     signIn: async (credentials) => {
       const passwordCredentials =

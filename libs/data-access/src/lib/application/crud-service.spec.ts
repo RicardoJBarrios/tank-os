@@ -1,7 +1,6 @@
 import { createEntityId, type CrudRepositoryPort } from '../core';
 import type { CrudRecord, ListRequest, Page } from '../core';
 import { createCrudService } from './crud-service';
-import { vi } from 'vitest';
 
 describe('createCrudService', () => {
   interface Data {
@@ -35,7 +34,6 @@ describe('createCrudService', () => {
     hasMore: false,
   };
   const request: ListRequest<Filter> = {
-    access: { principalId: id, roles: ['keeper'] },
     page: {
       pageSize: 20,
       orderBy: [{ field: 'updatedAt', direction: 'desc' }],
@@ -99,7 +97,7 @@ describe('createCrudService', () => {
     const dependency = repository();
     const service = createCrudService(dependency.port);
     const command = {
-      access: { principalId: id, roles: ['keeper'] as const },
+      metadata: { actorId: id },
       id,
       expectedRevision: 1,
     };
@@ -107,21 +105,15 @@ describe('createCrudService', () => {
     const update = { name: 'updated' };
 
     await service.get(command);
-    await service.create({ access: command.access, input: create });
+    await service.create({ metadata: command.metadata, input: create });
     await service.replace(command, update);
     await service.markForDeletion(command);
     await service.restore(command);
     await service.delete(command);
 
     expect(dependency.calls).toEqual({
-      get: [
-        {
-          access: command.access,
-          id: command.id,
-          lifecycle: ['active', 'inactive', 'marked-for-deletion', 'deleted'],
-        },
-      ],
-      create: [{ access: command.access, input: create }],
+      get: [command],
+      create: [{ metadata: command.metadata, input: create }],
       replace: [command, update],
       markForDeletion: [command],
       restore: [command],
@@ -136,19 +128,5 @@ describe('createCrudService', () => {
     await expect(createCrudService(dependency.port).get(request)).resolves.toBe(
       undefined,
     );
-  });
-
-  it('skips update validation when a replacement target is missing', async () => {
-    const dependency = repository();
-    dependency.port.get = async () => undefined;
-    const validateUpdate = async () => undefined;
-    const service = createCrudService(dependency.port, {
-      policy: { authorize: vi.fn(), validateUpdate },
-    });
-    await service.replace(
-      { access: request.access, id, expectedRevision: 1 },
-      { name: 'updated' },
-    );
-    expect(dependency.calls.replace).toBeDefined();
   });
 });

@@ -7,7 +7,7 @@
   "targets": {
     "build": {
       "executor": "@nx/angular:ng-packagr-lite",
-      "dependsOn": ["data-access:build"],
+      "dependsOn": ["authn:build"],
       "outputs": ["{workspaceRoot}/dist/libs/authz"],
       "options": {
         "project": "libs/authz/ng-package.json",

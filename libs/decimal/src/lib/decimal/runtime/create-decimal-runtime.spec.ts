@@ -20,10 +20,16 @@ describe('createDecimalRuntime', () => {
     expect(runtime.decimal('1').add('2').value).toBe('3');
     expect(runtime.decimal('1').subtract('2').value).toBe('1');
     expect(runtime.decimal('1').multiply('2').value).toBe('2');
-    expect(runtime.decimal('1').divide('2', { decimalPlaces: 1, rounding: 'down' }).value).toBe('0.5');
+    expect(
+      runtime.decimal('1').divide('2', { decimalPlaces: 1, rounding: 'down' })
+        .value,
+    ).toBe('0.5');
     expect(runtime.decimal('1').remainder('2').value).toBe('1');
     expect(runtime.decimal('1').power('2').value).toBe('1');
-    expect(runtime.decimal('1.1').round({ decimalPlaces: 0, rounding: 'down' }).value).toBe('1');
+    expect(
+      runtime.decimal('1.1').round({ decimalPlaces: 0, rounding: 'down' })
+        .value,
+    ).toBe('1');
     expect(runtime.decimal('1').negate().value).toBe('-1');
     expect(runtime.decimal('1').compare(runtime.decimal('2'))).toBe(0);
   });

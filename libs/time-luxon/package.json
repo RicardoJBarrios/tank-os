@@ -1,0 +1,25 @@
+{
+  "name": "@tankos/time-luxon",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js",
+      "default": "./index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "peerDependencies": {
+    "luxon": "^3.7.2",
+    "@tankos/time": "workspace:^"
+  },
+  "sideEffects": false,
+  "devDependencies": {
+    "luxon": "^3.7.2",
+    "@types/luxon": "^3.7.5",
+    "@tankos/time": "workspace:^"
+  }
+}

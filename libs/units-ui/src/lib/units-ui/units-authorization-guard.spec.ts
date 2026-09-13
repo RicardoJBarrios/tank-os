@@ -1,18 +1,18 @@
-import type { AccessContext } from '@tankos/data-access';
+import type { AuthorizationSubject } from '@tankos/authz';
 import { describe, expect, it, vi } from 'vitest';
 
 interface MockGuardOptions {
-  readonly policy: (context: AccessContext) => boolean;
+  readonly policy: (subject: AuthorizationSubject) => boolean;
 }
 
 const createAuthorizationGuard = vi.hoisted(() =>
   vi.fn(
-    (options: MockGuardOptions) => (context: AccessContext) =>
-      options.policy(context),
+    (options: MockGuardOptions) => (subject: AuthorizationSubject) =>
+      options.policy(subject),
   ),
 );
 
-vi.mock('@tankos/authz-ui', () => ({
+vi.mock('@tankos/authz-angular', () => ({
   createAuthorizationGuard,
 }));
 
@@ -25,13 +25,13 @@ describe('unitsAuthorizationGuard', () => {
 
   it.each([['keeper'], ['admin']])('allows a %s', (role) => {
     expect(
-      unitsAuthorizationGuard({ principalId: 'user-1', roles: [role] }),
+      unitsAuthorizationGuard({ id: 'user-1' as never, roles: [role] }),
     ).toBe(true);
   });
 
   it('denies a role without unit-management access', () => {
     expect(
-      unitsAuthorizationGuard({ principalId: 'user-1', roles: ['guest'] }),
+      unitsAuthorizationGuard({ id: 'user-1' as never, roles: ['guest'] }),
     ).toBe(false);
   });
 });

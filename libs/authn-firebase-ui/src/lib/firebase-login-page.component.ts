@@ -5,7 +5,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AUTH_SESSION, type AuthCredentials } from '@tankos/authn';
+import type { AuthCredentials } from '@tankos/authn';
+import { AUTH_SESSION } from '@tankos/authn-angular';
 
 @Component({
   imports: [

@@ -5,7 +5,8 @@ import {
   provideRouter,
   Router,
 } from '@angular/router';
-import { AUTH_SESSION, type AuthSessionPort } from '@tankos/authn';
+import type { AuthSessionPort } from '@tankos/authn';
+import { AUTH_SESSION } from '@tankos/authn-angular';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { FirebaseLoginPageComponent } from './firebase-login-page.component';
 

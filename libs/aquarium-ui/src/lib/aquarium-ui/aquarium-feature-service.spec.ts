@@ -24,9 +24,9 @@ function createService() {
     deletePermanently: vi.fn().mockResolvedValue(undefined),
   };
   const auth = {
-    access: vi
+    principal: vi
       .fn()
-      .mockResolvedValue({ principalId: 'keeper-1', roles: ['keeper'] }),
+      .mockResolvedValue({ id: 'keeper-1', claims: { roles: ['keeper'] } }),
   } as unknown as AuthSessionPort;
   const feedback = {
     error: vi.fn(),
@@ -51,7 +51,11 @@ describe('AquariumFeatureService', () => {
     const { service, reader } = createService();
     void service.load();
     await vi.waitFor(() => {
-      expect(reader.listAccessible).toHaveBeenCalledWith('keeper-1');
+      expect(reader.listAccessible).toHaveBeenCalledWith({
+        id: 'keeper-1',
+        roles: ['keeper'],
+        attributes: { roles: ['keeper'] },
+      });
     });
     expect(service.status()).toBe('ready');
   });
@@ -59,10 +63,10 @@ describe('AquariumFeatureService', () => {
   it('establishes an aquarium and reports success', async () => {
     const { service, establisher, feedback } = createService();
     await service.establish('  Reef  ');
-    expect(establisher.establish).toHaveBeenCalledWith({
-      name: 'Reef',
-      keeperId: 'keeper-1',
-    });
+    expect(establisher.establish).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'keeper-1', roles: ['keeper'] }),
+      { name: 'Reef', keeperId: 'keeper-1' },
+    );
     expect(feedback.success).toHaveBeenCalled();
   });
 });

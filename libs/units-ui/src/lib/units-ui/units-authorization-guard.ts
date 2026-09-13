@@ -1,4 +1,4 @@
-import { createAuthorizationGuard } from '@tankos/authz-ui';
+import { createAuthorizationGuard } from '@tankos/authz-angular';
 import { canAccessUnitDefinitions } from '@tankos/units';
 
 /** Angular route guard for the unit-definition workspace. */

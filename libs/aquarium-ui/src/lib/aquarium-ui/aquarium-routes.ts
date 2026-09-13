@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import type { Route } from '@angular/router';
-import { AUTH_SESSION } from '@tankos/authn';
+import { AUTH_SESSION } from '@tankos/authn-angular';
 import { FEEDBACK_SERVICE } from '@tankos/feedback';
 import { AquariumEditorPage } from './aquarium-editor-page';
 import { AquariumFeatureService } from './aquarium-feature-service';

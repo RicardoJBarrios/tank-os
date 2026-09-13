@@ -6,7 +6,6 @@ import {
   UNIT_DEFINITION_RESOURCE,
   canAccessUnitDefinitions,
   unitDefinitionCapabilities,
-  unitDefinitionCrudPolicy,
   unitDefinitionAuthorizationPolicy,
 } from './unit-definition-authorization';
 
@@ -167,15 +166,15 @@ describe('unitDefinitionAuthorizationPolicy', () => {
 
 describe('canAccessUnitDefinitions', () => {
   it.each([['keeper'], ['admin']])('allows a %s', (role) => {
-    expect(
-      canAccessUnitDefinitions({ principalId: 'user-1', roles: [role] }),
-    ).toBe(true);
+    expect(canAccessUnitDefinitions({ id: 'user-1', roles: [role] })).toBe(
+      true,
+    );
   });
 
   it('denies users without a unit-management role', () => {
-    expect(
-      canAccessUnitDefinitions({ principalId: 'user-1', roles: ['guest'] }),
-    ).toBe(false);
+    expect(canAccessUnitDefinitions({ id: 'user-1', roles: ['guest'] })).toBe(
+      false,
+    );
   });
 });
 
@@ -183,13 +182,13 @@ describe('unitDefinitionCapabilities', () => {
   it('derives create and owner filtering capabilities from the access context', () => {
     expect(
       unitDefinitionCapabilities({
-        principalId: createEntityId('keeper-1'),
+        id: createEntityId('keeper-1'),
         roles: ['keeper'],
       }),
     ).toMatchObject({ canCreate: true, canFilterByOwner: false });
     expect(
       unitDefinitionCapabilities({
-        principalId: createEntityId('admin-1'),
+        id: createEntityId('admin-1'),
         roles: ['admin'],
       }),
     ).toMatchObject({
@@ -199,138 +198,21 @@ describe('unitDefinitionCapabilities', () => {
     });
     expect(
       unitDefinitionCapabilities(
-        { principalId: createEntityId('keeper-1'), roles: ['keeper'] },
+        { id: createEntityId('keeper-1'), roles: ['keeper'] },
         { ownerId: 'keeper-1', visibility: 'private' } as UnitDefinition,
       ),
     ).toMatchObject({ canEdit: true, canDelete: true, canPublish: false });
     expect(
       unitDefinitionCapabilities(
-        { principalId: createEntityId('keeper-1'), roles: ['keeper'] },
+        { id: createEntityId('keeper-1'), roles: ['keeper'] },
         { ownerId: 'keeper-1' } as UnitDefinition,
       ).canEdit,
     ).toBe(true);
     expect(
       unitDefinitionCapabilities(
-        { principalId: createEntityId('keeper-1'), roles: ['keeper'] },
+        { id: createEntityId('keeper-1'), roles: ['keeper'] },
         { visibility: 'private' } as UnitDefinition,
       ).canEdit,
     ).toBe(false);
-  });
-});
-
-describe('unitDefinitionCrudPolicy', () => {
-  const keeper = { id: createEntityId('keeper-1'), roles: ['keeper'] };
-  const admin = { id: createEntityId('admin-1'), roles: ['admin'] };
-  const privateUnit = {
-    type: UNIT_DEFINITION_RESOURCE,
-    id: createEntityId('unit-1'),
-    attributes: { ownerId: keeper.id, visibility: 'private' as const },
-  };
-  const publicUnit = {
-    ...privateUnit,
-    attributes: { ownerId: keeper.id, visibility: 'public' as const },
-  };
-  const privateData = privateUnit.attributes as unknown as UnitDefinition;
-  const publicData = publicUnit.attributes as unknown as UnitDefinition;
-  const record = {
-    ...privateUnit,
-    data: privateData,
-    lifecycle: { status: 'active' as const },
-    revision: 1,
-    metadata: {},
-  };
-
-  it('authorizes the generic CRUD operations through the unit ABAC policy', async () => {
-    expect(() =>
-      unitDefinitionCrudPolicy.authorize({
-        operation: 'create',
-        access: { principalId: keeper.id, roles: ['keeper'] },
-        input: privateData,
-      }),
-    ).not.toThrow();
-    expect(() =>
-      unitDefinitionCrudPolicy.authorize({
-        operation: 'create',
-        access: { principalId: keeper.id, roles: ['keeper'] },
-        input: { ownerId: keeper.id } as unknown as UnitDefinition,
-      }),
-    ).not.toThrow();
-    expect(() =>
-      unitDefinitionCrudPolicy.authorize({
-        operation: 'get',
-        access: { principalId: keeper.id, roles: ['keeper'] },
-        record,
-      }),
-    ).not.toThrow();
-    expect(() =>
-      unitDefinitionCrudPolicy.authorize({
-        operation: 'markForDeletion',
-        access: { principalId: keeper.id, roles: ['keeper'] },
-        record,
-      }),
-    ).not.toThrow();
-    expect(() =>
-      unitDefinitionCrudPolicy.authorize({
-        operation: 'delete',
-        access: { principalId: admin.id, roles: ['admin'] },
-        record: { ...record, data: publicData },
-      }),
-    ).not.toThrow();
-    expect(() =>
-      unitDefinitionCrudPolicy.authorize({
-        operation: 'restore',
-        access: { principalId: admin.id, roles: ['admin'] },
-        record,
-      }),
-    ).not.toThrow();
-    expect(() =>
-      unitDefinitionCrudPolicy.authorize({
-        operation: 'list',
-        access: { principalId: admin.id, roles: ['admin'] },
-        record,
-      }),
-    ).not.toThrow();
-  });
-
-  it('denies a keeper replacing a public unit and prevents keeper publication', () => {
-    expect(() =>
-      unitDefinitionCrudPolicy.authorize({
-        operation: 'replace',
-        access: { principalId: keeper.id, roles: ['keeper'] },
-        record: { ...record, data: publicData },
-        input: publicData,
-      }),
-    ).toThrow();
-    expect(() =>
-      unitDefinitionCrudPolicy.validateUpdate?.(
-        { principalId: keeper.id, roles: ['keeper'] },
-        record,
-        { ...privateData, visibility: 'public' },
-      ),
-    ).toThrow();
-  });
-
-  it('allows an admin to publish and ignores updates without a visibility change', () => {
-    expect(() =>
-      unitDefinitionCrudPolicy.validateUpdate?.(
-        { principalId: admin.id, roles: ['admin'] },
-        record,
-        { ...privateData, symbol: 'changed' },
-      ),
-    ).not.toThrow();
-    expect(() =>
-      unitDefinitionCrudPolicy.validateUpdate?.(
-        { principalId: admin.id, roles: ['admin'] },
-        record,
-        { ...privateData, visibility: 'public' },
-      ),
-    ).not.toThrow();
-    expect(() =>
-      unitDefinitionCrudPolicy.validateUpdate?.(
-        { principalId: admin.id, roles: ['admin'] },
-        { ...record, data: { ...privateData, visibility: undefined } },
-        { ...privateData, visibility: 'public' },
-      ),
-    ).not.toThrow();
   });
 });

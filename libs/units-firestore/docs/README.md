@@ -1,18 +1,19 @@
 # Units Firestore adapter
 
-`@tankos/units-firestore` is the Firestore adapter for the public and private units and
-conversion catalogues. It contains no unit or conversion business rules and
-does not know about Aquarium or Measurement records.
+`@tankos/units-firestore` is the Firestore adapter for the public and private
+unit-definition catalogue. It contains no unit business rules and does not know
+about Aquarium or Measurement records.
 
 It composes `createFirestoreCrudRepository()` from
-`@tankos/data-access-firestore`, while `@tankos/units-zod` validates and
-maps the persisted DTO data. Technical metadata, optimistic revisions,
-lifecycle transitions, authorization hooks, pagination and cache policy stay
-owned by the shared Firestore/data-access boundaries.
+`@tankos/data-access-firestore`, while the canonical schemas from
+`@tankos/units` validate and map the persisted DTO data. Technical metadata, optimistic revisions,
+lifecycle transitions and pagination stay owned by the shared Firestore/data-access
+boundaries. Authorization is completed by the Units application service before
+this adapter receives a technical request.
 
-The application supplies collection paths, query builders, cursors and
-authorization. This adapter supplies only the entity-specific DTO schemas and
-domain mapping for `UnitDefinition` and `ConversionDefinition`.
+This adapter supplies the entity-specific DTO schema, domain projection,
+collection path, bounded query builder, cursor and deterministic ID policy for
+`UnitDefinition`. It does not inspect roles.
 
 Unit-definition pages use a stable `(data.code, __name__)` ordering. The
 adapter encodes both values and applies them with `startAfter`; a cursor is

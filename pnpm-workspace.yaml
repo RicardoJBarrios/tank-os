@@ -1,8 +1,6 @@
 packages:
   - 'libs/time'
-  - 'libs/time-angular'
-  - 'libs/time-date-intl'
-  - 'libs/time-firestore'
+  - 'libs/time-luxon'
   - 'libs/decimal'
   - 'libs/decimal-angular'
   - 'libs/decimal-big-js'

@@ -1,57 +1,80 @@
-# Contrato de `@tankos/time`
+# Contrato de Time
 
-Esta librería define el modelo temporal que pueden usar dominio, aplicación y
-fronteras de validación sin conocer Angular, Firebase ni la implementación de
-fechas elegida por la aplicación.
+## Fronteras internas
 
-## Valores y semántica
+`src/lib/time/core` contiene valores y puertos neutrales;
+`src/lib/time/zod` contiene la validación externa decidida para TankOS.
+`src/lib/angular` contiene aplicación Angular, composición, adaptadores de
+presentación, pipes y formularios. `src/lib/firestore` convierte representaciones
+persistidas. El núcleo no importa sus integraciones.
 
-- `Instant` representa un punto de la línea temporal UTC. Se persiste y se
-  intercambia normalizado, nunca como una fecha local implícita.
-- `LocalDate` representa una fecha civil del calendario gregoriano (`YYYY-MM-DD`)
-  sin hora ni zona. Cumpleaños, días de mantenimiento o fechas de alta suelen
-  pertenecer a este tipo.
-- `Duration` representa tiempo transcurrido en milisegundos. No equivale a un
-  mes o un año civil.
-- `CalendarPeriod` permite mover una `LocalDate` por años, meses o días sin
-  convertirla en un instante.
-- Una zona IANA, como `Atlantic/Canary`, solo aporta reglas al resolver una hora
-  local o al mostrar un `Instant`; nunca modifica el instante almacenado.
+La raíz exporta únicamente núcleo y Zod. Angular y Firestore importan esa raíz
+a través de entradas secundarias del mismo paquete, conservadas para que
+importar un valor temporal no cargue dependencias de UI o persistencia.
+No se mantienen librerías puente, alias antiguos ni proveedores redundantes
+para la estructura anterior.
 
-## Frontera Zod y JSON/REST
+La app selecciona un `TimeRuntime` completo (`clock`, `timePort`,
+`timeZoneDatabase`) y lo entrega a `provideTimeAngular`. La integración no
+selecciona el motor. Solo la composición de la app y las pruebas importan
+`time-luxon`. Su dependencia desde el setup de pruebas no es una
+dependencia de producción: el build de Time no construye el runtime.
 
-Zod es una decisión cerrada de la aplicación y actúa como parser de frontera.
-Por eso `createZodTimeSchemas` forma parte de esta librería y no de un paquete
-`time-zod` separado. Sus esquemas convierten cadenas externas en valores
-temporales del dominio usando los puertos configurados.
+## Valores
 
-JSON/REST tampoco necesita una librería temporal propia:
+- `Instant`: punto UTC a precisión de milisegundos, no una hora local.
+- `LocalDate`: fecha gregoriana civil `YYYY-MM-DD`, sin hora ni zona.
+- `LocalTime`: hora civil sin fecha ni zona, de 00:00 a 23:59:59.999.
+  `parseLocalTime` acepta valores o `HH:mm[:ss[.SSS]]`;
+  `toLocalTimeString` produce siempre `HH:mm:ss.SSS`.
+  Rechaza 24:00, segundos intercalares, offsets y precisión superior a milisegundos.
+- `Duration`: tiempo transcurrido en milisegundos enteros. El runtime convierte
+  unidades ISO de calendario con las aproximaciones predeterminadas de Luxon;
+  para desplazar fechas reales por meses/años se usa `CalendarPeriod`.
+- `CalendarPeriod`: desplazamiento civil por años, meses y días.
+- Zona IANA: reglas para interpretar o presentar un instante, no un offset fijo.
 
-- entrada: validar `Instant`, `LocalDate`, `Duration` y zona IANA con los
-  esquemas de `createZodTimeSchemas`;
-- salida: serializar instantes con `TimePort.toUtcIsoString`, duraciones con
-  `TimePort.toDurationIsoString` y fechas civiles con
-  `TimePort.toLocalDateString`;
-- no aceptar cadenas sin `Z` u offset como instantes; si la entrada representa
-  una hora local, debe declarar además la zona IANA o el offset y resolverse de
-  forma explícita.
+Los valores se validan al entrar; una interfaz TypeScript no sustituye la
+validación en ejecución. `LocalTime` no necesita un puerto de motor: su rango y
+serialización no dependen de calendario, reloj ni base de zonas.
 
-## Dependencias permitidas
+## Zod y JSON
 
-Esta librería puede contener TypeScript independiente del runtime y Zod. No
-puede importar Angular, Firebase, `Date`, `Intl`, pipes, formato de presentación
-ni seleccionar una implementación concreta. Las demás librerías deben depender
-de sus contratos, no de `@tankos/time-date-intl`.
+`createZodTimeSchemas(timePort, timeZoneDatabase)` ofrece `instant`,
+`localDate`, `localTime`, `duration` y `timeZone`. Zod pertenece al módulo;
+no existe una librería Zod separada. Los esquemas de transporte aceptan cadenas
+y devuelven valores de dominio.
 
-La aplicación elige la implementación una sola vez en su raíz de composición.
-Para sustituir `Date`/`Intl` por Temporal u otro motor solo debe implementarse el
-mismo conjunto de puertos; el dominio y los adaptadores de persistencia no deben
-cambiar.
+La salida usa `toUtcIsoString`, `toLocalDateString`,
+`toLocalTimeString` y `toDurationIsoString`. El runtime Luxon interpreta un ISO
+sin Z/offset en UTC. Para una hora de una ubicación concreta se usa resolución
+con zona/offset explícito; los campos de instantes siempre exigen esa zona.
 
-## Deuda de migración del agregado Aquarium
+## Angular, formato y localización
 
-`Aquarium.establishedAt` todavía usa `Date` y el agregado aún no modela su zona
-IANA. La migración correcta debe modificar conjuntamente dominio, DTO Zod,
-formulario y representación Firestore. Hasta abordar ese corte vertical no se
-aceptará una adaptación parcial que mezcle el contrato nuevo con el modelo
-anterior.
+La página pasa el locale del usuario; `LOCALE_ID` es el fallback. La zona puede
+proceder del acuario o del usuario según el contexto. Pipes y campos reciben
+valores reactivos explícitos. La edición usa Material/Luxon, con sus tipos
+encapsulados: véase la [auditoría de paridad](localization-audit.md).
+Angular i18n/localize traduce el texto de UI; cambiar el locale regional no
+cambia automáticamente el idioma compilado. No hay un puerto alternativo de
+localización ni una política de selección de preferencias dentro de Time.
+
+`provideTimeDisplayContext` establece zonas estables del inyector.
+La presentación de un instante usa zona explícita, luego acuario, usuario y UTC.
+Si el contexto cambia reactivamente, pasar la zona como argumento de una signal;
+un provider no es un store de preferencias.
+
+Pipes públicos: `tankInstant`, `tankAquariumInstant`, `tankUserInstant`,
+`tankLocalDate`, `tankLocalTime`, `tankDuration` y `tankHumanizeDuration`.
+El pipe de fecha civil no recibe zona. Los controles editan valores, no textos
+de esos pipes. Véase [formularios](forms.md).
+
+## Fuera del módulo
+
+Time no posee formularios de Aquarium, motores de formularios dinámicos,
+planificación de mantenimiento, permisos, repositorios de negocio ni despliegue
+Firebase. No necesita puertos abstractos para tecnologías estructurales ya elegidas.
+
+La migración de `Aquarium.establishedAt` y la incorporación de una zona IANA al
+agregado siguen pendientes como corte vertical completo.

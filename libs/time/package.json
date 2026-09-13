@@ -3,6 +3,27 @@
   "version": "0.0.0",
   "sideEffects": false,
   "peerDependencies": {
+    "@angular/cdk": "22.1.3",
+    "@angular/common": "22.1.3",
+    "@angular/core": "22.1.3",
+    "@angular/forms": "22.1.3",
+    "@angular/localize": "22.1.3",
+    "@angular/material": "22.1.3",
+    "@angular/material-luxon-adapter": "22.1.3",
+    "luxon": "^3.7.2",
+    "firebase": "12.17.1",
     "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@angular/material-luxon-adapter": "22.1.3",
+    "luxon": "^3.7.2",
+    "@types/luxon": "^3.7.1",
+    "@angular/cdk": "22.1.3",
+    "@angular/common": "22.1.3",
+    "@angular/core": "22.1.3",
+    "@angular/forms": "22.1.3",
+    "@angular/localize": "22.1.3",
+    "@angular/material": "22.1.3",
+    "firebase": "12.17.1"
   }
 }

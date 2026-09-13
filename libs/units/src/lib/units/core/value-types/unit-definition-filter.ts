@@ -10,4 +10,6 @@ export interface UnitDefinitionFilter {
   readonly ownerId?: string;
   readonly ownerName?: string;
   readonly lifecycle?: 'active' | 'marked-for-deletion' | 'deleted';
+  /** Explicit query scope selected by the authorized application service. */
+  readonly accessibleOwnerId?: string;
 }

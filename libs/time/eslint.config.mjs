@@ -5,7 +5,7 @@ export default [
   ...createAngularEslintConfig({ prefix: 'tankos' }),
   ...createVitestEslintConfig(),
   {
-    files: ['src/**/*.ts'],
+    files: ['src/lib/time/**/*.ts', 'src/index.ts'],
     ignores: ['src/**/*.spec.ts', 'src/**/*.test.ts'],
     rules: {
       'no-restricted-globals': [
@@ -18,8 +18,20 @@ export default [
         {
           patterns: [
             {
-              group: ['@angular/*', 'firebase', 'firebase/*'],
-              message: 'The time core cannot depend on Angular or Firebase.',
+              group: ['@angular/*', 'firebase', 'firebase/*', 'luxon'],
+              message:
+                'The time core cannot depend on Angular, Firebase or Luxon.',
+            },
+            {
+              group: [
+                '@tankos/time/*',
+                '**/angular',
+                '**/angular/**',
+                '**/firestore',
+                '**/firestore/**',
+              ],
+              message:
+                'The neutral Time entry point cannot depend on its integrations.',
             },
           ],
         },

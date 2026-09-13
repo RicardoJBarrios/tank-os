@@ -58,7 +58,10 @@ class DecimalValueObject implements Decimal {
 
   public remainder(right: DecimalOperand): Decimal {
     return this.#create(
-      this.#arithmetic.remainder(this.#value, DecimalValueObject.#valueOf(right)),
+      this.#arithmetic.remainder(
+        this.#value,
+        DecimalValueObject.#valueOf(right),
+      ),
     );
   }
 
@@ -97,7 +100,9 @@ class DecimalValueObject implements Decimal {
 
   public [Symbol.toPrimitive](hint: string): string {
     if (hint === 'string') return this.#value;
-    throw new TypeError('Decimal values must use fluent arithmetic methods explicitly');
+    throw new TypeError(
+      'Decimal values must use fluent arithmetic methods explicitly',
+    );
   }
 
   #create(value: DecimalValue): Decimal {
@@ -124,5 +129,7 @@ class DecimalValueObject implements Decimal {
 }
 
 function toDecimalValue(operand: DecimalOperand): DecimalValue {
-  return typeof operand === 'object' ? operand.value : normalizeDecimalInput(operand);
+  return typeof operand === 'object'
+    ? operand.value
+    : normalizeDecimalInput(operand);
 }

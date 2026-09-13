@@ -6,7 +6,9 @@ import { DecimalService } from './decimal-service';
 describe('DecimalService', () => {
   const createService = createServiceFactory({
     service: DecimalService,
-    providers: [{ provide: DECIMAL_RUNTIME, useValue: createBigJsDecimalRuntime() }],
+    providers: [
+      { provide: DECIMAL_RUNTIME, useValue: createBigJsDecimalRuntime() },
+    ],
   });
 
   it('uses the runtime configured by Angular composition', () => {

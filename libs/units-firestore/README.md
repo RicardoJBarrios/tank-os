@@ -1,7 +1,7 @@
 # @tankos/units-firestore
 
-Firestore persistence adapter for the independent TankOS units and conversion
-catalogues. Firebase is intentionally absent from `@tankos/units` itself.
+Firestore persistence adapter for the independent TankOS unit-definition
+catalogue. Firebase is intentionally absent from `@tankos/units` itself.
 
 ## Running unit tests
 

@@ -1,4 +1,9 @@
-import type { EntityId } from '@tankos/data-access';
+import type { AuthenticatedPrincipal, PrincipalId } from '@tankos/authn';
+
+declare const authorizationResourceIdBrand: unique symbol;
+export type AuthorizationResourceId = string & {
+  readonly [authorizationResourceIdBrand]: true;
+};
 
 /** General roles understood by the authorization layer. */
 export const AUTHORIZATION_ROLES = {
@@ -17,14 +22,14 @@ export function hasAuthorizationRole(
 }
 
 export interface AuthorizationSubject {
-  readonly id: EntityId;
+  readonly id: PrincipalId;
   readonly roles: readonly string[];
   readonly attributes?: Readonly<Record<string, unknown>>;
 }
 
 export interface AuthorizationResource<TAttributes = unknown> {
   readonly type: string;
-  readonly id?: EntityId;
+  readonly id?: AuthorizationResourceId;
   readonly attributes: TAttributes;
 }
 
@@ -57,10 +62,10 @@ export interface AuthorizationPort<TAttributes = unknown> {
 
 /** A persisted authorization fact, not a precomputed decision. */
 export interface AuthorizationGrant {
-  readonly id: EntityId;
-  readonly subjectId: EntityId;
+  readonly id: AuthorizationResourceId;
+  readonly subjectId: PrincipalId;
   readonly resourceType: string;
-  readonly resourceId: EntityId;
+  readonly resourceId: AuthorizationResourceId;
   readonly actions: readonly string[];
   readonly effect: 'allow' | 'deny';
   readonly status: 'active' | 'revoked';
@@ -68,9 +73,9 @@ export interface AuthorizationGrant {
 }
 
 export interface AuthorizationGrantQuery {
-  readonly subjectId: EntityId;
+  readonly subjectId: PrincipalId;
   readonly resourceType: string;
-  readonly resourceId?: EntityId;
+  readonly resourceId?: AuthorizationResourceId;
   readonly status?: AuthorizationGrant['status'];
 }
 
@@ -80,7 +85,36 @@ export interface AuthorizationGrantStore {
     query: AuthorizationGrantQuery,
   ) => Promise<readonly AuthorizationGrant[]>;
   readonly save: (grant: AuthorizationGrant) => Promise<void>;
-  readonly revoke: (grantId: EntityId) => Promise<void>;
+  readonly revoke: (grantId: AuthorizationResourceId) => Promise<void>;
+}
+
+/** Interprets identity-provider claims at the authorization boundary. */
+export function authorizationSubjectFromPrincipal(
+  principal: AuthenticatedPrincipal,
+): AuthorizationSubject {
+  return {
+    id: principal.id,
+    roles: authorizationRolesFromClaims(principal.claims),
+    attributes: {
+      ...principal.claims,
+      ...(principal.displayName ? { displayName: principal.displayName } : {}),
+    },
+  };
+}
+
+function authorizationRolesFromClaims(
+  claims: Readonly<Record<string, unknown>>,
+): readonly string[] {
+  const roles = claims['roles'];
+  const validRoles = Array.isArray(roles) ? roles.filter(isNonEmptyString) : [];
+  if (Array.isArray(roles) && validRoles.length === roles.length)
+    return validRoles;
+  const role = claims['role'];
+  return typeof role === 'string' && role.trim() ? [role] : [];
+}
+
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === 'string' && Boolean(value.trim());
 }
 
 export function createAuthorizationPort<TAttributes>(

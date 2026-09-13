@@ -9,6 +9,7 @@ import {
   validateDocumentId,
   type FirestoreRecordDto,
 } from './firestore-crud-repository';
+import { requireFirestoreRevision } from './firestore-crud-repository-policy';
 
 const firestoreMocks = vi.hoisted(() => ({
   collection: vi.fn(() => ({})),
@@ -54,7 +55,17 @@ describe('createFirestoreCrudRepository', () => {
     principalId: createEntityId('keeper'),
     roles: ['keeper'] as const,
   };
+  const metadata = { actorId: access.principalId };
   const schema = z.any() as z.ZodType<FirestoreRecordDto<{ name: string }>>;
+
+  it('rejects a non-integer optimistic revision', () => {
+    expect(() => {
+      requireFirestoreRevision(
+        { metadata, id: createEntityId('unit-1'), expectedRevision: 1.5 },
+        mapRecord(snapshot(true), schema),
+      );
+    }).toThrow('integer expectedRevision');
+  });
 
   function repository(
     applyCursor?: (query: never, cursor: never, request: never) => never,
@@ -69,7 +80,6 @@ describe('createFirestoreCrudRepository', () => {
       buildQuery: () => ({}) as never,
       encodeCursor: () => 'cursor' as never,
       ...(applyCursor ? { applyCursor } : {}),
-      authorize: () => undefined,
     });
   }
 
@@ -146,7 +156,6 @@ describe('createFirestoreCrudRepository', () => {
       docs: [snapshot(true), snapshot(true, 'unit-2')],
     });
     const result = await repository().list({
-      access,
       page: { pageSize: 1, orderBy: [{ field: 'id', direction: 'asc' }] },
     });
 
@@ -162,7 +171,6 @@ describe('createFirestoreCrudRepository', () => {
     const applyCursor = vi.fn((query: never) => query);
 
     await repository(applyCursor).list({
-      access,
       page: {
         pageSize: 1,
         after: 'opaque-cursor' as never,
@@ -182,7 +190,6 @@ describe('createFirestoreCrudRepository', () => {
   it('rejects a cursor when the adapter has no provider cursor implementation', async () => {
     await expect(
       repository().list({
-        access,
         page: {
           pageSize: 1,
           after: 'opaque-cursor' as never,
@@ -200,7 +207,6 @@ describe('createFirestoreCrudRepository', () => {
 
     await expect(
       repository().list({
-        access,
         page: { pageSize: 2, orderBy: [{ field: 'id', direction: 'asc' }] },
       }),
     ).resolves.toMatchObject({
@@ -215,7 +221,6 @@ describe('createFirestoreCrudRepository', () => {
 
     await expect(
       repository().list({
-        access,
         page: { pageSize: 2, orderBy: [{ field: 'id', direction: 'asc' }] },
       }),
     ).rejects.toMatchObject({ code: 'transient' });
@@ -235,7 +240,7 @@ describe('createFirestoreCrudRepository', () => {
     firestoreMocks.getDoc.mockResolvedValue(snapshot(true, 'unit-1', value));
 
     await expect(
-      repository().get({ access, id: createEntityId('unit-1') }),
+      repository().get({ id: createEntityId('unit-1') }),
     ).resolves.toMatchObject({
       metadata: {
         createdBy: 'keeper-1',
@@ -255,7 +260,6 @@ describe('createFirestoreCrudRepository', () => {
 
     await expect(
       repository().get({
-        access,
         id: createEntityId('unit-1'),
         lifecycle: ['marked-for-deletion'],
       }),
@@ -267,7 +271,6 @@ describe('createFirestoreCrudRepository', () => {
 
     await expect(
       repository().get({
-        access,
         id: createEntityId('unit-1'),
         lifecycle: ['inactive'],
       }),
@@ -278,7 +281,7 @@ describe('createFirestoreCrudRepository', () => {
     firestoreMocks.getDoc.mockResolvedValue(snapshot(false));
 
     await expect(
-      repository().get({ access, id: createEntityId('missing') }),
+      repository().get({ id: createEntityId('missing') }),
     ).resolves.toBeUndefined();
   });
 
@@ -295,7 +298,7 @@ describe('createFirestoreCrudRepository', () => {
 
     await expect(
       repository().create({
-        access: { ...access, requestId: 'create-unit-1' },
+        metadata: { actorId: access.principalId, requestId: 'create-unit-1' },
         input: { name: 'litre' },
       }),
     ).resolves.toMatchObject({
@@ -333,7 +336,7 @@ describe('createFirestoreCrudRepository', () => {
       encodeCursor: () => 'cursor' as never,
     });
 
-    await configured.create({ access, input: { name: 'gallon' } });
+    await configured.create({ metadata, input: { name: 'gallon' } });
 
     expect(transaction.set).toHaveBeenCalledWith(
       expect.anything(),
@@ -353,7 +356,7 @@ describe('createFirestoreCrudRepository', () => {
     );
 
     await expect(
-      repository().create({ access, input: { name: 'litre' } }),
+      repository().create({ metadata, input: { name: 'litre' } }),
     ).rejects.toMatchObject({ code: 'conflict' });
     expect(transaction.set).not.toHaveBeenCalled();
   });
@@ -380,7 +383,7 @@ describe('createFirestoreCrudRepository', () => {
 
     await expect(
       current.replace(
-        { access, id: createEntityId('unit-1'), expectedRevision: 1 },
+        { metadata, id: createEntityId('unit-1'), expectedRevision: 1 },
         { name: 'gallon' },
       ),
     ).resolves.toMatchObject({
@@ -405,8 +408,8 @@ describe('createFirestoreCrudRepository', () => {
     );
 
     await expect(
-      repository().replaceVersioned?.(
-        { access, id: createEntityId('unit-1'), expectedRevision: 1 },
+      repository().replaceVersioned(
+        { metadata, id: createEntityId('unit-1'), expectedRevision: 1 },
         { name: 'gallon' },
       ),
     ).resolves.toMatchObject({ id: 'gallon' });
@@ -433,8 +436,8 @@ describe('createFirestoreCrudRepository', () => {
       );
 
       await expect(
-        repository().replaceVersioned?.(
-          { access, id: createEntityId('unit-1'), expectedRevision: 1 },
+        repository().replaceVersioned(
+          { metadata, id: createEntityId('unit-1'), expectedRevision: 1 },
           { name: 'gallon' },
         ),
       ).rejects.toBeInstanceOf(Error);
@@ -455,8 +458,8 @@ describe('createFirestoreCrudRepository', () => {
     );
 
     await expect(
-      repository().replaceVersioned?.(
-        { access, id: createEntityId('unit-1'), expectedRevision: 1 },
+      repository().replaceVersioned(
+        { metadata, id: createEntityId('unit-1'), expectedRevision: 1 },
         { name: 'gallon' },
       ),
     ).rejects.toBeInstanceOf(Error);
@@ -466,8 +469,8 @@ describe('createFirestoreCrudRepository', () => {
     firestoreMocks.runTransaction.mockRejectedValueOnce(new Error('offline'));
 
     await expect(
-      repository().replaceVersioned?.(
-        { access, id: createEntityId('unit-1'), expectedRevision: 1 },
+      repository().replaceVersioned(
+        { metadata, id: createEntityId('unit-1'), expectedRevision: 1 },
         { name: 'gallon' },
       ),
     ).rejects.toMatchObject({ name: 'DataAccessError' });
@@ -477,7 +480,7 @@ describe('createFirestoreCrudRepository', () => {
     const { repository: current, transaction } = transactionalRepository();
 
     await current.markForDeletion({
-      access,
+      metadata,
       id: createEntityId('unit-1'),
       expectedRevision: 1,
     });
@@ -492,7 +495,7 @@ describe('createFirestoreCrudRepository', () => {
     const { repository: current, transaction } = transactionalRepository();
 
     await current.restore({
-      access,
+      metadata,
       id: createEntityId('unit-1'),
       expectedRevision: 1,
     });
@@ -519,7 +522,7 @@ describe('createFirestoreCrudRepository', () => {
 
     await expect(
       repository().delete({
-        access,
+        metadata,
         id: createEntityId('unit-1'),
         expectedRevision: 1,
       }),
@@ -539,7 +542,7 @@ describe('createFirestoreCrudRepository', () => {
     );
 
     await expect(
-      repository().delete({ access, id: createEntityId('missing') }),
+      repository().delete({ metadata, id: createEntityId('missing') }),
     ).rejects.toMatchObject({
       code: 'not-found',
     });
@@ -556,7 +559,7 @@ describe('createFirestoreCrudRepository', () => {
     );
 
     await expect(
-      repository().delete({ access, id: createEntityId('unit-1') }),
+      repository().delete({ metadata, id: createEntityId('unit-1') }),
     ).rejects.toMatchObject({
       code: 'lifecycle',
     });
@@ -578,7 +581,7 @@ describe('createFirestoreCrudRepository', () => {
 
     await expect(
       repository().delete({
-        access,
+        metadata,
         id: createEntityId('unit-1'),
         expectedRevision: 99,
       }),
@@ -603,7 +606,7 @@ describe('createFirestoreCrudRepository', () => {
 
     await expect(
       repository().restore({
-        access,
+        metadata,
         id: createEntityId('unit-1'),
         expectedRevision: 1,
       }),
@@ -628,7 +631,7 @@ describe('createFirestoreCrudRepository', () => {
 
     await expect(
       repository().replace(
-        { access, id: createEntityId('unit-1'), expectedRevision: 1 },
+        { metadata, id: createEntityId('unit-1'), expectedRevision: 1 },
         { name: 'gallon' },
       ),
     ).rejects.toMatchObject({
@@ -642,7 +645,7 @@ describe('createFirestoreCrudRepository', () => {
 
     await expect(
       current.replace(
-        { access, id: createEntityId('unit-1'), expectedRevision: 99 },
+        { metadata, id: createEntityId('unit-1'), expectedRevision: 99 },
         { name: 'gallon' },
       ),
     ).rejects.toMatchObject({
@@ -661,31 +664,11 @@ describe('createFirestoreCrudRepository', () => {
 
     await expect(
       repository().replace(
-        { access, id: createEntityId('missing'), expectedRevision: 1 },
+        { metadata, id: createEntityId('missing'), expectedRevision: 1 },
         { name: 'gallon' },
       ),
     ).rejects.toMatchObject({ code: 'not-found' });
     expect(transaction.update).not.toHaveBeenCalled();
-  });
-
-  it('Given an authorization callback, When an operation runs, Then delegates the operation and access context', async () => {
-    const authorize = vi.fn();
-    const authorizedRepository = createFirestoreCrudRepository({
-      firestore: {} as never,
-      collectionPath: 'units',
-      recordSchema: schema,
-      createId: (input: { name: string }) => input.name,
-      createData: (input: { name: string }) => input,
-      updateData: (_data, input: { name: string }) => input,
-      buildQuery: () => ({}) as never,
-      encodeCursor: () => 'cursor' as never,
-      authorize,
-    });
-
-    firestoreMocks.getDoc.mockResolvedValue(snapshot(false));
-    await authorizedRepository.get({ access, id: createEntityId('missing') });
-
-    expect(authorize).toHaveBeenCalledWith(access, 'get', undefined);
   });
 
   it('Given a malformed Firestore document, When read, Then rejects at the DTO boundary', async () => {
@@ -706,7 +689,7 @@ describe('createFirestoreCrudRepository', () => {
     });
 
     await expect(
-      strictRepository.get({ access, id: createEntityId('unit-1') }),
+      strictRepository.get({ id: createEntityId('unit-1') }),
     ).rejects.toThrow();
   });
 
@@ -732,7 +715,7 @@ describe('createFirestoreCrudRepository', () => {
       );
 
       await expect(
-        repository().get({ access, id: createEntityId('unit-1') }),
+        repository().get({ id: createEntityId('unit-1') }),
       ).rejects.toMatchObject({ code: expectedCode });
     },
   );

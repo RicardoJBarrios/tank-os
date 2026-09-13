@@ -49,15 +49,14 @@ describe('createDefaultUnitDefinitionFirestoreRepository', () => {
     expect(
       options.createReplacementId(
         { code: 'TANKOS:CUSTOM dKH' },
-        { principalId: 'keeper-1', roles: ['keeper'] },
+        { actorId: 'keeper-1' },
       ),
     ).toBe('tankos-custom-dkh-revision-unknown');
     expect(
       options.createReplacementId(
         { code: 'TANKOS:CUSTOM dKH' },
         {
-          principalId: 'keeper-1',
-          roles: ['keeper'],
+          actorId: 'keeper-1',
           requestId: 'units-1:replacement:1',
         },
       ),
@@ -66,7 +65,7 @@ describe('createDefaultUnitDefinitionFirestoreRepository', () => {
       options.buildQuery(
         {},
         {
-          access: { principalId: 'keeper-1', roles: ['keeper'] },
+          filter: { accessibleOwnerId: 'keeper-1' },
         },
       ),
     ).toEqual({
@@ -104,15 +103,13 @@ describe('createDefaultUnitDefinitionFirestoreRepository', () => {
     options.buildQuery(
       {},
       {
-        access: { principalId: 'keeper-1', roles: ['keeper'] },
-        filter: { record: 'BAR' },
+        filter: { record: 'BAR', accessibleOwnerId: 'keeper-1' },
       },
     );
     expect(
       options.buildQuery(
         {},
         {
-          access: { principalId: 'admin-1', roles: ['admin'] },
           filter: {
             ownerId: 'keeper-1',
             ownerName: 'Keeper One',
@@ -142,7 +139,6 @@ describe('createDefaultUnitDefinitionFirestoreRepository', () => {
       options.buildQuery(
         {},
         {
-          access: { principalId: 'admin-1', roles: ['admin'] },
           filter: { visibility: 'public' },
         },
       ),
@@ -163,8 +159,7 @@ describe('createDefaultUnitDefinitionFirestoreRepository', () => {
       options.buildQuery(
         {},
         {
-          access: { principalId: 'keeper-1', roles: ['keeper'] },
-          filter: { visibility: 'public' },
+          filter: { visibility: 'public', accessibleOwnerId: 'keeper-1' },
         },
       ),
     ).toEqual({
@@ -184,8 +179,7 @@ describe('createDefaultUnitDefinitionFirestoreRepository', () => {
       options.buildQuery(
         {},
         {
-          access: { principalId: 'keeper-1', roles: ['keeper'] },
-          filter: { visibility: 'private' },
+          filter: { visibility: 'private', accessibleOwnerId: 'keeper-1' },
         },
       ),
     ).toEqual({
@@ -202,14 +196,7 @@ describe('createDefaultUnitDefinitionFirestoreRepository', () => {
         { field: '__name__', direction: 'asc' },
       ],
     });
-    expect(
-      options.buildQuery(
-        {},
-        {
-          access: { principalId: 'admin-1', roles: ['admin'] },
-        },
-      ),
-    ).toEqual({
+    expect(options.buildQuery({}, {})).toEqual({
       reference: {},
       constraints: [
         {
@@ -246,13 +233,5 @@ describe('createDefaultUnitDefinitionFirestoreRepository', () => {
     expect(() =>
       options.applyCursor({}, JSON.stringify({ code: 'only' }), {}),
     ).toThrow('Invalid unit-definition page cursor');
-    expect(options.authorize({ roles: ['keeper'] }, 'mark')).toBeUndefined();
-    expect(options.authorize({ roles: ['admin'] }, 'mark')).toBeUndefined();
-    expect(() => options.authorize({ roles: ['viewer'] }, 'mark')).toThrow(
-      'Unit catalogue requires keeper or admin access',
-    );
-    expect(() =>
-      options.authorize({ roles: ['keeper'] }, 'list', ['marked-for-deletion']),
-    ).toThrow('Deleted unit records require admin access');
   });
 });

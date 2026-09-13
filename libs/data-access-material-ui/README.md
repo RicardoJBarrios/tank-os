@@ -13,5 +13,5 @@ tabla, selección, acciones y paginación para Angular Material.
 ## Límites y arquitectura
 
 Es un adaptador visual, no una librería de dominio ni de persistencia. El
-contrato headless vive en `@tankos/data-access-ui`; esta librería añade la
+contrato headless vive en `@tankos/data-access-angular`; esta librería añade la
 dependencia opcional de Angular Material.

@@ -26,7 +26,9 @@
     "**/coverage/**",
     "**/test-results/**",
     "**/src/test-setup.ts",
-    "**/*.integration.spec.ts"
+    "**/*.integration.spec.ts",
+    "libs/time/tests/browser/check.mjs",
+    "libs/time/tests/browser/main.js"
   ],
   "ignoreDependencies": [
     "@tankos/*",

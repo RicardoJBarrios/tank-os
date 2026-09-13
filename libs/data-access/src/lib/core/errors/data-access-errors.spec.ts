@@ -16,6 +16,9 @@ describe('DataAccessError', () => {
 
   it('Given no retry policy, When created, Then defaults to non-retryable', () => {
     expect(new DataAccessError('validation', 'invalid').retryable).toBe(false);
+    expect(
+      createDataAccessError('validation', 'invalid').cause,
+    ).toBeUndefined();
   });
 
   it('Given a transient provider cause, When normalized, Then keeps a safe message and a private cause', () => {

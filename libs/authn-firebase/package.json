@@ -5,7 +5,6 @@
   "sideEffects": false,
   "peerDependencies": {
     "@tankos/authn": "^0.0.0",
-    "@tankos/data-access": "^0.0.0",
     "firebase": "^12.17.1"
   }
 }

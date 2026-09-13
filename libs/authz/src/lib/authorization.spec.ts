@@ -2,6 +2,7 @@ import {
   AUTHORIZATION_ROLES,
   AuthorizationDeniedError,
   createAuthorizationPort,
+  authorizationSubjectFromPrincipal,
   hasAuthorizationRole,
   type AuthorizationRequest,
 } from './authorization';
@@ -50,5 +51,35 @@ describe('createAuthorizationPort', () => {
     expect(
       hasAuthorizationRole(request.subject, AUTHORIZATION_ROLES.ADMIN),
     ).toBe(false);
+  });
+
+  it('interprets plural, singular and absent role claims at the authz boundary', () => {
+    expect(
+      authorizationSubjectFromPrincipal({
+        id: 'plural' as never,
+        displayName: 'Keeper One',
+        claims: { roles: ['keeper', 'admin'], tenant: 'reef' },
+      }),
+    ).toEqual({
+      id: 'plural',
+      roles: ['keeper', 'admin'],
+      attributes: {
+        roles: ['keeper', 'admin'],
+        tenant: 'reef',
+        displayName: 'Keeper One',
+      },
+    });
+    expect(
+      authorizationSubjectFromPrincipal({
+        id: 'singular' as never,
+        claims: { role: 'keeper' },
+      }).roles,
+    ).toEqual(['keeper']);
+    expect(
+      authorizationSubjectFromPrincipal({
+        id: 'none' as never,
+        claims: { roles: [42], role: ' ' },
+      }).roles,
+    ).toEqual([]);
   });
 });

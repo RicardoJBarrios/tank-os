@@ -21,14 +21,9 @@
       "@tankos/data-access-firestore": [
         "./libs/data-access-firestore/src/index.ts"
       ],
-      "@tankos/data-access-json-http": [
-        "./libs/data-access-json-http/src/index.ts"
-      ],
-      "@tankos/time-firestore": ["./libs/time-firestore/src/index.ts"],
+      "@tankos/time/firestore": ["./libs/time/src/firestore.ts"],
       "@tankos/decimal-big-js": ["./libs/decimal-big-js/src/index.ts"],
-      "@tankos/units-zod": ["./libs/units-zod/src/index.ts"],
       "@tankos/units-firestore": ["./libs/units-firestore/src/index.ts"],
-      "@tankos/data-access-ui": ["./libs/data-access-ui/src/index.ts"],
       "@tankos/formatting": ["./libs/formatting/src/index.ts"],
       "@tankos/units-ui": ["./libs/units-ui/src/index.ts"],
       "@tankos/authn": ["./libs/authn/src/index.ts"],
@@ -37,7 +32,6 @@
       "@tankos/authn-firebase": ["./libs/authn-firebase/src/index.ts"],
       "@tankos/authz": ["./libs/authz/src/index.ts"],
       "@tankos/authz-firestore": ["./libs/authz-firestore/src/index.ts"],
-      "@tankos/authz-ui": ["./libs/authz-ui/src/index.ts"],
       "@tankos/authn-firebase-ui": ["./libs/authn-firebase-ui/src/index.ts"],
       "@tankos/feedback": ["./libs/feedback/src/index.ts"],
       "@tankos/feedback-ui": ["./libs/feedback-ui/src/index.ts"],
@@ -54,9 +48,14 @@
       "@tankos/ui": ["./libs/ui/src/index.ts"],
       "@tankos/ui-material": ["./libs/ui-material/src/index.ts"],
       "@tankos/shell-ui": ["./libs/shell-ui/src/index.ts"],
-      "@tankos/time-date-intl": ["./libs/time-date-intl/src/index.ts"],
-      "@tankos/time-angular": ["./libs/time-angular/src/index.ts"],
-      "@tankos/decimal-angular": ["./libs/decimal-angular/src/index.ts"]
+      "@tankos/time-luxon": ["./libs/time-luxon/src/index.ts"],
+      "@tankos/time/angular": ["./libs/time/src/angular.ts"],
+      "@tankos/decimal-angular": ["./libs/decimal-angular/src/index.ts"],
+      "@tankos/data-access-angular": [
+        "./libs/data-access-angular/src/index.ts"
+      ],
+      "@tankos/authn-angular": ["./libs/authn-angular/src/index.ts"],
+      "@tankos/authz-angular": ["./libs/authz-angular/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

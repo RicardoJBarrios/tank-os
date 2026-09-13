@@ -1,5 +1,9 @@
 import { inject, Injectable } from '@angular/core';
-import { createDecimalContext, type DecimalInput, type Decimal } from '@tankos/decimal';
+import {
+  createDecimalContext,
+  type DecimalInput,
+  type Decimal,
+} from '@tankos/decimal';
 import { DECIMAL_RUNTIME } from '../composition/decimal-runtime-token';
 
 /** Angular facade for the decimal runtime selected by application composition. */

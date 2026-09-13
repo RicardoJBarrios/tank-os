@@ -1,17 +1,10 @@
 # `@tankos/authn`
 
-Authentication capability split into explicit architectural layers:
+Provider- and framework-neutral authentication contracts for TankOS.
 
-- `core`: provider-neutral `AuthSessionPort` contract.
-- `composition`: Angular injection token, provider, and route guard.
+`AuthSessionPort` resolves an `AuthenticatedPrincipal`, signs in, signs out and
+refreshes credentials. It reports provider claims as identity facts; it does
+not interpret roles or decide resource permissions.
 
-Feature libraries depend on the core contract. Provider implementations live in
-separate libraries; `@tankos/authn-firebase` currently provides the Firebase
-adapter without making `@tankos/authn` depend on Firebase.
-
-The session contract covers access context and roles, sign-in, sign-out, and
-explicit credential refresh. Adapters own token storage, renewal and provider
-claims.
-
-See [`docs/README.md`](docs/README.md) for the full boundary, architecture,
-security decisions and extension guide.
+Angular composition lives in `@tankos/authn-angular` and Firebase Auth in
+`@tankos/authn-firebase`. See [`docs/README.md`](docs/README.md).

@@ -5,16 +5,18 @@ import {
   type WritableSignal,
 } from '@angular/core';
 import type { AuthSessionPort } from '@tankos/authn';
+import { authorizationSubjectFromPrincipal } from '@tankos/authz';
 import { createFeedbackService, type FeedbackService } from '@tankos/feedback';
 import { createNoopLogger, type Logger } from '@tankos/observability';
 import {
   createCrudListStore,
+  type CrudListService,
   type CrudListStoreInstance,
-} from '@tankos/data-access-ui';
+} from '@tankos/data-access-angular';
 import type {
   CrudListLifecycleRequest,
   CrudOperationResult,
-} from '@tankos/data-access-ui';
+} from '@tankos/data-access-angular';
 import type {
   UnitDefinition,
   UnitDefinitionManagementService,
@@ -28,13 +30,8 @@ const UNIT_DEFINITION_PAGE = {
 };
 
 export type UnitDefinitionListStore = Omit<
-  CrudListStoreInstance<UnitDefinition, unknown, unknown>,
-  | 'load'
-  | 'loadMore'
-  | 'markForDeletion'
-  | 'restore'
-  | 'submitBatch'
-  | 'updateBatch'
+  CrudListStoreInstance<UnitDefinition, unknown>,
+  'load' | 'loadMore' | 'markForDeletion' | 'restore'
 > & {
   readonly load: (filter?: unknown) => Promise<void>;
   readonly loadMore: () => Promise<void>;
@@ -43,7 +40,7 @@ export type UnitDefinitionListStore = Omit<
 export interface UnitDefinitionListStoreParts {
   readonly list: UnitDefinitionListStore;
   readonly lifecycle: Pick<
-    CrudListStoreInstance<UnitDefinition, unknown, unknown>,
+    CrudListStoreInstance<UnitDefinition, unknown>,
     'markForDeletion' | 'restore'
   >;
 }
@@ -54,8 +51,8 @@ export function createUnitDefinitionListStore(
   logger: Logger = createNoopLogger(),
   feedback: FeedbackService = createFeedbackService(),
 ): UnitDefinitionListStoreParts {
-  const rawList = createRawUnitDefinitionList(service, logger);
-  const list = createUnitDefinitionListView(rawList, authSession, feedback);
+  const rawList = createRawUnitDefinitionList(service, authSession, logger);
+  const list = createUnitDefinitionListView(rawList, feedback);
   return {
     list,
     lifecycle: {
@@ -71,18 +68,13 @@ export function createUnitDefinitionListStore(
 
 function createRawUnitDefinitionList(
   service: UnitDefinitionManagementService,
+  authSession: AuthSessionPort,
   logger: Logger,
-): CrudListStoreInstance<UnitDefinition, unknown, unknown> {
-  return new (createCrudListStore<
-    UnitDefinition,
-    UnitDefinition,
-    UnitDefinition,
-    unknown
-  >({
-    service,
+): CrudListStoreInstance<UnitDefinition, unknown> {
+  return new (createCrudListStore<UnitDefinition, unknown>({
+    service: createAuthorizedListAdapter(service, authSession),
     logger,
     page: UNIT_DEFINITION_PAGE,
-    schema: 'unit-definition',
     lifecycle: (filter) =>
       isDeletedUnitFilter(filter)
         ? ['marked-for-deletion']
@@ -91,8 +83,7 @@ function createRawUnitDefinitionList(
 }
 
 function createUnitDefinitionListView(
-  rawList: CrudListStoreInstance<UnitDefinition, unknown, unknown>,
-  authSession: AuthSessionPort,
+  rawList: CrudListStoreInstance<UnitDefinition, unknown>,
   feedback: FeedbackService,
 ): UnitDefinitionListStore {
   const accessError = signal<unknown>(undefined);
@@ -101,32 +92,26 @@ function createUnitDefinitionListView(
     ...createUnitDefinitionListSignals(rawList, accessError),
     load: (filter) => {
       loadQueue = enqueueListLoad(loadQueue, () =>
-        loadUnitDefinitionList(
-          rawList,
-          authSession,
-          feedback,
-          accessError,
-          filter,
-        ),
+        loadUnitDefinitionList(rawList, feedback, accessError, filter),
       );
       return loadQueue;
     },
-    loadMore: () =>
-      loadMoreUnitDefinitionList(rawList, authSession, feedback, accessError),
+    loadMore: () => loadMoreUnitDefinitionList(rawList, feedback, accessError),
   };
 }
 
 async function loadUnitDefinitionList(
-  rawList: CrudListStoreInstance<UnitDefinition, unknown, unknown>,
-  authSession: AuthSessionPort,
+  rawList: CrudListStoreInstance<UnitDefinition, unknown>,
   feedback: FeedbackService,
   accessError: WritableSignal<unknown>,
   filter?: unknown,
 ): Promise<void> {
   accessError.set(undefined);
-  await authSession
-    .access()
-    .then((access) => rawList.load(access, filter))
+  await rawList
+    .load(filter)
+    .then((result) => {
+      if (!result.ok) throw result.error;
+    })
     .catch((error: unknown) => {
       accessError.set(error);
       feedback.error('Unable to load the units.');
@@ -134,16 +119,13 @@ async function loadUnitDefinitionList(
 }
 
 async function loadMoreUnitDefinitionList(
-  rawList: CrudListStoreInstance<UnitDefinition, unknown, unknown>,
-  authSession: AuthSessionPort,
+  rawList: CrudListStoreInstance<UnitDefinition, unknown>,
   feedback: FeedbackService,
   accessError: WritableSignal<unknown>,
 ): Promise<void> {
   accessError.set(undefined);
   try {
-    const result = await authSession
-      .access()
-      .then((access) => rawList.loadMore(access));
+    const result = await rawList.loadMore();
     if (!result.ok) throw result.error;
   } catch (error) {
     accessError.set(error);
@@ -152,7 +134,7 @@ async function loadMoreUnitDefinitionList(
 }
 
 function createUnitDefinitionListSignals(
-  rawList: CrudListStoreInstance<UnitDefinition, unknown, unknown>,
+  rawList: CrudListStoreInstance<UnitDefinition, unknown>,
   accessError: Signal<unknown>,
 ): Omit<UnitDefinitionListStore, 'load' | 'loadMore'> {
   return {
@@ -164,15 +146,50 @@ function createUnitDefinitionListSignals(
     nextCursor: rawList.nextCursor,
     hasMore: rawList.hasMore,
     selectedIds: rawList.selectedIds,
-    batch: rawList.batch,
     error: computed(() => accessError() ?? rawList.error()),
     isEmpty: rawList.isEmpty,
     canLoadMore: rawList.canLoadMore,
-    hasRunningBatch: rawList.hasRunningBatch,
     setFilter: rawList.setFilter,
     toggleSelection: rawList.toggleSelection,
     clearSelection: rawList.clearSelection,
   };
+}
+
+function createAuthorizedListAdapter(
+  service: UnitDefinitionManagementService,
+  authSession: AuthSessionPort,
+): CrudListService<UnitDefinition, unknown> {
+  return {
+    list: (request) =>
+      resolveSubject(authSession).then((resolved) =>
+        service.list({
+          ...request,
+          filter: request.filter as
+            import('@tankos/units').UnitDefinitionFilter | undefined,
+          subject: resolved,
+        }),
+      ),
+    markForDeletion: (request) =>
+      resolveSubject(authSession).then((resolved) =>
+        service.markForDeletion({
+          id: request.id,
+          expectedRevision: request.expectedRevision,
+          subject: resolved,
+        }),
+      ),
+    restore: (request) =>
+      resolveSubject(authSession).then((resolved) =>
+        service.restore({
+          id: request.id,
+          expectedRevision: request.expectedRevision,
+          subject: resolved,
+        }),
+      ),
+  };
+}
+
+function resolveSubject(authSession: AuthSessionPort) {
+  return authSession.principal().then(authorizationSubjectFromPrincipal);
 }
 
 function enqueueListLoad(

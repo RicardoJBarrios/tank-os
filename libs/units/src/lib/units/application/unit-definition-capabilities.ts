@@ -1,9 +1,4 @@
-import { AUTHORIZATION_ROLES } from '@tankos/authz';
-import {
-  createEntityId,
-  type AccessContext,
-  type EntityId,
-} from '@tankos/data-access';
+import { AUTHORIZATION_ROLES, type AuthorizationSubject } from '@tankos/authz';
 import type { UnitDefinition } from '../core';
 import {
   UNIT_DEFINITION_RESOURCE,
@@ -26,38 +21,34 @@ export interface UnitDefinitionCapabilities {
 
 /** Calculates UI-neutral capabilities from the domain ABAC policy. */
 export function unitDefinitionCapabilities(
-  access: AccessContext,
+  subject: AuthorizationSubject,
   record?: UnitDefinition,
 ): UnitDefinitionCapabilities {
   const attributes = {
-    ownerId: record ? unitOwnerId(record.ownerId) : access.principalId,
+    ownerId: record ? record.ownerId : subject.id,
     visibility: record?.visibility ?? 'private',
   };
   return {
-    canCreate: canUnitAction(access, attributes, 'create'),
-    canRead: canUnitAction(access, attributes, 'read'),
-    canUse: canUnitAction(access, attributes, 'use'),
-    canEdit: record ? canUnitAction(access, attributes, 'update') : false,
-    canDelete: record ? canUnitAction(access, attributes, 'delete') : false,
-    canRestore: record ? canUnitAction(access, attributes, 'restore') : false,
-    canPublish: record ? canUnitAction(access, attributes, 'publish') : false,
-    canInspectDeleted: access.roles.includes(AUTHORIZATION_ROLES.ADMIN),
-    canFilterByOwner: access.roles.includes(AUTHORIZATION_ROLES.ADMIN),
+    canCreate: canUnitAction(subject, attributes, 'create'),
+    canRead: canUnitAction(subject, attributes, 'read'),
+    canUse: canUnitAction(subject, attributes, 'use'),
+    canEdit: record ? canUnitAction(subject, attributes, 'update') : false,
+    canDelete: record ? canUnitAction(subject, attributes, 'delete') : false,
+    canRestore: record ? canUnitAction(subject, attributes, 'restore') : false,
+    canPublish: record ? canUnitAction(subject, attributes, 'publish') : false,
+    canInspectDeleted: subject.roles.includes(AUTHORIZATION_ROLES.ADMIN),
+    canFilterByOwner: subject.roles.includes(AUTHORIZATION_ROLES.ADMIN),
   };
 }
 
 function canUnitAction(
-  access: AccessContext,
+  subject: AuthorizationSubject,
   attributes: UnitDefinitionAuthorizationAttributes,
   action: UnitDefinitionAuthorizationAction,
 ): boolean {
   return unitDefinitionAuthorization({
-    subject: { id: access.principalId, roles: access.roles },
+    subject,
     action,
     resource: { type: UNIT_DEFINITION_RESOURCE, attributes },
   });
-}
-
-function unitOwnerId(ownerId: string | undefined): EntityId | undefined {
-  return ownerId === undefined ? undefined : createEntityId(ownerId);
 }

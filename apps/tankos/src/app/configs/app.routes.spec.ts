@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { authGuard } from '@tankos/authn';
+import { authGuard } from '@tankos/authn-angular';
 import { appRoutes } from './app.routes';
 
 vi.mock('@tankos/shell-ui', () => ({
@@ -22,8 +22,9 @@ vi.mock('@tankos/aquarium-ui', () => ({
   aquariumRoutes: [{ path: '' }],
   ACCESSIBLE_AQUARIUM_READER: Symbol('reader'),
   AQUARIUM_ESTABLISHER: Symbol('establisher'),
+  AQUARIUM_MANAGER: Symbol('manager'),
 }));
-vi.mock('@tankos/authz-ui', () => ({
+vi.mock('@tankos/authz-angular', () => ({
   ForbiddenPageComponent: class ForbiddenPageComponent {
     public readonly marker = true;
   },

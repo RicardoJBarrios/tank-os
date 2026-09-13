@@ -13,9 +13,9 @@ const LOCALE_SAMPLE = -123_456_789.5;
 export function createAngularDecimalLocaleData(
   locale: string,
 ): AngularDecimalLocaleData {
-  const parts = new Intl.NumberFormat(locale, { useGrouping: true }).formatToParts(
-    LOCALE_SAMPLE,
-  );
+  const parts = new Intl.NumberFormat(locale, {
+    useGrouping: true,
+  }).formatToParts(LOCALE_SAMPLE);
   const integerParts = parts
     .filter((part) => part.type === 'integer')
     .map((part) => part.value);

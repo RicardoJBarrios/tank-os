@@ -5,9 +5,10 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from 'firebase/auth';
-import { createAccessContext, createEntityId } from '@tankos/data-access';
 import {
   AuthRequiredError,
+  createAuthenticatedPrincipal,
+  createPrincipalId,
   type AuthCredentials,
   type AuthSessionPort,
 } from '@tankos/authn';
@@ -21,7 +22,6 @@ export interface FirebaseAuthSessionOptions {
   readonly auth: Auth;
   readonly email: string;
   readonly password: string;
-  readonly roles: readonly string[];
   readonly autoSignIn?: boolean;
 }
 
@@ -33,11 +33,9 @@ export function createFirebaseAuthSession(
       onAuthStateChanged(options.auth, () => {
         listener();
       }),
-    access: async () => {
+    principal: async () => {
       const user = await ensureFirebaseUser(options);
-      return createAccessContext(
-        await createAccessContextForUser(user, options),
-      );
+      return createPrincipalForUser(user);
     },
     signIn: async (credentials: AuthCredentials) => {
       const passwordCredentials =
@@ -57,21 +55,12 @@ export function createFirebaseAuthSession(
         }
       ).getIdToken;
       if (getIdToken) await getIdToken.call(user, true);
-      return createAccessContext(
-        await createAccessContextForUser(user, options),
-      );
+      return createPrincipalForUser(user);
     },
   };
 }
 
-async function createAccessContextForUser(
-  user: User,
-  options: FirebaseAuthSessionOptions,
-): Promise<{
-  readonly principalId: ReturnType<typeof createEntityId>;
-  readonly principalName: string;
-  readonly roles: readonly string[];
-}> {
+async function createPrincipalForUser(user: User) {
   const getIdTokenResult = (
     user as unknown as {
       readonly getIdTokenResult?: () => Promise<{
@@ -81,32 +70,12 @@ async function createAccessContextForUser(
   ).getIdTokenResult;
   const claims = getIdTokenResult
     ? (await getIdTokenResult.call(user)).claims
-    : undefined;
-  return {
-    principalId: createEntityId(user.uid),
-    principalName: user.displayName?.trim() || user.email || user.uid,
-    roles: rolesFromClaims(claims, options.roles),
-  };
-}
-
-function rolesFromClaims(
-  claims: Readonly<Record<string, unknown>> | undefined,
-  fallback: readonly string[],
-): readonly string[] {
-  const roles = claims?.['roles'];
-  if (isNonEmptyStringArray(roles)) {
-    return roles;
-  }
-  const role = claims?.['role'];
-  return typeof role === 'string' && role.length > 0 ? [role] : fallback;
-}
-
-function isNonEmptyStringArray(value: unknown): value is readonly string[] {
-  return (
-    Array.isArray(value) &&
-    value.length > 0 &&
-    value.every((item) => typeof item === 'string')
-  );
+    : {};
+  return createAuthenticatedPrincipal({
+    id: createPrincipalId(user.uid),
+    displayName: user.displayName?.trim() || user.email || user.uid,
+    claims,
+  });
 }
 
 async function ensureFirebaseUser(

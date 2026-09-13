@@ -1,13 +1,5 @@
-import type {
-  AccessContext,
-  CrudRecord,
-  ListRequest,
-  RecordCommand,
-} from '@tankos/data-access';
-import {
-  createDataAccessError,
-  validateLifecycleSelection,
-} from '@tankos/data-access';
+import type { CrudRecord, RecordCommand } from '@tankos/data-access';
+import { createDataAccessError } from '@tankos/data-access';
 import type { Timestamp } from 'firebase/firestore';
 import { Timestamp as FirestoreTimestamp } from 'firebase/firestore';
 import type { Transaction } from 'firebase/firestore';
@@ -20,71 +12,6 @@ import {
   timestamp,
   validateDocumentId,
 } from './firestore-crud-repository';
-
-/** Applies the host-provided authorization policy to a CRUD operation. */
-export async function authorizeFirestoreAccess<
-  TData,
-  TCreate,
-  TUpdate,
-  TFilter,
->(
-  options: FirestoreCrudRepositoryOptions<TData, TCreate, TUpdate, TFilter>,
-  access: AccessContext,
-  operation: Parameters<
-    NonNullable<
-      FirestoreCrudRepositoryOptions<
-        TData,
-        TCreate,
-        TUpdate,
-        TFilter
-      >['authorize']
-    >
-  >[1],
-  lifecycle?: ListRequest<TFilter>['lifecycle'],
-): Promise<void> {
-  if (options.authorize) {
-    await options.authorize(access, operation, lifecycle);
-    return;
-  }
-  if (isLifecycleMutation(operation))
-    throw createDataAccessError(
-      'forbidden',
-      `Firestore ${operation} requires an authorization policy`,
-    );
-}
-
-/** Validates lifecycle visibility before delegating the host authorization policy. */
-export async function authorizeFirestoreLifecycleRead<
-  TData,
-  TCreate,
-  TUpdate,
-  TFilter,
->(
-  options: FirestoreCrudRepositoryOptions<TData, TCreate, TUpdate, TFilter>,
-  access: AccessContext,
-  lifecycle: ListRequest<TFilter>['lifecycle'],
-  operation: 'list' | 'get',
-): Promise<void> {
-  validateLifecycleSelection(lifecycle);
-  const hasHiddenLifecycle =
-    lifecycle?.some((status) => status !== 'active' && status !== 'inactive') ??
-    false;
-  if (hasHiddenLifecycle && !options.authorize)
-    throw createDataAccessError(
-      'forbidden',
-      `Firestore ${operation} requires an authorization policy for hidden lifecycle states`,
-    );
-  await authorizeFirestoreAccess(options, access, operation, lifecycle);
-}
-
-function isLifecycleMutation(
-  operation:
-    'list' | 'get' | 'create' | 'replace' | 'mark' | 'restore' | 'delete',
-): boolean {
-  return (
-    operation === 'mark' || operation === 'restore' || operation === 'delete'
-  );
-}
 
 /** Enforces optimistic concurrency for a Firestore record command. */
 export function requireFirestoreRevision<TData>(
@@ -173,11 +100,11 @@ export async function transactFirestoreUpdate<TData, TCreate, TUpdate, TFilter>(
       ...next,
       revision: record.revision + 1,
       'metadata.updatedAt': updatedAt,
-      'metadata.updatedBy': request.access.principalId,
+      'metadata.updatedBy': request.metadata.actorId,
       ...(lifecycleChanged
         ? {
             'metadata.lifecycleChangedAt': updatedAt,
-            'metadata.lifecycleChangedBy': request.access.principalId,
+            'metadata.lifecycleChangedBy': request.metadata.actorId,
           }
         : {}),
     });
@@ -189,11 +116,11 @@ export async function transactFirestoreUpdate<TData, TCreate, TUpdate, TFilter>(
       metadata: {
         ...record.metadata,
         updatedAt: timestamp(updatedAt),
-        updatedBy: request.access.principalId,
+        updatedBy: request.metadata.actorId,
         ...(lifecycleChanged
           ? {
               lifecycleChangedAt: timestamp(updatedAt),
-              lifecycleChangedBy: request.access.principalId,
+              lifecycleChangedBy: request.metadata.actorId,
             }
           : {}),
       },

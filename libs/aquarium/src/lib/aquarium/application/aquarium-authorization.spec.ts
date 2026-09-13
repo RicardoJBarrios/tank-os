@@ -111,11 +111,9 @@ describe('aquariumAuthorizationPolicy', () => {
   it('denies subjects without a shared Aquarium role', () => {
     expect(
       aquariumAuthorizationPolicy(
-        request(
-          { id: 'guest-1' as never, roles: [] },
-          AQUARIUM_ACTIONS.READ,
-          { ownerKeeperId: 'guest-1' },
-        ),
+        request({ id: 'guest-1' as never, roles: [] }, AQUARIUM_ACTIONS.READ, {
+          ownerKeeperId: 'guest-1',
+        }),
       ),
     ).toBe(false);
   });

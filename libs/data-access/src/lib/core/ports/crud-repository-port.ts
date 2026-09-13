@@ -18,12 +18,20 @@ export interface CrudRepositoryPort<
   get(request: GetRequest): Promise<CrudRecord<TData> | undefined>;
   create(request: CreateRequest<TCreate>): Promise<CrudRecord<TData>>;
   replace(request: RecordCommand, input: TUpdate): Promise<CrudRecord<TData>>;
-  /** Optional provider transaction for replacing and retiring a version atomically. */
-  readonly replaceVersioned?: (
-    request: RecordCommand,
-    input: TUpdate,
-  ) => Promise<CrudRecord<TData>>;
   markForDeletion(request: RecordCommand): Promise<CrudRecord<TData>>;
   restore(request: RecordCommand): Promise<CrudRecord<TData>>;
   delete(request: RecordCommand): Promise<void>;
+}
+
+/** CRUD repository that can replace immutable versions atomically. */
+export interface VersionedCrudRepositoryPort<
+  TData,
+  TCreate,
+  TUpdate,
+  TFilter = unknown,
+> extends CrudRepositoryPort<TData, TCreate, TUpdate, TFilter> {
+  replaceVersioned(
+    request: RecordCommand,
+    input: TUpdate,
+  ): Promise<CrudRecord<TData>>;
 }

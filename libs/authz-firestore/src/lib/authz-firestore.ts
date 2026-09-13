@@ -14,7 +14,6 @@ import type {
   AuthorizationGrantQuery,
   AuthorizationGrantStore,
 } from '@tankos/authz';
-import type { EntityId } from '@tankos/data-access';
 
 const MAX_ID_LENGTH = 128;
 const MAX_RESOURCE_TYPE_LENGTH = 128;
@@ -74,10 +73,10 @@ function parseGrant(
   }
   const attributes = value['attributes'];
   return {
-    id: id as EntityId,
-    subjectId: value['subjectId'] as EntityId,
+    id: id as AuthorizationGrant['id'],
+    subjectId: value['subjectId'] as AuthorizationGrant['subjectId'],
     resourceType: value['resourceType'] as string,
-    resourceId: value['resourceId'] as EntityId,
+    resourceId: value['resourceId'] as AuthorizationGrant['resourceId'],
     actions: value['actions'] as readonly string[],
     effect: value['effect'] as AuthorizationGrant['effect'],
     status: value['status'] as AuthorizationGrant['status'],

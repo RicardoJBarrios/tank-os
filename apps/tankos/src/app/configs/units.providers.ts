@@ -1,6 +1,6 @@
 /* c8 ignore file -- lazy composition glue is exercised by the browser E2E suite. */
 import { inject, type Provider } from '@angular/core';
-import { TIME_CLOCK } from '@tankos/time-angular';
+import { TIME_CLOCK } from '@tankos/time/angular';
 import { createUnitDefinitionManagementService } from '@tankos/units';
 import { createDefaultUnitDefinitionFirestoreRepository } from '@tankos/units-firestore';
 import { UNIT_DEFINITION_MANAGEMENT_SERVICE } from '@tankos/units-composition';

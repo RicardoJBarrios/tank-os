@@ -8,11 +8,7 @@
   "targets": {
     "build": {
       "executor": "@nx/angular:ng-packagr-lite",
-      "dependsOn": [
-        "data-access-firestore:build",
-        "units-zod:build",
-        "units:build"
-      ],
+      "dependsOn": ["data-access-firestore:build", "units:build"],
       "outputs": ["{workspaceRoot}/dist/{projectRoot}"],
       "defaultConfiguration": "production",
       "options": {

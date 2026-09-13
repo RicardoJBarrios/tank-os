@@ -5,10 +5,10 @@ export default createVitestConfig({
   root: __dirname,
   aliases: {
     '@tankos/authn': '../authn/src/index.ts',
-    '@tankos/authz-ui': '../authz-ui/src/index.ts',
+    '@tankos/authz-angular': '../authz-angular/src/index.ts',
     '@tankos/units': '../units/src/index.ts',
     '@tankos/data-access': '../data-access/src/index.ts',
-    '@tankos/data-access-ui': '../data-access-ui/src/index.ts',
+    '@tankos/data-access-angular': '../data-access-angular/src/index.ts',
     '@tankos/data-access-material-ui':
       '../data-access-material-ui/src/index.ts',
     '@tankos/formatting': '../formatting/src/index.ts',

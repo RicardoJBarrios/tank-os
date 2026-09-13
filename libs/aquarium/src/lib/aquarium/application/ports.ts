@@ -1,9 +1,6 @@
 import type { Aquarium, AquariumId, AquariumName } from '../domain/aquarium';
-import type {
-  AccessContext,
-  CrudRecord,
-  LifecycleStatus,
-} from '@tankos/data-access';
+import type { CrudRecord, LifecycleStatus } from '@tankos/data-access';
+import type { AuthorizationSubject } from '@tankos/authz';
 
 export interface EstablishAquariumInput {
   readonly name: AquariumName;
@@ -13,7 +10,10 @@ export interface EstablishAquariumInput {
 }
 
 export interface AquariumEstablisher {
-  establish(input: EstablishAquariumInput): Promise<Aquarium>;
+  establish(
+    subject: AuthorizationSubject,
+    input: EstablishAquariumInput,
+  ): Promise<Aquarium>;
 }
 
 export interface AquariumListItem {
@@ -24,24 +24,29 @@ export interface AquariumListItem {
 }
 
 export interface AccessibleAquariumReader {
-  listAccessible(keeperId: string): Promise<readonly AquariumListItem[]>;
+  listAccessible(
+    subject: AuthorizationSubject,
+  ): Promise<readonly AquariumListItem[]>;
   getAccessible(
-    keeperId: string,
+    subject: AuthorizationSubject,
     aquariumId: AquariumId,
   ): Promise<AquariumListItem | null>;
 }
 
 export interface AquariumManager {
   get(
-    access: AccessContext,
+    subject: AuthorizationSubject,
     id: AquariumId,
   ): Promise<CrudRecord<Aquarium> | undefined>;
   rename(
-    access: AccessContext,
+    subject: AuthorizationSubject,
     id: AquariumId,
     name: AquariumName,
   ): Promise<void>;
-  markForDeletion(access: AccessContext, id: AquariumId): Promise<void>;
-  restore(access: AccessContext, id: AquariumId): Promise<void>;
-  deletePermanently(access: AccessContext, id: AquariumId): Promise<void>;
+  markForDeletion(subject: AuthorizationSubject, id: AquariumId): Promise<void>;
+  restore(subject: AuthorizationSubject, id: AquariumId): Promise<void>;
+  deletePermanently(
+    subject: AuthorizationSubject,
+    id: AquariumId,
+  ): Promise<void>;
 }

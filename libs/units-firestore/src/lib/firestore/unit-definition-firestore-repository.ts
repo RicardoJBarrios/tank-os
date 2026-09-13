@@ -3,20 +3,20 @@ import {
   createFirestoreRecordSchema,
   type FirestoreCrudRepositoryOptions,
 } from '@tankos/data-access-firestore';
-import type { CrudRepositoryPort } from '@tankos/data-access';
+import type { VersionedCrudRepositoryPort } from '@tankos/data-access';
 import { type UnitDefinition, type UnitDefinitionFilter } from '@tankos/units';
-import {
-  unitDefinitionDtoSchema,
-  unitDefinitionSchema,
-  unitDefinitionToDto,
-  type UnitDefinitionDto,
-} from '@tankos/units-zod';
 import { createMappedFirestoreCrudRepository } from './mapped-firestore-crud-repository';
+import {
+  type UnitDefinitionFirestoreData,
+  unitDefinitionFirestoreDataSchema,
+  unitDefinitionFromFirestoreData,
+  unitDefinitionToFirestoreData,
+} from './unit-definition-firestore-data';
 
 /** Firestore repository options for the public and private unit catalogue. */
 export type UnitDefinitionFirestoreRepositoryOptions = Omit<
   FirestoreCrudRepositoryOptions<
-    UnitDefinitionDto,
+    UnitDefinitionFirestoreData,
     UnitDefinition,
     UnitDefinition,
     UnitDefinitionFilter
@@ -27,36 +27,31 @@ export type UnitDefinitionFirestoreRepositoryOptions = Omit<
 /** Creates the unit CRUD port implementation backed by Firestore. */
 export function createUnitDefinitionFirestoreRepository(
   options: UnitDefinitionFirestoreRepositoryOptions,
-): CrudRepositoryPort<
+): VersionedCrudRepositoryPort<
   UnitDefinition,
   UnitDefinition,
   UnitDefinition,
   UnitDefinitionFilter
 > {
   const repository = createFirestoreCrudRepository<
-    UnitDefinitionDto,
+    UnitDefinitionFirestoreData,
     UnitDefinition,
     UnitDefinition,
     UnitDefinitionFilter
   >({
     ...options,
     recordSchema: unitDefinitionRecordSchema,
-    createData: (input, id) => ({
-      ...unitDefinitionToDto(input),
-      storageId: id,
-    }),
-    updateData: (_data, input, id) => ({
-      ...unitDefinitionToDto(input),
-      storageId: id,
-    }),
+    createData: (input, id) => unitDefinitionToFirestoreData(input, id),
+    updateData: (_data, input, id) => unitDefinitionToFirestoreData(input, id),
   });
 
-  return createMappedFirestoreCrudRepository(repository, (value) =>
-    unitDefinitionSchema.parse(value),
+  return createMappedFirestoreCrudRepository(
+    repository,
+    unitDefinitionFromFirestoreData,
   );
 }
 
 /** Strict Firestore envelope schema for unit-definition records. */
 export const unitDefinitionRecordSchema = createFirestoreRecordSchema(
-  unitDefinitionDtoSchema,
+  unitDefinitionFirestoreDataSchema,
 );

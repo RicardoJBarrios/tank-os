@@ -1,5 +1,9 @@
 import { signal, type Signal } from '@angular/core';
 import type { AuthSessionPort } from '@tankos/authn';
+import {
+  AUTHORIZATION_ROLES,
+  authorizationSubjectFromPrincipal,
+} from '@tankos/authz';
 import { createFeedbackService, type FeedbackService } from '@tankos/feedback';
 import type { Logger } from '@tankos/observability';
 import { createEntityId } from '@tankos/data-access';
@@ -82,12 +86,13 @@ export class UnitDefinitionFeatureService {
     this.recordStatus.set('pending');
     this.recordError.set(undefined);
     void this.#authSession
-      .access()
-      .then((access) =>
+      .principal()
+      .then(authorizationSubjectFromPrincipal)
+      .then((subject) =>
         this.#managementService.get({
-          access,
+          subject,
           id: createEntityId(id),
-          ...(access.roles.includes('admin')
+          ...(subject.roles.includes(AUTHORIZATION_ROLES.ADMIN)
             ? { lifecycle: ['active', 'inactive', 'marked-for-deletion'] }
             : {}),
         }),

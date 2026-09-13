@@ -1,7 +1,6 @@
 import {
   createEntityId,
   createPageCursor,
-  type AccessContext,
   type CrudRecord,
 } from '@tankos/data-access';
 import { describe, expect, it, vi } from 'vitest';
@@ -15,9 +14,14 @@ import {
   formatUnitDefinitionLabel,
 } from './unit-definition-feature-store';
 
-const access: AccessContext = {
-  principalId: createEntityId('keeper-1'),
+const principal = {
+  id: createEntityId('keeper-1') as never,
+  claims: { roles: ['keeper'] },
+};
+const subject = {
+  id: principal.id,
   roles: ['keeper'],
+  attributes: { roles: ['keeper'] },
 };
 const draft = {
   code: 'TANKOS:CUSTOM-ALK',
@@ -26,8 +30,8 @@ const draft = {
 };
 
 const authSession = {
-  access: vi.fn(() => Promise.resolve(access)),
-  refresh: vi.fn(() => Promise.resolve(access)),
+  principal: vi.fn(() => Promise.resolve(principal)),
+  refresh: vi.fn(() => Promise.resolve(principal)),
   signIn: vi.fn(),
   signOut: vi.fn(),
 };
@@ -40,7 +44,7 @@ describe('unit definition feature store', () => {
     feature.save(draft);
 
     await vi.waitFor(() => {
-      expect(service.saveSpy).toHaveBeenCalledWith({ access, draft });
+      expect(service.saveSpy).toHaveBeenCalledWith({ subject, draft });
       expect(service.listSpy).toHaveBeenCalled();
     });
     expect(feature.editingRecord()).toBeUndefined();
@@ -56,7 +60,7 @@ describe('unit definition feature store', () => {
 
     await vi.waitFor(() => {
       expect(service.saveSpy).toHaveBeenCalledWith({
-        access,
+        subject,
         id: record.id,
         expectedRevision: record.revision,
         current: record.data,
@@ -113,24 +117,24 @@ describe('unit definition feature store', () => {
     void feature.list.loadMore();
 
     expect(service.markForDeletionSpy).toHaveBeenCalledWith({
-      access,
+      subject,
       id: record.id,
       expectedRevision: record.revision,
     });
     expect(service.restoreSpy).toHaveBeenCalledWith({
-      access,
+      subject,
       id: record.id,
       expectedRevision: record.revision,
     });
     expect(service.publishSpy).toHaveBeenCalledWith({
-      access,
+      subject,
       id: record.id,
       expectedRevision: record.revision,
       current: record.data,
       currentLifecycle: record.lifecycle.status,
     });
     expect(service.deleteSpy).toHaveBeenCalledWith({
-      access,
+      subject,
       id: record.id,
       expectedRevision: record.revision,
     });
@@ -188,7 +192,7 @@ describe('unit definition feature store', () => {
   it('exposes session failures through the list signals', async () => {
     const failure = new Error('session expired');
     const failingAuthSession = {
-      access: vi.fn(() => Promise.reject(failure)),
+      principal: vi.fn(() => Promise.reject(failure)),
       refresh: vi.fn(() => Promise.reject(failure)),
       signIn: vi.fn(),
       signOut: vi.fn(),
@@ -205,11 +209,8 @@ describe('unit definition feature store', () => {
       expect(feature.list.status()).toBe('error');
       expect(feature.list.error()).toBe(failure);
     });
-    void feature.list.loadMore();
-    expect(feature.list.error()).toBeUndefined();
-    await vi.waitFor(() => {
-      expect(feature.list.error()).toBe(failure);
-    });
+    await feature.list.loadMore();
+    expect(feature.list.error()).toBe(failure);
   });
 
   it('exposes failures while loading another page', async () => {

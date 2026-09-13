@@ -10,7 +10,7 @@ import {
 } from 'firebase/firestore';
 import { type ListRequest } from '@tankos/data-access';
 import type { UnitDefinitionFilter } from '@tankos/units';
-import { unitDefinitionSearchToken } from '@tankos/units-zod';
+import { unitDefinitionSearchToken } from './unit-definition-firestore-data';
 
 /** Builds the unit-specific Firestore query without composing the repository. */
 export function buildUnitDefinitionQuery(
@@ -29,7 +29,7 @@ export function buildUnitDefinitionQuery(
   const lifecycleConstraint = where('lifecycle.status', 'in', [...lifecycle]);
   const recordConstraints = recordConstraint(record);
 
-  if (request.access.roles.includes('admin')) {
+  if (request.filter?.accessibleOwnerId === undefined) {
     return buildAdminUnitsQuery(
       reference,
       visibility,
@@ -43,7 +43,7 @@ export function buildUnitDefinitionQuery(
 
   return buildKeeperUnitsQuery(
     reference,
-    request.access.principalId,
+    request.filter.accessibleOwnerId,
     visibility,
     lifecycleConstraint,
     recordConstraints,

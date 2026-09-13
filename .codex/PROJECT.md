@@ -20,11 +20,13 @@ before interpretation and keep automation advisory until explicitly accepted.
 - `CareWork`: a planned or completed maintenance action.
 - `ParameterDefinition`: a global, versioned catalogue definition that an
   Aquarium may select; it is not Aquarium-owned.
-- `Unit`: an independent standard/custom unit and conversion contract; Units
-  have no Aquarium relationship.
+- `Unit`: an independent standard/custom unit definition and representation
+  contract; Units have no Aquarium relationship and do not execute conversions.
 - An Aquarium may be managed by multiple keepers. Membership, roles and
   per-capability permissions belong to the Aquarium access boundary, not to
   authentication alone.
+- Authentication exposes identity facts and raw claims. Authorization
+  interprets those facts; Data Access does not carry or decide permissions.
 
 The complete historical glossary, domain rules and accepted product discovery
 remain in [`archive/core/`](archive/core/) and [`archive/product/`](archive/product/).

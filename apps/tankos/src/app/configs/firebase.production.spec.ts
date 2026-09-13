@@ -12,7 +12,7 @@ const mocks = vi.hoisted(() => ({
     return { siteKey };
   }),
   createFirebaseAuthSession: vi.fn(() => ({
-    access: vi.fn(),
+    principal: vi.fn(),
     refresh: vi.fn(),
     signIn: vi.fn(),
     signOut: vi.fn(),
@@ -56,10 +56,9 @@ describe('firebase.production', () => {
       'tankos-production',
     );
     expect(mocks.createFirebaseAuthSession).toHaveBeenCalledWith({
-      auth: expect.anything(),
+      auth: { currentUser: null },
       email: '',
       password: '',
-      roles: [],
       autoSignIn: false,
     });
     expect(mocks.getFirestore).toHaveBeenCalledWith(expect.anything());

@@ -12,12 +12,12 @@ import {
   type AquariumManager,
   type AquariumEstablisher,
 } from '@tankos/aquarium';
-import { AUTH_SESSION } from '@tankos/authn';
 import {
   AuthorizationDeniedError,
+  AUTHORIZATION_ROLES,
   type AuthorizationSubject,
 } from '@tankos/authz';
-import { createEntityId, type AccessContext } from '@tankos/data-access';
+import { createEntityId } from '@tankos/data-access';
 import {
   createAquariumFirestoreRepository,
   type AquariumFirestoreRepository,
@@ -27,7 +27,7 @@ import {
   AQUARIUM_MANAGER,
   AQUARIUM_ESTABLISHER,
 } from '@tankos/aquarium-ui';
-import { TIME_CLOCK } from '@tankos/time-angular';
+import { TIME_CLOCK } from '@tankos/time/angular';
 import { tankosFirestore } from './firebase';
 
 /** Firebase composition loaded only when the Aquarium feature is requested. */
@@ -46,22 +46,16 @@ export function provideTankosAquarium(): Provider[] {
 }
 
 function createAquariumEstablisher(): AquariumEstablisher {
-  const auth = inject(AUTH_SESSION);
   const clock = inject(TIME_CLOCK);
   const repository = createAquariumFirestoreRepository({
     firestore: tankosFirestore,
     clock,
   });
   return {
-    establish: async (input) => {
-      const access = await auth.access();
+    establish: async (subject, input) => {
       const ownerKeeperId = input.ownerKeeperId ?? input.keeperId;
-      if (input.keeperId !== access.principalId)
+      if (input.keeperId !== subject.id)
         throw new Error('Aquarium keeper does not match the session');
-      const subject: AuthorizationSubject = {
-        id: access.principalId,
-        roles: access.roles,
-      };
       if (
         !aquariumAuthorizationPolicy({
           subject,
@@ -84,32 +78,38 @@ function createAquariumEstablisher(): AquariumEstablisher {
         components: [],
         links: [],
       });
-      return (await repository.create({ access, input: aquarium })).data;
+      return (
+        await repository.create({
+          metadata: { actorId: subject.id },
+          input: aquarium,
+        })
+      ).data;
     },
   };
 }
 
 function createAccessibleAquariumReader(): AccessibleAquariumReader {
-  const auth = inject(AUTH_SESSION);
   const clock = inject(TIME_CLOCK);
   const repository = createAquariumFirestoreRepository({
     firestore: tankosFirestore,
     clock,
   });
   return {
-    listAccessible: async (keeperId) => {
-      const access = await auth.access();
-      if (access.principalId !== keeperId)
-        throw new Error('Aquarium keeper does not match the session');
+    listAccessible: async (subject) => {
+      authorizeAquarium(subject, AQUARIUM_ACTIONS.READ, {
+        ownerKeeperId: subject.id,
+      });
       const page = await repository.list({
-        access,
         page: {
           // Firestore Rules require every list query to be bounded to 51
           // documents or fewer.
           pageSize: 50,
           orderBy: [{ field: 'data.name', direction: 'asc' }],
         },
-        lifecycle: access.roles.includes('admin')
+        filter: subject.roles.includes(AUTHORIZATION_ROLES.ADMIN)
+          ? undefined
+          : { establishedByKeeperId: subject.id },
+        lifecycle: subject.roles.includes(AUTHORIZATION_ROLES.ADMIN)
           ? ['active', 'inactive', 'marked-for-deletion', 'deleted']
           : ['active', 'inactive'],
       });
@@ -120,14 +120,15 @@ function createAccessibleAquariumReader(): AccessibleAquariumReader {
         lifecycleStatus: record.lifecycle.status,
       }));
     },
-    getAccessible: async (keeperId, aquariumId) => {
-      const access = await auth.access();
-      if (access.principalId !== keeperId)
-        throw new Error('Aquarium keeper does not match the session');
+    getAccessible: async (subject, aquariumId) => {
       const record = await repository.get({
-        access,
         id: createEntityId(aquariumId),
       });
+      if (record) {
+        authorizeAquarium(subject, AQUARIUM_ACTIONS.READ, {
+          ownerKeeperId: record.data.establishedByKeeperId,
+        });
+      }
       return record
         ? {
             id: record.data.id,
@@ -146,39 +147,52 @@ function createAquariumManager(): AquariumManager {
     firestore: tankosFirestore,
     clock,
   });
+  const authorize = authorizeAquariumRecord;
   return {
-    get: (access, id) => repository.get({ access, id: createEntityId(id) }),
-    rename: async (access, id, name) => {
-      const record = await findAquariumRecord(repository, access, id);
+    get: async (subject, id) => {
+      const record = await findAquariumRecord(repository, id);
+      if (record) authorize(subject, AQUARIUM_ACTIONS.READ, record);
+      return record;
+    },
+    rename: async (subject, id, name) => {
+      const record = await findAquariumRecord(repository, id);
       if (!record) throw new Error('Aquarium record is missing');
+      authorize(subject, AQUARIUM_ACTIONS.UPDATE, record);
       await repository.replace(
-        { access, id: record.id, expectedRevision: record.revision },
+        {
+          metadata: { actorId: subject.id },
+          id: record.id,
+          expectedRevision: record.revision,
+        },
         { ...record.data, name },
       );
     },
-    markForDeletion: async (access, id) => {
-      const record = await findAquariumRecord(repository, access, id);
+    markForDeletion: async (subject, id) => {
+      const record = await findAquariumRecord(repository, id);
       if (!record) throw new Error('Aquarium record is missing');
+      authorize(subject, AQUARIUM_ACTIONS.DELETE, record);
       await repository.markForDeletion({
-        access,
+        metadata: { actorId: subject.id },
         id: record.id,
         expectedRevision: record.revision,
       });
     },
-    restore: async (access, id) => {
-      const record = await findAquariumRecord(repository, access, id);
+    restore: async (subject, id) => {
+      const record = await findAquariumRecord(repository, id);
       if (!record) throw new Error('Aquarium record is missing');
+      authorize(subject, AQUARIUM_ACTIONS.RESTORE, record);
       await repository.restore({
-        access,
+        metadata: { actorId: subject.id },
         id: record.id,
         expectedRevision: record.revision,
       });
     },
-    deletePermanently: async (access, id) => {
-      const record = await findAquariumRecord(repository, access, id);
+    deletePermanently: async (subject, id) => {
+      const record = await findAquariumRecord(repository, id);
       if (!record) throw new Error('Aquarium record is missing');
+      authorize(subject, AQUARIUM_ACTIONS.DELETE_PHYSICALLY, record);
       await repository.delete({
-        access,
+        metadata: { actorId: subject.id },
         id: record.id,
         expectedRevision: record.revision,
       });
@@ -188,12 +202,41 @@ function createAquariumManager(): AquariumManager {
 
 function findAquariumRecord(
   repository: AquariumFirestoreRepository,
-  access: AccessContext,
   id: string,
 ) {
   return repository.get({
-    access,
     id: createEntityId(id),
     lifecycle: ['active', 'inactive', 'marked-for-deletion', 'deleted'],
   });
+}
+
+function authorizeAquariumRecord(
+  subject: AuthorizationSubject,
+  action: string,
+  record: Awaited<ReturnType<typeof findAquariumRecord>>,
+): void {
+  if (!record) return;
+  authorizeAquarium(subject, action, {
+    ownerKeeperId: record.data.establishedByKeeperId,
+    lifecycleStatus: record.lifecycle.status,
+  });
+}
+
+function authorizeAquarium(
+  subject: AuthorizationSubject,
+  action: string,
+  attributes: {
+    readonly ownerKeeperId?: string;
+    readonly lifecycleStatus?: string;
+  },
+): void {
+  if (
+    aquariumAuthorizationPolicy({
+      subject,
+      action,
+      resource: { type: AQUARIUM_RESOURCE_TYPE, attributes },
+    })
+  )
+    return;
+  throw new AuthorizationDeniedError(action, AQUARIUM_RESOURCE_TYPE);
 }

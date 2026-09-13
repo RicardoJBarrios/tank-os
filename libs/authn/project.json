@@ -3,8 +3,22 @@
   "$schema": "../../node_modules/nx/schemas/nx-schema.json",
   "sourceRoot": "libs/authn/src",
   "projectType": "library",
-  "tags": ["scope:shared", "type:infrastructure"],
+  "tags": ["scope:shared", "scope:tankos", "type:infrastructure"],
   "targets": {
+    "build": {
+      "executor": "@nx/angular:ng-packagr-lite",
+      "outputs": ["{workspaceRoot}/dist/libs/authn"],
+      "options": {
+        "project": "libs/authn/ng-package.json",
+        "tsConfig": "libs/authn/tsconfig.lib.json"
+      },
+      "configurations": {
+        "production": {
+          "tsConfig": "libs/authn/tsconfig.lib.json"
+        }
+      },
+      "defaultConfiguration": "production"
+    },
     "test": {
       "options": {
         "coverage": true,

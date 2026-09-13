@@ -1,7 +1,7 @@
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { AUTH_SESSION } from '@tankos/authn';
+import { AUTH_SESSION } from '@tankos/authn-angular';
 import { describe, expect, it, vi } from 'vitest';
 import { TankosShellComponent } from './tankos-shell.component';
 
@@ -10,7 +10,7 @@ describe('TankosShellComponent', () => {
     session: {
       signOut: () => Promise<void>;
       subscribe?: (listener: () => void) => () => void;
-      access?: () => Promise<unknown>;
+      principal?: () => Promise<unknown>;
     } | null = {
       signOut: vi.fn(() => Promise.resolve()),
     },
@@ -65,11 +65,11 @@ describe('TankosShellComponent', () => {
         changed = listener;
         return vi.fn();
       },
-      access: vi.fn(() =>
+      principal: vi.fn(() =>
         Promise.resolve({
-          principalId: 'user-1',
-          principalName: 'keeper@example.test',
-          roles: ['keeper'],
+          id: 'user-1',
+          displayName: 'keeper@example.test',
+          claims: { roles: ['keeper'] },
         }),
       ),
     });
@@ -83,7 +83,7 @@ describe('TankosShellComponent', () => {
         }
       ).account();
       expect(account).toMatchObject({
-        principalName: 'keeper@example.test',
+        displayName: 'keeper@example.test',
       });
     });
   });

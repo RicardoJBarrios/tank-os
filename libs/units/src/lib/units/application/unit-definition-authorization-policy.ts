@@ -3,13 +3,12 @@ import {
   hasAuthorizationRole,
   type AuthorizationPolicy,
 } from '@tankos/authz';
-import type { EntityId } from '@tankos/data-access';
 import type { UnitDefinitionVisibility } from '../core';
 
 export const UNIT_DEFINITION_RESOURCE = 'unit-definition';
 
 export interface UnitDefinitionAuthorizationAttributes {
-  readonly ownerId?: EntityId;
+  readonly ownerId?: string;
   readonly visibility: UnitDefinitionVisibility;
 }
 
@@ -27,7 +26,7 @@ export function unitDefinitionAuthorization(
 ): boolean {
   const action = request.action as UnitDefinitionAuthorizationAction;
   const attributes = request.resource.attributes;
-  const ownsResource = attributes.ownerId === request.subject.id;
+  const ownsResource = attributes.ownerId === String(request.subject.id);
 
   if (request.resource.type !== UNIT_DEFINITION_RESOURCE) return false;
   if (hasAuthorizationRole(request.subject, AUTHORIZATION_ROLES.ADMIN)) {

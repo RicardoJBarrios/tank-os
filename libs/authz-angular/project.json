@@ -1,0 +1,19 @@
+{
+  "name": "authz-angular",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/authz-angular/src",
+  "prefix": "tankos",
+  "projectType": "library",
+  "tags": ["scope:shared", "type:ui"],
+  "targets": {
+    "test": {
+      "options": {
+        "coverage": true,
+        "coverage.reportsDirectory": "../../coverage/libs/authz-angular"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

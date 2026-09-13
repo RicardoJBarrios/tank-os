@@ -16,7 +16,6 @@ import {
   type PageCursor,
 } from '@tankos/data-access';
 import type { Aquarium } from '@tankos/aquarium';
-import { AUTHORIZATION_ROLES } from '@tankos/authz';
 import {
   aquariumDtoSchema,
   aquariumSchema,
@@ -70,7 +69,6 @@ export function createAquariumFirestoreRepository(
     encodeCursor: encodeAquariumCursor,
     applyCursor: (_builtQuery, cursor) =>
       startAfter(...parseAquariumCursor(cursor)),
-    authorize: authorizeAquariumOperation,
   });
 
   return mapRepository(repository);
@@ -98,36 +96,13 @@ function buildAquariumQuery(
         ),
       ]
     : [];
-  const access = request.access.roles.includes(AUTHORIZATION_ROLES.ADMIN)
-    ? [...owner]
-    : [where('data.establishedByKeeperId', '==', request.access.principalId)];
   return query(
     reference,
-    ...access,
+    ...owner,
     ...name,
     lifecycle,
     orderBy('data.name', 'asc'),
     orderBy('__name__', 'asc'),
-  );
-}
-
-function authorizeAquariumOperation(
-  access: { readonly principalId: string; readonly roles: readonly string[] },
-  operation: string,
-): void {
-  if (!access.principalId || !hasAquariumRole(access.roles))
-    throw new Error('Aquarium access requires keeper or admin access');
-  if (
-    operation === 'delete' &&
-    !access.roles.includes(AUTHORIZATION_ROLES.ADMIN)
-  )
-    throw new Error('Only admins can permanently delete Aquariums');
-}
-
-function hasAquariumRole(roles: readonly string[]): boolean {
-  return (
-    roles.includes(AUTHORIZATION_ROLES.KEEPER) ||
-    roles.includes(AUTHORIZATION_ROLES.ADMIN)
   );
 }
 
@@ -168,8 +143,6 @@ function mapRepository(
     AquariumFilter
   >,
 ): AquariumFirestoreRepository {
-  const versioned = repository.replaceVersioned;
-
   return {
     list: (request) =>
       repository.list(request).then((page) => ({
@@ -180,14 +153,6 @@ function mapRepository(
     create: (request) => repository.create(request).then(requireAquariumRecord),
     replace: (request, input) =>
       repository.replace(request, input).then(requireAquariumRecord),
-    ...(versioned
-      ? {
-          replaceVersioned: (
-            request: Parameters<typeof versioned>[0],
-            input: Aquarium,
-          ) => versioned(request, input).then(requireAquariumRecord),
-        }
-      : {}),
     markForDeletion: (request) =>
       repository.markForDeletion(request).then(requireAquariumRecord),
     restore: (request) =>

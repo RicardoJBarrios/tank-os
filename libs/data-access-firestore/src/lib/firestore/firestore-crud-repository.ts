@@ -8,11 +8,10 @@ import type {
   Timestamp,
 } from 'firebase/firestore';
 import type {
-  AccessContext,
   CrudRecord,
-  CrudRepositoryPort,
   DataAccessErrorCode,
   ListRequest,
+  MutationMetadata,
   PageCursor,
   TechnicalTimestamp,
 } from '@tankos/data-access';
@@ -50,11 +49,11 @@ export interface FirestoreCrudRepositoryOptions<
   readonly schemaVersion?: number;
   /** Clock used for technical metadata; normally supplied by `TimeService`. */
   readonly clock?: ClockPort;
-  readonly createId: (input: TCreate, access?: AccessContext) => string;
+  readonly createId: (input: TCreate, metadata?: MutationMetadata) => string;
   /** Optional distinct id policy for immutable/versioned replacements. */
   readonly createReplacementId?: (
     input: TUpdate,
-    access: AccessContext,
+    metadata: MutationMetadata,
   ) => string;
   readonly createData: (input: TCreate, id: string) => TData;
   readonly updateData: (data: TData, input: TUpdate, id: string) => TData;
@@ -72,12 +71,6 @@ export interface FirestoreCrudRepositoryOptions<
     snapshot: QueryDocumentSnapshot,
     request: ListRequest<TFilter>,
   ) => PageCursor;
-  readonly authorize?: (
-    access: AccessContext,
-    operation:
-      'list' | 'get' | 'create' | 'replace' | 'mark' | 'restore' | 'delete',
-    lifecycle?: readonly CrudRecord<TData>['lifecycle']['status'][],
-  ) => void | Promise<void>;
 }
 
 /** Converts a Firestore timestamp to the technical instant contract. */
@@ -143,15 +136,12 @@ export function mapRecord<TData>(
       schemaVersion: dto.metadata.schemaVersion,
       createdAt: timestamp(dto.metadata.createdAt),
       updatedAt: timestamp(dto.metadata.updatedAt),
-      createdBy: dto.metadata
-        .createdBy as CrudRecord<TData>['metadata']['createdBy'],
-      updatedBy: dto.metadata
-        .updatedBy as CrudRecord<TData>['metadata']['updatedBy'],
+      createdBy: dto.metadata.createdBy,
+      updatedBy: dto.metadata.updatedBy,
       lifecycleChangedAt: dto.metadata.lifecycleChangedAt
         ? timestamp(dto.metadata.lifecycleChangedAt)
         : undefined,
-      lifecycleChangedBy: dto.metadata
-        .lifecycleChangedBy as CrudRecord<TData>['metadata']['lifecycleChangedBy'],
+      lifecycleChangedBy: dto.metadata.lifecycleChangedBy,
     },
   };
 }
@@ -164,6 +154,11 @@ export function createFirestoreCrudRepository<
   TFilter = unknown,
 >(
   options: FirestoreCrudRepositoryOptions<TData, TCreate, TUpdate, TFilter>,
-): CrudRepositoryPort<TData, TCreate, TUpdate, TFilter> {
+): import('@tankos/data-access').VersionedCrudRepositoryPort<
+  TData,
+  TCreate,
+  TUpdate,
+  TFilter
+> {
   return new FirestoreCrudRepositoryImplementation(options);
 }

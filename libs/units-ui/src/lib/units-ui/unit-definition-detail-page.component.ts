@@ -7,9 +7,12 @@ import {
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { AUTH_SESSION } from '@tankos/authn';
+import { AUTH_SESSION } from '@tankos/authn-angular';
 import { CONFIRMATION_SERVICE, confirmAndRun } from '@tankos/feedback';
-import type { AccessContext } from '@tankos/data-access';
+import {
+  authorizationSubjectFromPrincipal,
+  type AuthorizationSubject,
+} from '@tankos/authz';
 import { formatUnitValue } from '@tankos/formatting';
 import {
   unitDefinitionCapabilities,
@@ -38,16 +41,16 @@ export class UnitDefinitionDetailPageComponent implements OnInit {
   readonly #service = inject(UnitDefinitionFeatureService);
   readonly #authSession = inject(AUTH_SESSION);
   readonly #confirmation = inject(CONFIRMATION_SERVICE);
-  readonly #access = signal<AccessContext | undefined>(undefined);
+  readonly #subject = signal<AuthorizationSubject | undefined>(undefined);
 
   protected readonly record = this.#service.selectedRecord;
   protected readonly status = this.#service.recordStatus;
   protected readonly lifecycleStatus = this.#service.lifecycleStatus;
   protected readonly capabilities = computed(() => {
-    const access = this.#access();
+    const subject = this.#subject();
     const record = this.record();
-    return access
-      ? unitDefinitionCapabilities(access, record?.data)
+    return subject
+      ? unitDefinitionCapabilities(subject, record?.data)
       : undefined;
   });
   protected readonly canEdit = computed(
@@ -76,8 +79,8 @@ export class UnitDefinitionDetailPageComponent implements OnInit {
   protected readonly formatValue = formatUnitValue;
 
   public ngOnInit(): void {
-    void this.#authSession.access().then((access) => {
-      this.#access.set(access);
+    void this.#authSession.principal().then((principal) => {
+      this.#subject.set(authorizationSubjectFromPrincipal(principal));
     });
     const id = this.#route.snapshot.paramMap.get('id');
     if (id) this.#service.loadRecord(id);

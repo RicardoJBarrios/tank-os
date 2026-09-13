@@ -20,6 +20,8 @@ export interface VitestConfigOptions {
   readonly root: string;
   readonly workspacePathPrefix?: string;
   readonly angular?: boolean;
+  readonly angularTsconfig?: string;
+  readonly coverageInclude?: readonly string[];
   readonly staticCopy?: boolean;
   readonly aliases?: Readonly<Record<string, string>>;
   readonly dedupe?: readonly string[];
@@ -34,31 +36,12 @@ export function createVitestConfig(options: VitestConfigOptions) {
     options.projectName,
     workspacePathPrefix,
   );
-  const plugins: PluginOption[] = [];
-  if (options.angular !== false) plugins.push(angular());
-  if (options.staticCopy !== false)
-    plugins.push(viteStaticCopy({ targets: [{ src: '*.md', dest: '.' }] }));
-
-  const resolveOptions = {
-    tsconfigPaths: true,
-    ...(options.dedupe ? { dedupe: [...options.dedupe] } : {}),
-    ...(options.aliases
-      ? {
-          alias: Object.fromEntries(
-            Object.entries(options.aliases).map(([name, path]) => [
-              name,
-              resolve(options.root, path),
-            ]),
-          ),
-        }
-      : {}),
-  };
 
   return defineConfig(() => ({
     root: options.root,
     cacheDir: `${workspacePathPrefix}node_modules/.vite/${options.projectName}`,
-    resolve: resolveOptions,
-    plugins,
+    resolve: createResolveOptions(options),
+    plugins: createPlugins(options),
     test: {
       name: options.projectName,
       watch: false,
@@ -79,6 +62,9 @@ export function createVitestConfig(options: VitestConfigOptions) {
                   '@angular/common',
                   '@angular/compiler',
                   '@angular/forms',
+                  '@angular/cdk',
+                  '@angular/material',
+                  '@angular/material-luxon-adapter',
                   '@angular/platform-browser',
                   '@angular/platform-browser-dynamic',
                   '@ngneat/spectator',
@@ -89,16 +75,52 @@ export function createVitestConfig(options: VitestConfigOptions) {
         : {}),
       coverage: {
         ...reporting.coverage,
-        reportsDirectory: `${workspacePathPrefix}coverage/${
-          options.projectName.includes('/')
-            ? options.projectName
-            : options.root.includes('/apps/')
-              ? `apps/${options.projectName}`
-              : `libs/${options.projectName}`
-        }`,
+        ...(options.coverageInclude
+          ? {
+              include: options.coverageInclude.map((pattern) =>
+                resolve(options.root, pattern),
+              ),
+              excludeAfterRemap: true,
+            }
+          : {}),
+        reportsDirectory: `${workspacePathPrefix}coverage/${reportPath(options)}`,
         provider: 'v8' as const,
         thresholds: COVERAGE_THRESHOLDS,
       },
     },
   }));
+}
+
+function createPlugins(options: VitestConfigOptions): PluginOption[] {
+  const plugins: PluginOption[] = [];
+  const angularOptions = options.angularTsconfig
+    ? { tsconfig: resolve(options.root, options.angularTsconfig) }
+    : undefined;
+  if (options.angular !== false) plugins.push(angular(angularOptions));
+  if (options.staticCopy !== false)
+    plugins.push(viteStaticCopy({ targets: [{ src: '*.md', dest: '.' }] }));
+  return plugins;
+}
+
+function createResolveOptions(options: VitestConfigOptions) {
+  return {
+    tsconfigPaths: true,
+    ...(options.dedupe ? { dedupe: [...options.dedupe] } : {}),
+    ...(options.aliases
+      ? {
+          alias: Object.fromEntries(
+            Object.entries(options.aliases).map(([name, path]) => [
+              name,
+              resolve(options.root, path),
+            ]),
+          ),
+        }
+      : {}),
+  };
+}
+
+function reportPath(options: VitestConfigOptions): string {
+  if (options.projectName.includes('/')) return options.projectName;
+  const group = options.root.includes('/apps/') ? 'apps' : 'libs';
+  return `${group}/${options.projectName}`;
 }

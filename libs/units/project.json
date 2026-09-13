@@ -8,7 +8,7 @@
   "targets": {
     "build": {
       "executor": "@nx/angular:ng-packagr-lite",
-      "dependsOn": ["decimal:build", "data-access:build", "authz:build"],
+      "dependsOn": ["data-access:build", "authz:build"],
       "outputs": ["{workspaceRoot}/dist/libs/units"],
       "options": {
         "project": "libs/units/ng-package.json",

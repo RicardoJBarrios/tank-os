@@ -4,13 +4,13 @@ import {
   createUnitDefinition,
   createUnitRepresentation,
 } from '@tankos/units';
-import { unitDefinitionToDto } from '@tankos/units-zod';
 import { Timestamp } from 'firebase/firestore';
 import { describe, expect, it, vi } from 'vitest';
 import {
   createUnitDefinitionFirestoreRepository,
   unitDefinitionRecordSchema,
 } from './unit-definition-firestore-repository';
+import { unitDefinitionToFirestoreData } from './unit-definition-firestore-data';
 
 const firestoreAdapter = vi.hoisted(() => ({
   createFirestoreCrudRepository: vi.fn(),
@@ -36,7 +36,7 @@ describe('createUnitDefinitionFirestoreRepository', () => {
   });
   const record = {
     id: createEntityId('unit-1'),
-    data: { ...unitDefinitionToDto(definition), storageId: 'unit-1' },
+    data: unitDefinitionToFirestoreData(definition, 'unit-1'),
     lifecycle: { status: 'active' as const },
     revision: 1,
     metadata: {
@@ -97,10 +97,10 @@ describe('createUnitDefinitionFirestoreRepository', () => {
     const firestoreOptions =
       firestoreAdapter.createFirestoreCrudRepository.mock.calls[0][0];
     expect(firestoreOptions.createData(definition)).toEqual(
-      unitDefinitionToDto(definition),
+      unitDefinitionToFirestoreData(definition),
     );
     expect(firestoreOptions.updateData(record.data, definition)).toEqual(
-      expect.objectContaining(unitDefinitionToDto(definition)),
+      unitDefinitionToFirestoreData(definition),
     );
     expect(raw.create).toHaveBeenCalledWith({ access, input: definition });
   });
@@ -111,7 +111,7 @@ describe('createUnitDefinitionFirestoreRepository', () => {
     );
 
     expect(unitDefinitionRecordSchema.parse(envelope).data).toEqual(
-      expect.objectContaining(unitDefinitionToDto(definition)),
+      unitDefinitionToFirestoreData(definition, 'unit-1'),
     );
   });
 

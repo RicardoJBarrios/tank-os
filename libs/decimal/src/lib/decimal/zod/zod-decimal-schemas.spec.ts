@@ -5,7 +5,9 @@ describe('createZodDecimalSchemas', () => {
     const schemas = createZodDecimalSchemas();
 
     expect(schemas.value.parse('001.20')).toBe('1.2');
-    expect(schemas.context.parse({ decimalPlaces: 2, rounding: 'half-up' })).toEqual({
+    expect(
+      schemas.context.parse({ decimalPlaces: 2, rounding: 'half-up' }),
+    ).toEqual({
       decimalPlaces: 2,
       rounding: 'half-up',
     });
@@ -16,7 +18,8 @@ describe('createZodDecimalSchemas', () => {
 
     expect(schemas.value.safeParse('1,2').success).toBe(false);
     expect(
-      schemas.context.safeParse({ decimalPlaces: -1, rounding: 'down' }).success,
+      schemas.context.safeParse({ decimalPlaces: -1, rounding: 'down' })
+        .success,
     ).toBe(false);
   });
 });

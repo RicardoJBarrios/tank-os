@@ -5,7 +5,8 @@ import type {
   InstantPort,
   TimeZoneDatabasePort,
 } from '../core';
-import type { Duration, Instant, LocalDate } from '../core';
+import type { Duration, Instant, LocalDate, LocalTime } from '../core';
+import { createZodLocalTimeSchema } from './create-zod-local-time-schema';
 import { createZodDurationSchema } from './create-zod-duration-schema';
 import { createZodInstantSchema } from './create-zod-instant-schema';
 import { createZodLocalDateSchema } from './create-zod-local-date-schema';
@@ -13,6 +14,8 @@ import { createZodTimeZoneSchema } from './create-zod-time-zone-schema';
 
 /** Zod schemas for canonical JSON/HTTP temporal strings. */
 export interface ZodTimeSchemas {
+  /** Parses a civil clock string, without inventing a date or zone. */
+  readonly localTime: z.ZodType<LocalTime>;
   /** Parses a canonical or supported ISO instant into an Instant. */
   readonly instant: z.ZodType<Instant>;
   /** Parses a YYYY-MM-DD calendar string into a LocalDate. */
@@ -35,6 +38,7 @@ export function createZodTimeSchemas(
   timeZoneDatabase: TimeZoneDatabasePort,
 ): ZodTimeSchemas {
   return {
+    localTime: createZodLocalTimeSchema(),
     instant: createZodInstantSchema(timePort),
     localDate: createZodLocalDateSchema(timePort),
     duration: createZodDurationSchema(timePort),

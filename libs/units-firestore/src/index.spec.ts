@@ -1,11 +1,8 @@
 import * as publicApi from './index';
 
 describe('Units Firestore public entry point', () => {
-  it('Given the public entry point, When imported, Then exposes both entity repositories', () => {
+  it('Given the public entry point, When imported, Then exposes the unit-definition repository', () => {
     expect(publicApi.createUnitDefinitionFirestoreRepository).toBeTypeOf(
-      'function',
-    );
-    expect(publicApi.createConversionDefinitionFirestoreRepository).toBeTypeOf(
       'function',
     );
   });

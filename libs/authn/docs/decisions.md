@@ -1,14 +1,10 @@
-# Authn: decisiones de autenticación
+# AuthN decisions
 
-`@tankos/authn` define quién es la persona autenticada, no qué recursos puede
-usar. `AccessContext` solo contiene identidad, roles generales y metadatos de
-petición; no contiene Aquarium, Units ni claims de negocio.
-
-La sesión debe soportar restauración tras recarga, login, logout y renovación
-explícita de credenciales. Los roles son una ayuda de contexto y UX; nunca son
-la única frontera de seguridad. Los adaptadores validan y normalizan sus claims
-sin convertir claims arbitrarios en permisos.
-
-Firebase, OAuth, OIDC y sus componentes de login son adaptadores separados. La
-UI de Firebase vive en `authn-firebase-ui`; el núcleo no conoce Angular ni
-Firebase.
+- AuthN identifies the principal; it does not decide permissions.
+- Provider claims remain raw identity facts in `AuthenticatedPrincipal`.
+- Role interpretation is owned by AuthZ, not by a Firebase adapter or Data
+  Access.
+- The neutral core has no Angular or provider SDK dependency.
+- Angular DI and route integration live in `@tankos/authn-angular`.
+- Firebase, OAuth or OIDC implementations live in separate provider packages.
+- Guards are navigation aids, never the persisted-data security boundary.
